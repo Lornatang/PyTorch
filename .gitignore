@@ -115,6 +115,6 @@ dmypy.json
 
 # my file
 resize.py
-.tutorials/data/
+.research/data/
 .idea/
 .vscode/
