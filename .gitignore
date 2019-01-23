@@ -112,4 +112,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# my file
 resize.py
+.tutorials/data/
+.idea/
+.vscode/
