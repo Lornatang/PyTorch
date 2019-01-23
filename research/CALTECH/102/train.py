@@ -10,7 +10,7 @@ import os
 
 import torch
 import torchvision
-from net import Net
+from net import GoogleNet
 from torch import nn, optim
 from torch.utils import data
 from torchvision import transforms
@@ -59,7 +59,7 @@ def main():
     print(f"Train numbers:{len(train_datasets)}")
     print(f"Val numbers:{len(val_datasets)}")
 
-    model = Net()
+    model = GoogleNet()
     model.train()
     # cast
     cast = nn.CrossEntropyLoss().to(device)
