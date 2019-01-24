@@ -24,10 +24,10 @@ if not os.path.exists(MODEL_DIR):
     os.makedirs(MODEL_DIR)
 
 transform = transforms.Compose([
-    transforms.Resize(96),  # 将图像转化为224 * 224
-    transforms.RandomHorizontalFlip(),  # 几率随机旋转
-    transforms.ToTensor(),  # 将numpy数据类型转化为Tensor
-    transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])  # 归一化
+    transforms.Resize(96),  # 96 * 96
+    transforms.RandomHorizontalFlip(),
+    transforms.ToTensor(),
+    transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])  # lrn
 ])
 
 
