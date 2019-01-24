@@ -33,24 +33,24 @@ transform = transforms.Compose([
 
 
 # Load data
-train_datasets = torchvision.datasets.ImageFolder(root=WORK_DIR + 'train/',
-                                                  transform=transform)
+train_dataset = torchvision.datasets.ImageFolder(root=WORK_DIR + 'train/',
+                                                 transform=transform)
 
-train_loader = torch.utils.data.DataLoader(dataset=train_datasets,
+train_loader = torch.utils.data.DataLoader(dataset=train_dataset,
                                            batch_size=BATCH_SIZE,
                                            shuffle=True)
 
-val_datasets = torchvision.datasets.ImageFolder(root=WORK_DIR + 'val/',
-                                                transform=transform)
+val_dataset = torchvision.datasets.ImageFolder(root=WORK_DIR + 'val/',
+                                               transform=transform)
 
-val_loader = torch.utils.data.DataLoader(dataset=train_datasets,
+val_loader = torch.utils.data.DataLoader(dataset=train_dataset,
                                          batch_size=BATCH_SIZE,
                                          shuffle=True)
 
 
 def main():
-    print(f"Train numbers:{len(train_datasets)}")
-    print(f"Val numbers:{len(val_datasets)}")
+    print(f"Train numbers:{len(train_dataset)}")
+    print(f"Val numbers:{len(val_dataset)}")
 
     model = GoogLeNet()
     # cast
@@ -77,7 +77,7 @@ def main():
             loss.backward()
             optimizer.step()
 
-            print(f"Step [{step * BATCH_SIZE}/{NUM_EPOCHS * len(train_datasets)}], "
+            print(f"Step [{step * BATCH_SIZE}/{NUM_EPOCHS * len(train_dataset)}], "
                   f"Loss: {loss.item():.8f}.")
             step += 1
 
