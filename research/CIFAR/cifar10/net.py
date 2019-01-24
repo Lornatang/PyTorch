@@ -60,7 +60,7 @@ class inception(nn.Module):
 
 class GoogLeNet(nn.Module):
     """use google network(inception v3).
-    input img size is 224 * 224"""
+    input img size is 96 * 96"""
 
     def __init__(self, num_classes=NUM_CLASSES):
         super(GoogLeNet, self).__init__()
