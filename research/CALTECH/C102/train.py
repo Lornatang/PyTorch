@@ -1,16 +1,8 @@
-"""
-# author: shiyipaisizuo
-# contact: shiyipaisizuo@gmail.com
-# file: train.py
-# time: 2019/1/23
-# license: MIT
-"""
-
 import os
 
 import torch
 import torchvision
-from net import GoogleNet
+from research.CALTECH.C102.net import GoogleNet
 from torch import nn, optim
 from torch.utils import data
 from torchvision import transforms
@@ -40,24 +32,16 @@ transform = transforms.Compose([
 
 
 # Load data
-train_datasets = torchvision.datasets.ImageFolder(root=WORK_DIR + 'train/',
-                                                  transform=transform)
+train_dataset = torchvision.datasets.ImageFolder(root=WORK_DIR + 'train/',
+                                                 transform=transform)
 
-train_loader = torch.utils.data.DataLoader(dataset=train_datasets,
+train_loader = torch.utils.data.DataLoader(dataset=train_dataset,
                                            batch_size=BATCH_SIZE,
                                            shuffle=True)
 
-val_datasets = torchvision.datasets.ImageFolder(root=WORK_DIR + 'val/',
-                                                transform=transform)
-
-val_loader = torch.utils.data.DataLoader(dataset=train_datasets,
-                                         batch_size=BATCH_SIZE,
-                                         shuffle=True)
-
 
 def main():
-    print(f"Train numbers:{len(train_datasets)}")
-    print(f"Val numbers:{len(val_datasets)}")
+    print(f"Train numbers:{len(train_dataset)}")
 
     model = GoogleNet()
     model.train()
@@ -83,7 +67,7 @@ def main():
             loss.backward()
             optimizer.step()
 
-            print(f"Step [{step * 64}/{int(10 * len(train_datasets))}], "
+            print(f"Step [{step * 64}/{int(10 * len(train_dataset))}], "
                   f"Loss: {loss.item():.8f}.")
             step += 1
 

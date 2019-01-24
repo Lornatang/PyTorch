@@ -1,11 +1,11 @@
 from torch import nn
 
-NUM_CLASSES = 4
+NUM_CLASSES = 154
 
 
 class Net(nn.Module):
     """use myself network.
-    input img size is 224 * 224"""
+    input img size is 96 * 96"""
 
     def __init__(self, num_classes=NUM_CLASSES):
         super(Net, self).__init__()

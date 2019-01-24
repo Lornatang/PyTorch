@@ -1,11 +1,3 @@
-"""
-# author: shiyipaisizuo
-# contact: shiyipaisizuo@gmail.com
-# file: prediction.py
-# time: 2018/8/24 22:18
-# license: MIT
-"""
-
 import os
 
 import torch
@@ -16,22 +8,22 @@ from torchvision import transforms
 # Device configuration
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-WORK_DIR = '../../data/CALTECH/4/'
+WORK_DIR = '../../data/CALTECH/C154/'
 NUM_EPOCHS = 10
 BATCH_SIZE = 64
 LEARNING_RATE = 1e-4
-NUM_CLASSES = 4
+NUM_CLASSES = 154
 
 MODEL_PATH = '../../../models/pytorch/CALTECH/'
-MODEL_NAME = '4.pth'
+MODEL_NAME = '154.pth'
 
 # Create model
 if not os.path.exists(MODEL_PATH):
     os.makedirs(MODEL_PATH)
 
 transform = transforms.Compose([
-    transforms.Resize(224),  # 将图像转化为800 * 800
-    transforms.ToTensor(),  # 将numpy数据类型转化为Tensor
+    transforms.Resize(96),  # 将图像转化为96 * 96
+    transforms.ToTensor(),
     transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])  # 归一化
 ])
 

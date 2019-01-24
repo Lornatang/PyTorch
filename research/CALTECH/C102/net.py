@@ -59,7 +59,7 @@ class inception(nn.Module):
 
 class GoogleNet(nn.Module):
     """use google network(inception v3).
-    input img size is 224 * 224"""
+    input img size is 96 * 96"""
 
     def __init__(self, num_classes=NUM_CLASSES):
         super(GoogleNet, self).__init__()
@@ -96,7 +96,7 @@ class GoogleNet(nn.Module):
             inception(832, 384, 182, 384, 48, 128, 128),
             nn.AvgPool2d(kernel_size=2)
         )
-        self.classifier = nn.Linear(9216, num_classes)
+        self.classifier = nn.Linear(1024, num_classes)
 
     def forward(self, x):
         x = self.block1(x)
@@ -104,6 +104,6 @@ class GoogleNet(nn.Module):
         x = self.block3(x)
         x = self.block4(x)
         x = self.block5(x)
-        x = x.view(x.size(0), 9216)
+        x = x.view(x.size(0), -1)
         out = self.classifier(x)
         return out
