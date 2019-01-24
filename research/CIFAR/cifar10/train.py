@@ -60,10 +60,9 @@ def main():
         model.parameters(),
         lr=LEARNING_RATE,
         weight_decay=1e-8)
-
+    step = 1
     for epoch in range(1, NUM_EPOCHS + 1):
         model.train()
-        step = 1
         for images, labels in train_loader:
             images = images.to(device)
             labels = labels.to(device)
