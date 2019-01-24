@@ -1,5 +1,3 @@
-import sys
-from tools.unpack_cifar import CIFAR10
-sys.path.append('../../../tools')
-
+from tools.unpack_cifar import CIFAR10, CIFAR100
 CIFAR10()
+CIFAR100()
