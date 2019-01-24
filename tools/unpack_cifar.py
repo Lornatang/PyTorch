@@ -5,14 +5,14 @@ import cv2
 import numpy as np
 
 # source directory
-CIFAR10_DIR = '/Users/mac/program/data/CIFAR/cifar10'
-CIFAR100_DIR = '/Users/mac/program/data/CIFAR/cifar100'
+CIFAR10_DIR = '/Users/mac/data/CIFAR/cifar10'
+CIFAR100_DIR = '/Users/mac/data/CIFAR/cifar100'
 
 # extract cifar img in here.
-CIFAR10_TRAIN_DIR = '/Users/mac/program/data/CIFAR/cifar10/train'
-CIFAR10_VAL_DIR = '/Users/mac/program/data/CIFAR/cifar10/val'
-CIFAR100_TRAIN_DIR = '/Users/mac/program/data/CIFAR/cifar100/trains'
-CIFAR100_VAL_DIR = '/Users/mac/program/data/CIFAR/cifar100/val'
+CIFAR10_TRAIN_DIR = CIFAR10_DIR + '/' + 'train'
+CIFAR10_VAL_DIR = CIFAR10_DIR + '/' + 'val'
+CIFAR100_TRAIN_DIR = CIFAR100_DIR + '/' + 'trains'
+CIFAR100_VAL_DIR = CIFAR100_DIR + '/' + 'val'
 
 dir_list = [CIFAR10_TRAIN_DIR, CIFAR100_TRAIN_DIR, CIFAR10_VAL_DIR, CIFAR100_VAL_DIR]
 
