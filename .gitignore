@@ -114,7 +114,5 @@ dmypy.json
 .pyre/
 
 # my file
-resize.py
-research/data/
 .idea/
 .vscode/
