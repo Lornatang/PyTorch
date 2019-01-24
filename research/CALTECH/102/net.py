@@ -96,8 +96,7 @@ class GoogleNet(nn.Module):
             inception(832, 384, 182, 384, 48, 128, 128),
             nn.AvgPool2d(kernel_size=2)
         )
-
-        self.classifier = nn.Linear(1024, num_classes)
+        self.classifier = nn.Linear(9216, num_classes)
 
     def forward(self, x):
         x = self.block1(x)
@@ -105,6 +104,6 @@ class GoogleNet(nn.Module):
         x = self.block3(x)
         x = self.block4(x)
         x = self.block5(x)
-        x = x.view(x.shape[0], -1)
+        x = x.view(x.size(0), 9216)
         out = self.classifier(x)
         return out
