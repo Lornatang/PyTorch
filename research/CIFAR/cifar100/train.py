@@ -5,11 +5,13 @@ import torchvision
 from torch import nn, optim
 from torchvision import transforms
 
+from research.CIFAR.cifar10.net import GoogLeNet
+
 
 # Device configuration
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-WORK_DIR = '../../../../../data/CALTECH/4/'
+WORK_DIR = '../../../../../data/CIFAR/cifar10/'
 NUM_EPOCHS = 10
 BATCH_SIZE = 128
 LEARNING_RATE = 1e-4
@@ -23,6 +25,7 @@ if not os.path.exists(MODEL_PATH):
     os.makedirs(MODEL_PATH)
 
 transform = transforms.Compose([
+    transforms.Resize(96),  # 调整图片大小
     transforms.RandomHorizontalFlip(),  # 几率随机旋转
     transforms.ToTensor(),  # 将numpy数据类型转化为Tensor
     transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])  # 归一化
@@ -30,26 +33,26 @@ transform = transforms.Compose([
 
 
 # Load data
-train_datasets = torchvision.datasets.ImageFolder(root=WORK_DIR + 'train/',
-                                                  transform=transform)
+train_dataset = torchvision.datasets.ImageFolder(root=WORK_DIR + 'train/',
+                                                 transform=transform)
 
-train_loader = torch.utils.data.DataLoader(dataset=train_datasets,
+train_loader = torch.utils.data.DataLoader(dataset=train_dataset,
                                            batch_size=BATCH_SIZE,
                                            shuffle=True)
 
-val_datasets = torchvision.datasets.ImageFolder(root=WORK_DIR + 'val/',
-                                                transform=transform)
+val_dataset = torchvision.datasets.ImageFolder(root=WORK_DIR + 'val/',
+                                               transform=transform)
 
-val_loader = torch.utils.data.DataLoader(dataset=train_datasets,
+val_loader = torch.utils.data.DataLoader(dataset=train_dataset,
                                          batch_size=BATCH_SIZE,
                                          shuffle=True)
 
 
 def main():
-    print(f"Train numbers:{len(train_datasets)}")
-    print(f"Val numbers:{len(val_datasets)}")
+    print(f"Train numbers:{len(train_dataset)}")
+    print(f"Val numbers:{len(val_dataset)}")
 
-    model = Net()
+    model = GoogLeNet()
     # cast
     cast = nn.CrossEntropyLoss().to(device)
     # Optimization
@@ -74,8 +77,9 @@ def main():
             loss.backward()
             optimizer.step()
 
-            print(f"Step [{step * 64}/{10 * len(train_datasets)}], "
+            print(f"Step [{step * BATCH_SIZE}/{NUM_EPOCHS * len(train_dataset)}], "
                   f"Loss: {loss.item():.8f}.")
+            step += 1
 
         # Save the model checkpoint
         torch.save(model, MODEL_PATH + MODEL_NAME)
