@@ -113,6 +113,6 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# my file
+# Tool generated files
 .idea/
 .vscode/
