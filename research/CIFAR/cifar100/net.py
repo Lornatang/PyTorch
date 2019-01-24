@@ -1,7 +1,7 @@
 import torch
 from torch import nn
 
-NUM_CLASSES = 10
+NUM_CLASSES = 100
 
 
 class inception(nn.Module):
@@ -105,6 +105,6 @@ class GoogLeNet(nn.Module):
         x = self.block3(x)
         x = self.block4(x)
         x = self.block5(x)
-        x = x.view(x.size(0), -1)
+        x = x.view(x.size(0), 1024)
         out = self.classifier(x)
         return out

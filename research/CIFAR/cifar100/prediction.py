@@ -5,16 +5,16 @@ import torchvision
 from torch.utils import data
 from torchvision import transforms
 
-from research.CIFAR.cifar10.net import GoogLeNet
+from research.CIFAR.cifar100.net import GoogLeNet
 
 # Device configuration
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-WORK_DIR = '../../../../../data/CIFAR/cifar10/'
+WORK_DIR = '../../../../../data/CIFAR/cifar100/'
 BATCH_SIZE = 128
 
 MODEL_PATH = '../../../../models/pytorch/CIFAR/'
-MODEL_NAME = '10.pth'
+MODEL_NAME = '100.pth'
 
 # Create model
 if not os.path.exists(MODEL_PATH):
