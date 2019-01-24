@@ -9,9 +9,9 @@ CIFAR10_DIR = '/Users/mac/program/data/CIFAR/cifar10'
 CIFAR100_DIR = '/Users/mac/program/data/CIFAR/cifar100'
 
 # extract cifar img in here.
-CIFAR10_TRAIN_DIR = '/Users/mac/program/data/CIFAR/cifar10train'
+CIFAR10_TRAIN_DIR = '/Users/mac/program/data/CIFAR/cifar10/train'
 CIFAR10_VAL_DIR = '/Users/mac/program/data/CIFAR/cifar10/val'
-CIFAR100_TRAIN_DIR = '/Users/mac/program/data/CIFAR/cifar100/train'
+CIFAR100_TRAIN_DIR = '/Users/mac/program/data/CIFAR/cifar100/trains'
 CIFAR100_VAL_DIR = '/Users/mac/program/data/CIFAR/cifar100/val'
 
 dir_list = [CIFAR10_TRAIN_DIR, CIFAR100_TRAIN_DIR, CIFAR10_VAL_DIR, CIFAR100_VAL_DIR]
@@ -75,7 +75,7 @@ class CIFAR100(object):
             # binary files are converted to images.
             img = np.reshape(train_data[b'data'][i], (3, 32, 32))
             img = img.transpose(1, 2, 0)
-            img_path = CIFAR100_TRAIN_DIR + '/' + str(train_data[b'labels'][i]) + '_' + str(i) + '.jpg'
+            img_path = CIFAR100_TRAIN_DIR + '/' + str(train_data[b'fine_labels'][i]) + '_' + str(i) + '.jpg'
             cv2.imwrite(img_path, img)
         print(data_dir + " loaded.")
 
@@ -88,7 +88,7 @@ class CIFAR100(object):
             # binary files are converted to images
             img = np.reshape(val_data[b'data'][i], (3, 32, 32))
             img = img.transpose(1, 2, 0)
-            img_path = CIFAR100_VAL_DIR + '/' + str(val_data[b'labels'][i]) + '_' + str(i) + '.jpg'
+            img_path = CIFAR100_VAL_DIR + '/' + str(val_data[b'fine_labels'][i]) + '_' + str(i) + '.jpg'
             cv2.imwrite(img_path, img)
         print("test_batch loaded.")
         return
