@@ -15,19 +15,19 @@ from torch import nn, optim
 from torch.utils import data
 from torchvision import transforms
 
-from net import Net
+from research.CALTECH.C4.net import Net
 
 # Device configuration
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-WORK_DIR = '../../data/CALTECH/4/'
+WORK_DIR = '../../data/CALTECH/C4/'
 NUM_EPOCHS = 10
 BATCH_SIZE = 64
 LEARNING_RATE = 1e-4
 NUM_CLASSES = 4
 
 MODEL_PATH = '../../../models/pytorch/CALTECH/'
-MODEL_NAME = '4.pth'
+MODEL_NAME = 'C4.pth'
 
 # Create model
 if not os.path.exists(MODEL_PATH):

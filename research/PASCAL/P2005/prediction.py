@@ -10,11 +10,11 @@ from research.PASCAL.P2005.net import GoogLeNet
 # Device configuration
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-WORK_DIR = '../../../../../data/CIFAR/PASCAL/'
+WORK_DIR = '../../../../../data/PASCAL/P2005/'
 BATCH_SIZE = 64
 
 MODEL_PATH = '../../../../models/pytorch/PASCAL/'
-MODEL_NAME = '2005.pth'
+MODEL_NAME = 'P2005.pth'
 
 # Create model
 if not os.path.exists(MODEL_PATH):

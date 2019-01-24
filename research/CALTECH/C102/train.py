@@ -17,7 +17,7 @@ LEARNING_RATE = 1e-4
 NUM_CLASSES = 102
 
 MODEL_DIR = '../../../../models/pytorch/CALTECH/'
-MODEL_NAME = '102.pth'
+MODEL_NAME = 'C102.pth'
 
 # Create model
 if not os.path.exists(MODEL_DIR):
