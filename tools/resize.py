@@ -1,11 +1,3 @@
-"""
-# author: shiyipaisizuo
-# contact: shiyipaisizuo@gmail.com
-# file: resize.py
-# time: 2018/8/18 22:16
-# license: MIT
-"""
-
 import os.path
 import glob
 import cv2
@@ -20,19 +12,32 @@ def convert_size(file, out_dir, width, height):
         print(e)
 
 
-for root in os.listdir(
-        '../../data/CVPR/09/train/'):
-    dirs = os.path.join(
-        '../../data/CVPR/09/train/', root)
-    print(f"{dirs} has done!")
-    for img in glob.glob(dirs + '/*'):
-        convert_size(img, dirs, 224, 224)
+class RESIZE(object):
+    """use one key to reformat the image size.
 
+    para:
+        work_dir: A directory for work.
+        high: Pictures that need to be modified high.
+        width: Pictures that need to be modified width.
+    return:
+        None
+    """
+    def __init__(self, work_dir, high, width):
+        self.work_dir = work_dir
+        self.high = high
+        self.width = width
 
-for root in os.listdir(
-        '../../data/CVPR/09/val/'):
-    dirs = os.path.join(
-        '../../data/CVPR/09/val/', root)
-    print(f"{dirs} has done!")
-    for img in glob.glob(dirs + '/*'):
-        convert_size(img, dirs, 224, 224)
+        if self.work_dir is None:
+            raise Exception('Work dir cannot be empty!')
+        elif self.high is None:
+            raise Exception('Image high cannot be empty!')
+        elif self.width is None:
+            raise Exception('Image width cannot be empty!')
+
+        for root in os.listdir(work_dir):
+            dirs = os.path.join(work_dir, root)
+            print(f'{dirs} has done!')
+            for img in glob.glob(dirs + '/*.jpg'):
+                if img is None:
+                    raise Exception('The images in the directory must be in JPG format.')
+                convert_size(img, dirs, high, width)
