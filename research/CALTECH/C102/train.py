@@ -10,13 +10,13 @@ from torchvision import transforms
 # Device configuration
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-WORK_DIR = '../../data/CALTECH/102/'
+WORK_DIR = '../../../../../data/CALTECH/C102/'
 NUM_EPOCHS = 10
 BATCH_SIZE = 64
 LEARNING_RATE = 1e-4
 NUM_CLASSES = 102
 
-MODEL_DIR = '../../../models/pytorch/CALTECH/'
+MODEL_DIR = '../../../../models/pytorch/CALTECH/'
 MODEL_NAME = '102.pth'
 
 # Create model
@@ -24,7 +24,7 @@ if not os.path.exists(MODEL_DIR):
     os.makedirs(MODEL_DIR)
 
 transform = transforms.Compose([
-    transforms.Resize(224),  # 将图像转化为224 * 224
+    transforms.Resize(96),  # 将图像转化为224 * 224
     transforms.RandomHorizontalFlip(),  # 几率随机旋转
     transforms.ToTensor(),  # 将numpy数据类型转化为Tensor
     transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])  # 归一化
