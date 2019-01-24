@@ -16,11 +16,11 @@ from torchvision import transforms
 # Device configuration
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-WORK_DIR = '../../data/CALTECH/102/'
+WORK_DIR = '../../../../../data/CALTECH/102/'
 BATCH_SIZE = 64
 NUM_CLASSES = 102
 
-MODEL_DIR = '../../../models/pytorch/CALTECH/'
+MODEL_DIR = '../../../../models/pytorch/CALTECH/'
 MODEL_NAME = '102.pth'
 
 # Create model
