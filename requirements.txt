@@ -1,8 +1,6 @@
-dlib
 opencv-python
 matplotlib
 numpy
-scikit-learn
 pillow
 torchvision
 torch
