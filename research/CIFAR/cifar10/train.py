@@ -5,11 +5,13 @@ import torchvision
 from torch import nn, optim
 from torchvision import transforms
 
+from research.CIFAR.cifar10.net import GoogLeNet
+
 
 # Device configuration
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-WORK_DIR = '../../../../../data/CALTECH/4/'
+WORK_DIR = '../../../../../data/CIFAR/cifar10/'
 NUM_EPOCHS = 10
 BATCH_SIZE = 128
 LEARNING_RATE = 1e-4
@@ -23,6 +25,7 @@ if not os.path.exists(MODEL_PATH):
     os.makedirs(MODEL_PATH)
 
 transform = transforms.Compose([
+    transforms.Resize(96),  # 调整图片大小
     transforms.RandomHorizontalFlip(),  # 几率随机旋转
     transforms.ToTensor(),  # 将numpy数据类型转化为Tensor
     transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])  # 归一化
@@ -49,7 +52,7 @@ def main():
     print(f"Train numbers:{len(train_datasets)}")
     print(f"Val numbers:{len(val_datasets)}")
 
-    model = Net()
+    model = GoogLeNet()
     # cast
     cast = nn.CrossEntropyLoss().to(device)
     # Optimization
@@ -74,8 +77,9 @@ def main():
             loss.backward()
             optimizer.step()
 
-            print(f"Step [{step * 64}/{10 * len(train_datasets)}], "
+            print(f"Step [{step * BATCH_SIZE}/{NUM_EPOCHS * len(train_datasets)}], "
                   f"Loss: {loss.item():.8f}.")
+            step += 1
 
         # Save the model checkpoint
         torch.save(model, MODEL_PATH + MODEL_NAME)
