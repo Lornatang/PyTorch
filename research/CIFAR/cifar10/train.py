@@ -40,17 +40,9 @@ train_loader = torch.utils.data.DataLoader(dataset=train_dataset,
                                            batch_size=BATCH_SIZE,
                                            shuffle=True)
 
-val_dataset = torchvision.datasets.ImageFolder(root=WORK_DIR + 'val/',
-                                               transform=transform)
-
-val_loader = torch.utils.data.DataLoader(dataset=train_dataset,
-                                         batch_size=BATCH_SIZE,
-                                         shuffle=True)
-
 
 def main():
     print(f"Train numbers:{len(train_dataset)}")
-    print(f"Val numbers:{len(val_dataset)}")
 
     model = GoogLeNet()
     # cast
