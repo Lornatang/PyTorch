@@ -116,3 +116,4 @@ dmypy.json
 # Tool generated files
 .idea/
 .vscode/
+*.DS_Store
