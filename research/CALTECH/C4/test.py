@@ -4,7 +4,7 @@ from torchvision import transforms
 
 BATCH_SIZE = 1
 
-MODEL_PATH = '../../../models/pytorch/CALTECH/'
+MODEL_PATH = '../../../.../models/pytorch/CALTECH/'
 MODEL_NAME = 'C4.pth'
 
 
@@ -20,16 +20,16 @@ transform = transforms.Compose([
 
 
 # Load data
-test_datasets = torchvision.datasets.ImageFolder(root='/Users/mac/program/lorna/pytorch-project/CALTECH/4/test',
-                                                 transform=transform)
+test_dataset = torchvision.datasets.ImageFolder(root='test',
+                                                transform=transform)
 
-test_loader = torch.utils.data.DataLoader(dataset=test_datasets,
+test_loader = torch.utils.data.DataLoader(dataset=test_dataset,
                                           batch_size=BATCH_SIZE,
                                           shuffle=True)
 
 
 def main():
-    print(f"Image numbers:{len(test_datasets)}")
+    print(f"Image numbers:{len(test_dataset)}")
 
     # Load model
     if torch.cuda.is_available():
@@ -46,15 +46,6 @@ def main():
         outputs = model(images)
         # equal prediction and acc
         _, predicted = torch.max(outputs.data, 1)
-
-        if predicted == 0:
-            print(f"Classifier is airplane.")
-        if predicted == 1:
-            print(f"Classifier is car.")
-        if predicted == 2:
-            print(f"Classifier is face.")
-        if predicted == 3:
-            print(f"Classifier is motorbike.")
 
 
 if __name__ == '__main__':

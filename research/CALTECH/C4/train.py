@@ -1,14 +1,5 @@
-"""
-# author: shiyipaisizuo
-# contact: shiyipaisizuo@gmail.com
-# file: train.py
-# time: 2018/8/24 17:52
-# license: MIT
-"""
-
 import os
 
-import time
 import torch
 import torchvision
 from torch import nn, optim
@@ -20,13 +11,13 @@ from research.CALTECH.C4.net import Net
 # Device configuration
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-WORK_DIR = '../../data/CALTECH/C4/'
-NUM_EPOCHS = 10
-BATCH_SIZE = 64
+WORK_DIR = '../../../../../data/CALTECH/C4'
+NUM_EPOCHS = 50
+BATCH_SIZE = 16
 LEARNING_RATE = 1e-4
 NUM_CLASSES = 4
 
-MODEL_PATH = '../../../models/pytorch/CALTECH/'
+MODEL_PATH = '../../../../models/pytorch/CALTECH/'
 MODEL_NAME = 'C4.pth'
 
 # Create model
@@ -42,24 +33,16 @@ transform = transforms.Compose([
 
 
 # Load data
-train_datasets = torchvision.datasets.ImageFolder(root=WORK_DIR + 'train/',
-                                                  transform=transform)
+train_dataset = torchvision.datasets.ImageFolder(root=WORK_DIR + '/' + 'train/',
+                                                 transform=transform)
 
-train_loader = torch.utils.data.DataLoader(dataset=train_datasets,
+train_loader = torch.utils.data.DataLoader(dataset=train_dataset,
                                            batch_size=BATCH_SIZE,
                                            shuffle=True)
 
-val_datasets = torchvision.datasets.ImageFolder(root=WORK_DIR + 'val/',
-                                                transform=transform)
-
-val_loader = torch.utils.data.DataLoader(dataset=train_datasets,
-                                         batch_size=BATCH_SIZE,
-                                         shuffle=True)
-
 
 def main():
-    print(f"Train numbers:{len(train_datasets)}")
-    print(f"Val numbers:{len(val_datasets)}")
+    print(f"Train numbers:{len(train_dataset)}")
 
     model = Net()
     # cast
@@ -70,11 +53,9 @@ def main():
         lr=LEARNING_RATE,
         weight_decay=1e-8)
 
+    step = 1
     for epoch in range(1, NUM_EPOCHS + 1):
-        # model.train()
-        # start time
-        start = time.time()
-        step = 1
+        model.train()
         for images, labels in train_loader:
             images = images.to(device)
             labels = labels.to(device)
@@ -88,10 +69,9 @@ def main():
             loss.backward()
             optimizer.step()
 
-            end = time.time()
-            print(f"Step [{step * 64}/{10 * len(train_datasets) / 64}], "
-                  f"Loss: {loss.item():.8f}, "
-                  f"Time: {(end-start) * 1:.1f}sec!")
+            print(f"Step [{step * BATCH_SIZE}/{NUM_EPOCHS * len(train_dataset)}], "
+                  f"Loss: {loss.item():.8f}.")
+            step += 1
 
         # Save the model checkpoint
         torch.save(model, MODEL_PATH + MODEL_NAME)

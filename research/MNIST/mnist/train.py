@@ -13,7 +13,7 @@ from research.MNIST.mnist.net import Net
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 WORK_DIR = '../../../../../data/MNIST/mnist'
-NUM_EPOCHS = 10
+NUM_EPOCHS = 20
 BATCH_SIZE = 128
 LEARNING_RATE = 1e-4
 NUM_CLASSES = 10
