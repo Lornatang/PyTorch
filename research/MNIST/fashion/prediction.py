@@ -17,7 +17,7 @@ LEARNING_RATE = 1e-4
 NUM_CLASSES = 10
 
 MODEL_PATH = '../../../../models/pytorch/MNIST'
-MODEL_NAME = 'mnist.pth'
+MODEL_NAME = 'fashion.pth'
 
 # Create model
 if not os.path.exists(MODEL_PATH):
