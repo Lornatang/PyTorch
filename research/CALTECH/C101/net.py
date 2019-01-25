@@ -1,6 +1,6 @@
 import torch
 from torch import nn
-NUM_CLASSES = 102
+NUM_CLASSES = 101
 
 
 class inception(nn.Module):

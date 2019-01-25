@@ -2,7 +2,7 @@ import os
 
 import torch
 import torchvision
-from research.CALTECH.C102.net import GoogleNet
+from research.CALTECH.C101.net import GoogleNet
 from torch import nn, optim
 from torch.utils import data
 from torchvision import transforms
@@ -10,14 +10,14 @@ from torchvision import transforms
 # Device configuration
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-WORK_DIR = '../../../../../data/CALTECH/C102/'
+WORK_DIR = '../../../../../data/CALTECH/C101/'
 NUM_EPOCHS = 10
 BATCH_SIZE = 64
 LEARNING_RATE = 1e-4
-NUM_CLASSES = 102
+NUM_CLASSES = 101
 
 MODEL_DIR = '../../../../models/pytorch/CALTECH/'
-MODEL_NAME = 'C102.pth'
+MODEL_NAME = 'C101.pth'
 
 # Create model
 if not os.path.exists(MODEL_DIR):

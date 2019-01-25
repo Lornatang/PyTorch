@@ -8,12 +8,12 @@ from torchvision import transforms
 # Device configuration
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-WORK_DIR = '../../../../../data/CALTECH/C102/'
+WORK_DIR = '../../../../../data/CALTECH/C101/'
 BATCH_SIZE = 64
-NUM_CLASSES = 102
+NUM_CLASSES = 101
 
 MODEL_DIR = '../../../../models/pytorch/CALTECH/'
-MODEL_NAME = 'C102.pth'
+MODEL_NAME = 'C101.pth'
 
 # Create model
 if not os.path.exists(MODEL_DIR):
