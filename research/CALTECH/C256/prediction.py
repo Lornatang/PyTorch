@@ -29,16 +29,16 @@ transform = transforms.Compose([
 
 
 # Load data
-val_datasets = torchvision.datasets.ImageFolder(root=WORK_DIR + '/' + 'val/',
+val_dataset = torchvision.datasets.ImageFolder(root=WORK_DIR + '/' + 'val/',
                                                 transform=transform)
 
-val_loader = torch.utils.data.DataLoader(dataset=val_datasets,
+val_loader = torch.utils.data.DataLoader(dataset=val_dataset,
                                          batch_size=BATCH_SIZE,
                                          shuffle=True)
 
 
 def main():
-    print(f"Val numbers:{len(val_datasets)}")
+    print(f"Val numbers:{len(val_dataset)}")
 
     # Load model
     if torch.cuda.is_available():
