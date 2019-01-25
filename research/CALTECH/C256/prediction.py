@@ -8,14 +8,14 @@ from torchvision import transforms
 # Device configuration
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-WORK_DIR = '../../data/CALTECH/C154/'
+WORK_DIR = '../../data/CALTECH/C256'
 NUM_EPOCHS = 10
 BATCH_SIZE = 64
 LEARNING_RATE = 1e-4
-NUM_CLASSES = 154
+NUM_CLASSES = 256
 
 MODEL_PATH = '../../../models/pytorch/CALTECH/'
-MODEL_NAME = 'C154.pth'
+MODEL_NAME = 'C256.pth'
 
 # Create model
 if not os.path.exists(MODEL_PATH):
@@ -29,7 +29,7 @@ transform = transforms.Compose([
 
 
 # Load data
-val_datasets = torchvision.datasets.ImageFolder(root=WORK_DIR + 'val/',
+val_datasets = torchvision.datasets.ImageFolder(root=WORK_DIR + '/' + 'val/',
                                                 transform=transform)
 
 val_loader = torch.utils.data.DataLoader(dataset=val_datasets,

@@ -1,17 +1,8 @@
-"""
-# author: shiyipaisizuo
-# contact: shiyipaisizuo@gmail.com
-# file: train.py
-# time: 2018/8/24 17:52
-# license: MIT
-"""
-
 import os
 
-import time
 import torch
 import torchvision
-from research.CALTECH.C154.net import Net
+from research.CALTECH.C256.net import Net
 from torch import nn, optim
 from torch.utils import data
 from torchvision import transforms
@@ -19,14 +10,14 @@ from torchvision import transforms
 # Device configuration
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-WORK_DIR = '../../data/CALTECH/C154/'
+WORK_DIR = '../../data/CALTECH/C256'
 NUM_EPOCHS = 10
 BATCH_SIZE = 64
 LEARNING_RATE = 1e-4
-NUM_CLASSES = 154
+NUM_CLASSES = 256
 
 MODEL_PATH = '../../../models/pytorch/CALTECH/'
-MODEL_NAME = 'C154.pth'
+MODEL_NAME = 'C256.pth'
 
 # Create model
 if not os.path.exists(MODEL_PATH):
@@ -41,8 +32,8 @@ transform = transforms.Compose([
 
 
 # Load data
-train_dataset = torchvision.datasets.ImageFolder(root=WORK_DIR + 'train/',
-                                                  transform=transform)
+train_dataset = torchvision.datasets.ImageFolder(root=WORK_DIR + '/' + 'train',
+                                                 transform=transform)
 
 train_loader = torch.utils.data.DataLoader(dataset=train_dataset,
                                            batch_size=BATCH_SIZE,
@@ -77,9 +68,9 @@ def main():
             loss.backward()
             optimizer.step()
 
-            end = time.time()
             print(f"Step [{step * BATCH_SIZE}/{NUM_EPOCHS * len(train_dataset)}], "
                   f"Loss: {loss.item():.8f}.")
+            step += 1
 
         # Save the model checkpoint
         torch.save(model, MODEL_PATH + MODEL_NAME)
