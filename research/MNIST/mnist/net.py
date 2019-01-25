@@ -1,16 +1,16 @@
 from torch import nn
 
-NUM_CLASSES = 4
+NUM_CLASSES = 10
 
 
 class Net(nn.Module):
     """use myself network.
-    input img size is 224 * 224"""
+    input img size is 32 * 32"""
 
     def __init__(self, num_classes=NUM_CLASSES):
         super(Net, self).__init__()
         self.features = nn.Sequential(
-            nn.Conv2d(3, 64, kernel_size=11, stride=4, padding=1),
+            nn.Conv2d(1, 64, kernel_size=11, stride=4, padding=1),
             nn.ReLU(inplace=True),
             nn.MaxPool2d(kernel_size=3, stride=2),
             nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1),
@@ -30,7 +30,7 @@ class Net(nn.Module):
 
     def forward(self, x):
         x = self.features(x)
-        x = x.view(x.size(0), 12 * 12 * 128)
+        x = x.view(x.size(0), -1)
         out = self.classifier(x)
 
         return out
