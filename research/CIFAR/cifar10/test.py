@@ -2,10 +2,12 @@ import torch
 import torchvision
 from torchvision import transforms
 
+from research.CIFAR.cifar10.net import GoogLeNet
+
 BATCH_SIZE = 1
 
-MODEL_PATH = '../../../models/pytorch/CALTECH/'
-MODEL_NAME = 'C4.pth'
+MODEL_PATH = '../../../../models/pytorch/CIFAR/'
+MODEL_NAME = '10.pth'
 
 
 # Device configuration
@@ -13,23 +15,28 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
 transform = transforms.Compose([
-    transforms.Resize(224),  # 将图像转化为224 * 224
+    transforms.Resize(96),  # 将图像转化为224 * 224
     transforms.ToTensor(),  # 将numpy数据类型转化为Tensor
     transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])  # 归一化
 ])
 
 
 # Load data
-test_datasets = torchvision.datasets.ImageFolder(root='/Users/mac/program/lorna/pytorch-project/CALTECH/4/test',
-                                                 transform=transform)
+test_dataset = torchvision.datasets.ImageFolder(root='test',
+                                                transform=transform)
 
-test_loader = torch.utils.data.DataLoader(dataset=test_datasets,
+test_loader = torch.utils.data.DataLoader(dataset=test_dataset,
                                           batch_size=BATCH_SIZE,
                                           shuffle=True)
 
 
+def label_name(index):
+    label = ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
+    return label[index]
+
+
 def main():
-    print(f"Image numbers:{len(test_datasets)}")
+    print(f"Image numbers:{len(test_dataset)}")
 
     # Load model
     if torch.cuda.is_available():
@@ -47,14 +54,8 @@ def main():
         # equal prediction and acc
         _, predicted = torch.max(outputs.data, 1)
 
-        if predicted == 0:
-            print(f"Classifier is airplane.")
-        if predicted == 1:
-            print(f"Classifier is car.")
-        if predicted == 2:
-            print(f"Classifier is face.")
-        if predicted == 3:
-            print(f"Classifier is motorbike.")
+        print(f"Classifier is {label_name(predicted)}.")
+        print(predicted)
 
 
 if __name__ == '__main__':
