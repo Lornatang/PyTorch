@@ -10,13 +10,13 @@ from research.MNIST.mnist.net import Net
 # Device configuration
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-WORK_DIR = '../../data/MNIST/mnist'
+WORK_DIR = '../../../../../data/MNIST/mnist'
 NUM_EPOCHS = 10
 BATCH_SIZE = 128
 LEARNING_RATE = 1e-4
 NUM_CLASSES = 10
 
-MODEL_PATH = '../../../models/pytorch/MNIST'
+MODEL_PATH = '../../../../models/pytorch/MNIST'
 MODEL_NAME = 'mnist.pth'
 
 # Create model
@@ -24,7 +24,7 @@ if not os.path.exists(MODEL_PATH):
     os.makedirs(MODEL_PATH)
 
 transform = transforms.Compose([
-    transforms.Resize(224),  # 将图像转化为800 * 800
+    transforms.Resize(28),  # 将图像转化为800 * 800
     transforms.ToTensor(),  # 将numpy数据类型转化为Tensor
     transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])  # 归一化
 ])
