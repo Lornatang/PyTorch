@@ -4,7 +4,7 @@ import struct
 from PIL import Image
 import os
 
-data_file = '../../../../data/MNIST/mnist/t10k-images-idx3-ubyte'  # 需要修改的路径
+data_file = '../../../../data/MNIST/mnist/t10k-images-idx3-ubyte'
 # It's 47040016B, but we should set to 47040000B
 data_file_size = 7840016
 data_file_size = str(data_file_size - 16) + 'B'
@@ -18,7 +18,7 @@ datas = struct.unpack_from(
 datas = np.array(datas).astype(np.uint8).reshape(
     numImages, 1, numRows, numColumns)
 
-label_file = '../../../../data/MNIST/mnist/t10k-labels-idx1-ubyte'  # 需要修改的路径
+label_file = '../../../../data/MNIST/mnist/t10k-labels-idx1-ubyte'
 
 # It's 60008B, but we should set to 60000B
 label_file_size = 10008
@@ -31,7 +31,7 @@ labels = struct.unpack_from(
     '>' + label_file_size, label_buf, struct.calcsize('>II'))
 labels = np.array(labels).astype(np.int64)
 
-datas_root = 'val'  # 需要修改的路径
+datas_root = 'val'
 if not os.path.exists(datas_root):
     os.mkdir(datas_root)
 
@@ -43,6 +43,5 @@ for i in range(10):
 for ii in range(numLabels):
     img = Image.fromarray(datas[ii, 0, 0:28, 0:28])
     label = labels[ii]
-    file_name = datas_root + os.sep + str(label) + os.sep + \
-                'mnist_train_' + str(ii) + '.png'
+    file_name = datas_root + os.sep + str(label) + os.sep + str(ii) + '.png'
     img.save(file_name)
