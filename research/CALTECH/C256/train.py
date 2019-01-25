@@ -10,13 +10,13 @@ from torchvision import transforms
 # Device configuration
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-WORK_DIR = '../../data/CALTECH/C256'
+WORK_DIR = '../../../../../data/CALTECH/C256'
 NUM_EPOCHS = 10
 BATCH_SIZE = 64
 LEARNING_RATE = 1e-4
 NUM_CLASSES = 256
 
-MODEL_PATH = '../../../models/pytorch/CALTECH/'
+MODEL_PATH = '../../../../models/pytorch/CALTECH/'
 MODEL_NAME = 'C256.pth'
 
 # Create model
