@@ -6,7 +6,7 @@ from torchvision import transforms
 
 from research.PASCAL.P2005.net import GoogLeNet
 
-WORK_DIR = '../../../../../data/PASCAL/P2006'
+WORK_DIR = '../../../../../data/PASCAL/P2005'
 BATCH_SIZE = 1
 
 MODEL_PATH = '../../../../models/pytorch/PASCAL/'
