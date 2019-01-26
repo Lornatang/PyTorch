@@ -5,8 +5,6 @@ import torchvision
 from torch.utils import data
 from torchvision import transforms
 
-from research.PASCAL.P2005.net import GoogLeNet
-
 # Device configuration
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
