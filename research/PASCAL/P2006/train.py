@@ -7,7 +7,11 @@ import torchvision
 from torch import nn, optim
 from torchvision import transforms
 
+# first train run this code
+
 # from research.PASCAL.P2006.net import GoogLeNet
+
+# incremental training comments out that line of code.
 
 
 # Device configuration
@@ -15,7 +19,7 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 WORK_DIR = '../../../../../data/PASCAL/P2006'
 NUM_EPOCHS = 20
-BATCH_SIZE = 16
+BATCH_SIZE = 32
 LEARNING_RATE = 1e-4
 NUM_CLASSES = 10
 

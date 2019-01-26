@@ -23,8 +23,8 @@ label = ['bicycle', 'bus', 'car', 'cat', 'cow', 'dog', 'horse', 'sheep', 'motorb
 
 # check file name is exist
 for dir_index in range(0, 10):
-    if not os.path.exists(WORK_DIR + '/' + 'train' + '/' + label[dir_index]):
-        os.makedirs(WORK_DIR + '/' + 'train' + '/' + label[dir_index])
+    if not os.path.exists(WORK_DIR + '/' + 'val' + '/' + label[dir_index]):
+        os.makedirs(WORK_DIR + '/' + 'val' + '/' + label[dir_index])
 
 transform = transforms.Compose([
     transforms.Resize(224),
@@ -60,7 +60,7 @@ def main():
         _, predicted = torch.max(outputs.data, 1)
 
         img = to_pil_image(images[0])
-        img.save(str(WORK_DIR + '/' + 'train' + '/' + label[predicted]) + '/' + str(index) + '.jpg')
+        img.save(str(WORK_DIR + '/' + 'val' + '/' + label[predicted]) + '/' + str(index) + '.jpg')
         index += 1
 
 
