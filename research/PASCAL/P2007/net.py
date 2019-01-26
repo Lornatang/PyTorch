@@ -1,7 +1,7 @@
 import torch
 from torch import nn
 
-NUM_CLASSES = 4
+NUM_CLASSES = 10
 
 
 class inception(nn.Module):
@@ -60,7 +60,7 @@ class inception(nn.Module):
 
 class GoogLeNet(nn.Module):
     """use google network(inception v3).
-    input img size is 96 * 96"""
+    input img size is 224 * 224"""
 
     def __init__(self, num_classes=NUM_CLASSES):
         super(GoogLeNet, self).__init__()
@@ -97,7 +97,7 @@ class GoogLeNet(nn.Module):
             inception(832, 384, 182, 384, 48, 128, 128),
             nn.AvgPool2d(kernel_size=2)
         )
-        self.classifier = nn.Linear(1024, num_classes)
+        self.classifier = nn.Linear(9216, num_classes)
 
     def forward(self, x):
         x = self.block1(x)

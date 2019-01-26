@@ -5,30 +5,28 @@ import torchvision
 from torch.utils import data
 from torchvision import transforms
 
-from research.PASCAL.P2005.net import GoogLeNet
-
 # Device configuration
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-WORK_DIR = '../../../../../data/PASCAL/P2005'
-BATCH_SIZE = 16
+WORK_DIR = '../../../../../data/PASCAL/P2006'
+BATCH_SIZE = 32
 
 MODEL_PATH = '../../../../models/pytorch/PASCAL/'
-MODEL_NAME = 'P2005.pth'
+MODEL_NAME = 'P2006.pth'
 
 # Create model
 if not os.path.exists(MODEL_PATH):
     os.makedirs(MODEL_PATH)
 
 transform = transforms.Compose([
-    transforms.Resize(96),  # 96 * 96
+    transforms.Resize(224),
     transforms.ToTensor(),
-    transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])  # lrn
+    transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
 ])
 
 
 # Load data
-val_dataset = torchvision.datasets.ImageFolder(root=WORK_DIR + '/' + 'val/',
+val_dataset = torchvision.datasets.ImageFolder(root=WORK_DIR + '/' + 'train',
                                                transform=transform)
 
 val_loader = torch.utils.data.DataLoader(dataset=val_dataset,
