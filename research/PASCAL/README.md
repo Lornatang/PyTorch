@@ -1,6 +1,6 @@
-<h1 style="text-align:center">The PASCAL Visual Object Classes Homepage </h1>
+The PASCAL Visual Object Classes Homepage 
 
-![Pascal 2 Logo](http://host.robots.ox.ac.uk/pascal/VOC/pascal2.png)
+<center>![Pascal 2 Logo](http://host.robots.ox.ac.uk/pascal/VOC/pascal2.png)</center>
 
 ## The PASCAL VOC project:
 - Provides standardised image data sets for object class recognition
