@@ -88,7 +88,7 @@ class GoogLeNet(nn.Module):
 
         self.avgpool = nn.AvgPool2d(8, stride=1)
 
-        self.classifier = nn.Linear(9216, num_classes)
+        self.classifier = nn.Linear(1024, num_classes)
 
     def forward(self, x):
         out = self.pre_layers(x)
