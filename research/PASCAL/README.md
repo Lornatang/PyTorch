@@ -1,4 +1,4 @@
-# The PASCAL Visual Object Classes Homepage
+<h1 style="text-align:center">The PASCAL Visual Object Classes Homepage </h1>
 
 ![Pascal 2 Logo](http://host.robots.ox.ac.uk/pascal/VOC/pascal2.png)
 
