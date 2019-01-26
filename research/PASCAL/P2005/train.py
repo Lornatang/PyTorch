@@ -35,7 +35,7 @@ transform = transforms.Compose([
 
 
 # Load data
-train_dataset = torchvision.datasets.ImageFolder(root=WORK_DIR + '/' + 'train',
+train_dataset = torchvision.datasets.ImageFolder(root=WORK_DIR + '/' + 'val',
                                                  transform=transform)
 
 train_loader = torch.utils.data.DataLoader(dataset=train_dataset,
@@ -46,7 +46,14 @@ train_loader = torch.utils.data.DataLoader(dataset=train_dataset,
 def main():
     print(f"Train numbers:{len(train_dataset)}")
 
-    model = GoogLeNet()
+    # first train run this line
+    # model = GoogLeNet()
+    # load model
+    # Load model
+    if torch.cuda.is_available():
+        model = torch.load(MODEL_PATH + MODEL_NAME).to(device)
+    else:
+        model = torch.load(MODEL_PATH + MODEL_NAME, map_location='cpu')
     # cast
     cast = nn.CrossEntropyLoss().to(device)
     # Optimization
