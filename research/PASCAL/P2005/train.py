@@ -81,7 +81,7 @@ def main():
         # cal train one epoch time
         end = time.time()
         print(f"Epoch [{epoch}/{NUM_EPOCHS}], "
-              f"time: {end-start}sec!")
+              f"time: {end-start} sec!")
 
         # Save the model checkpoint
         torch.save(model, MODEL_PATH + MODEL_NAME)
