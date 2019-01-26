@@ -19,20 +19,21 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 # Tensor image transforms to PIL image
 to_pil_image = transforms.ToPILImage()
 
-label = ['bike', 'car', 'motorbike', 'person']
+label = ['bicycle', 'bus', 'car', 'cat', 'cow', 'dog', 'horse', 'sheep', 'motorbike', 'person']
 
 # check file name is exist
-for dir_index in range(0, 4):
+for dir_index in range(0, 10):
     if not os.path.exists(WORK_DIR + '/' + 'train' + '/' + label[dir_index]):
         os.makedirs(WORK_DIR + '/' + 'train' + '/' + label[dir_index])
 
 transform = transforms.Compose([
     transforms.Resize(224),
+    transforms.RandomHorizontalFlip(),
     transforms.ToTensor(),
 ])
 
 # Load data
-test_dataset = torchvision.datasets.ImageFolder(root=WORK_DIR,
+test_dataset = torchvision.datasets.ImageFolder(root=WORK_DIR + '/' + 'train',
                                                 transform=transform)
 
 test_loader = torch.utils.data.DataLoader(dataset=test_dataset,
