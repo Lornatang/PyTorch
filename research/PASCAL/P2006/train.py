@@ -7,7 +7,7 @@ import torchvision
 from torch import nn, optim
 from torchvision import transforms
 
-from research.PASCAL.P2006.net import GoogLeNet
+# from research.PASCAL.P2006.net import GoogLeNet
 
 
 # Device configuration
@@ -15,7 +15,7 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 WORK_DIR = '../../../../../data/PASCAL/P2006'
 NUM_EPOCHS = 20
-BATCH_SIZE = 32
+BATCH_SIZE = 16
 LEARNING_RATE = 1e-4
 NUM_CLASSES = 10
 
@@ -46,7 +46,14 @@ train_loader = torch.utils.data.DataLoader(dataset=train_dataset,
 def main():
     print(f"Train numbers:{len(train_dataset)}")
 
-    model = GoogLeNet()
+    # first train run this line
+    # model = GoogLeNet()
+    # load model
+    # Load model
+    if torch.cuda.is_available():
+        model = torch.load(MODEL_PATH + MODEL_NAME).to(device)
+    else:
+        model = torch.load(MODEL_PATH + MODEL_NAME, map_location='cpu')
     # cast
     cast = nn.CrossEntropyLoss().to(device)
     # Optimization
