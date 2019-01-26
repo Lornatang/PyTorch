@@ -13,21 +13,21 @@ from research.PASCAL.P2005.net import GoogLeNet
 # Device configuration
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-WORK_DIR = '../../../../../data/PASCAL/P2005'
+WORK_DIR = '../../../../../data/PASCAL/P2006'
 NUM_EPOCHS = 20
 BATCH_SIZE = 16
 LEARNING_RATE = 1e-4
 NUM_CLASSES = 4
 
 MODEL_PATH = '../../../../models/pytorch/PASCAL/'
-MODEL_NAME = 'P2005.pth'
+MODEL_NAME = 'P2006.pth'
 
 # Create model
 if not os.path.exists(MODEL_PATH):
     os.makedirs(MODEL_PATH)
 
 transform = transforms.Compose([
-    transforms.Resize(96),  # 调整图片大小
+    transforms.Resize(224),  # 调整图片大小
     transforms.RandomHorizontalFlip(),  # 几率随机旋转
     transforms.ToTensor(),  # 将numpy数据类型转化为Tensor
     transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])  # 归一化

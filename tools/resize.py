@@ -36,8 +36,9 @@ class RESIZE(object):
 
         for root in os.listdir(work_dir):
             dirs = os.path.join(work_dir, root)
-            print(f'{dirs} has done!')
-            for img in glob.glob(dirs + '/*.jpg'):
+            print(f"'{dirs}' are being resized!")
+            for img in glob.glob(dirs + '/*'):
                 if img is None:
-                    raise Exception('The images in the directory must be in JPG format.')
+                    raise Exception('The images in the directory must be in JPG/PNG format.')
                 convert_size(img, dirs, high, width)
+            print(f"'{dirs}' has done!")
