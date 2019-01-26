@@ -43,6 +43,3 @@ class RESIZE(object):
                     raise Exception('The images in the directory must be in JPG/PNG format.')
                 convert_size(img, dirs, high, width)
             print(f"'{dirs}' has done!")
-
-
-RESIZE('../../../data/PASCAL/P2006/train', 224, 224)
