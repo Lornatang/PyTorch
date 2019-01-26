@@ -11,7 +11,7 @@ from research.PASCAL.P2005.net import GoogLeNet
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 WORK_DIR = '../../../../../data/PASCAL/P2006'
-BATCH_SIZE = 16
+BATCH_SIZE = 32
 
 MODEL_PATH = '../../../../models/pytorch/PASCAL/'
 MODEL_NAME = 'P2006.pth'
@@ -28,7 +28,7 @@ transform = transforms.Compose([
 
 
 # Load data
-val_dataset = torchvision.datasets.ImageFolder(root=WORK_DIR + '/' + 'val/',
+val_dataset = torchvision.datasets.ImageFolder(root=WORK_DIR + '/' + 'train',
                                                transform=transform)
 
 val_loader = torch.utils.data.DataLoader(dataset=val_dataset,
