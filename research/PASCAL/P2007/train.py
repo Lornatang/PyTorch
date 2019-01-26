@@ -7,20 +7,20 @@ import torchvision
 from torch import nn, optim
 from torchvision import transforms
 
-from research.PASCAL.P2006.net import GoogLeNet
+from research.PASCAL.P2007.net import GoogLeNet
 
 
 # Device configuration
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-WORK_DIR = '../../../../../data/PASCAL/P2006'
+WORK_DIR = '../../../../../data/PASCAL/P2007'
 NUM_EPOCHS = 20
 BATCH_SIZE = 32
 LEARNING_RATE = 1e-4
-NUM_CLASSES = 10
+NUM_CLASSES = 20
 
 MODEL_PATH = '../../../../models/pytorch/PASCAL/'
-MODEL_NAME = 'P2006.pth'
+MODEL_NAME = 'P2007.pth'
 
 # Create model
 if not os.path.exists(MODEL_PATH):
