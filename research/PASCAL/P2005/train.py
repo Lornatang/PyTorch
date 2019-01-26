@@ -1,5 +1,7 @@
 import os
 
+import time
+
 import torch
 import torchvision
 from torch import nn, optim
@@ -11,11 +13,11 @@ from research.PASCAL.P2005.net import GoogLeNet
 # Device configuration
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-WORK_DIR = '../../../../../data/PASCAL/P2005/'
-NUM_EPOCHS = 10
-BATCH_SIZE = 64
+WORK_DIR = '../../../../../data/PASCAL/P2005'
+NUM_EPOCHS = 20
+BATCH_SIZE = 16
 LEARNING_RATE = 1e-4
-NUM_CLASSES = 6
+NUM_CLASSES = 4
 
 MODEL_PATH = '../../../../models/pytorch/PASCAL/'
 MODEL_NAME = 'P2005.pth'
@@ -33,7 +35,7 @@ transform = transforms.Compose([
 
 
 # Load data
-train_dataset = torchvision.datasets.ImageFolder(root=WORK_DIR + 'train/',
+train_dataset = torchvision.datasets.ImageFolder(root=WORK_DIR + '/' + 'train',
                                                  transform=transform)
 
 train_loader = torch.utils.data.DataLoader(dataset=train_dataset,
@@ -55,6 +57,10 @@ def main():
     step = 1
     for epoch in range(1, NUM_EPOCHS + 1):
         model.train()
+
+        # cal one epoch time
+        start = time.time()
+
         for images, labels in train_loader:
             images = images.to(device)
             labels = labels.to(device)
@@ -71,6 +77,11 @@ def main():
             print(f"Step [{step * BATCH_SIZE}/{NUM_EPOCHS * len(train_dataset)}], "
                   f"Loss: {loss.item():.8f}.")
             step += 1
+
+        # cal train one epoch time
+        end = time.time()
+        print(f"Epoch [{epoch}/{NUM_EPOCHS}], "
+              f"time: {end-start}!")
 
         # Save the model checkpoint
         torch.save(model, MODEL_PATH + MODEL_NAME)

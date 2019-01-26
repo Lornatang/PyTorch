@@ -10,8 +10,8 @@ from research.PASCAL.P2005.net import GoogLeNet
 # Device configuration
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-WORK_DIR = '../../../../../data/PASCAL/P2005/'
-BATCH_SIZE = 64
+WORK_DIR = '../../../../../data/PASCAL/P2005'
+BATCH_SIZE = 16
 
 MODEL_PATH = '../../../../models/pytorch/PASCAL/'
 MODEL_NAME = 'P2005.pth'
@@ -28,7 +28,7 @@ transform = transforms.Compose([
 
 
 # Load data
-val_dataset = torchvision.datasets.ImageFolder(root=WORK_DIR + 'val/',
+val_dataset = torchvision.datasets.ImageFolder(root=WORK_DIR + '/' + 'val/',
                                                transform=transform)
 
 val_loader = torch.utils.data.DataLoader(dataset=val_dataset,
