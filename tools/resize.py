@@ -22,6 +22,7 @@ class RESIZE(object):
     return:
         None
     """
+
     def __init__(self, work_dir, high, width):
         self.work_dir = work_dir
         self.high = high
