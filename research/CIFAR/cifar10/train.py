@@ -4,6 +4,7 @@ import torch
 import torchvision
 from torch import nn, optim
 from torchvision import transforms
+import torch.utils.data
 
 from research.CIFAR.cifar10.net import GoogLeNet
 
@@ -33,8 +34,9 @@ transform = transforms.Compose([
 
 
 # Load data
-train_dataset = torchvision.datasets.ImageFolder(root=WORK_DIR + 'train/',
-                                                 transform=transform)
+train_dataset = torchvision.datasets.CIFAR10(root='train',
+                                             download=True,
+                                             transform=transform)
 
 train_loader = torch.utils.data.DataLoader(dataset=train_dataset,
                                            batch_size=BATCH_SIZE,
