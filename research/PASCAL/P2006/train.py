@@ -9,7 +9,7 @@ from torchvision import transforms
 
 # first train run this code
 
-# from research.PASCAL.P2006.net import GoogLeNet
+from research.PASCAL.P2006.net import GoogLeNet
 
 # incremental training comments out that line of code.
 
@@ -19,7 +19,7 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 WORK_DIR = '../../../../../data/PASCAL/P2006'
 NUM_EPOCHS = 20
-BATCH_SIZE = 32
+BATCH_SIZE = 64
 LEARNING_RATE = 1e-4
 NUM_CLASSES = 10
 
@@ -32,7 +32,8 @@ if not os.path.exists(MODEL_PATH):
 
 transform = transforms.Compose([
     transforms.Resize(224),
-    transforms.RandomHorizontalFlip(),
+    transforms.RandomHorizontalFlip(0.5),
+    transforms.RandomResizedCrop(224),
     transforms.ToTensor(),
     transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
 ])
@@ -51,12 +52,12 @@ def main():
     print(f"Train numbers:{len(train_dataset)}")
 
     # first train run this line
-    # model = GoogLeNet()
+    model = GoogLeNet()
     # load model
-    if torch.cuda.is_available():
-        model = torch.load(MODEL_PATH + MODEL_NAME).to(device)
-    else:
-        model = torch.load(MODEL_PATH + MODEL_NAME, map_location='cpu')
+    # if torch.cuda.is_available():
+    #     model = torch.load(MODEL_PATH + MODEL_NAME).to(device)
+    # else:
+    #     model = torch.load(MODEL_PATH + MODEL_NAME, map_location='cpu')
     # cast
     cast = nn.CrossEntropyLoss().to(device)
     # Optimization

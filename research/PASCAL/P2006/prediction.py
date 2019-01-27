@@ -9,7 +9,7 @@ from torchvision import transforms
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 WORK_DIR = '../../../../../data/PASCAL/P2006'
-BATCH_SIZE = 32
+BATCH_SIZE = 64
 
 MODEL_PATH = '../../../../models/pytorch/PASCAL/'
 MODEL_NAME = 'P2006.pth'
