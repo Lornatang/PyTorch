@@ -18,8 +18,8 @@ from research.PASCAL.P2006.net import GoogLeNet
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 WORK_DIR = '../../../../../data/PASCAL/P2006'
-NUM_EPOCHS = 20
-BATCH_SIZE = 64
+NUM_EPOCHS = 50
+BATCH_SIZE = 16
 LEARNING_RATE = 1e-4
 NUM_CLASSES = 10
 
@@ -33,7 +33,7 @@ if not os.path.exists(MODEL_PATH):
 transform = transforms.Compose([
     transforms.Resize(224),
     transforms.RandomHorizontalFlip(0.5),
-    transforms.RandomResizedCrop(224),
+    # transforms.RandomResizedCrop(224),
     transforms.ToTensor(),
     transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
 ])
