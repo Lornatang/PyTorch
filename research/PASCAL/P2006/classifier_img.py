@@ -29,11 +29,12 @@ for dir_index in range(0, 10):
 transform = transforms.Compose([
     transforms.Resize(224),
     transforms.RandomHorizontalFlip(),
+    transforms.RandomResizedCrop(224),
     transforms.ToTensor(),
 ])
 
 # Load data
-test_dataset = torchvision.datasets.ImageFolder(root=WORK_DIR + '/' + 'train',
+test_dataset = torchvision.datasets.ImageFolder(root=WORK_DIR + '/' + 'val',
                                                 transform=transform)
 
 test_loader = torch.utils.data.DataLoader(dataset=test_dataset,

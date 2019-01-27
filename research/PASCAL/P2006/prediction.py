@@ -20,6 +20,7 @@ if not os.path.exists(MODEL_PATH):
 
 transform = transforms.Compose([
     transforms.Resize(224),
+    transforms.RandomResizedCrop(224),
     transforms.ToTensor(),
     transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
 ])
