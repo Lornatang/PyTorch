@@ -67,7 +67,7 @@ class GoogLeNet(nn.Module):
     def __init__(self, num_classes=NUM_CLASSES):
         super(GoogLeNet, self).__init__()
         self.pre_layers = nn.Sequential(
-            nn.Conv2d(3, 192, kernel_size=3, stride=1),
+            nn.Conv2d(3, 192, kernel_size=3, padding=1),
             nn.BatchNorm2d(192),
             nn.ReLU(inplace=True),
         )
@@ -75,7 +75,7 @@ class GoogLeNet(nn.Module):
         self.a3 = Inception(192, 64, 96, 128, 16, 32, 32)
         self.b3 = Inception(256, 128, 128, 192, 32, 96, 64)
 
-        self.maxpool = nn.MaxPool2d(3, kernel_size=2, padding=1)
+        self.maxpool = nn.MaxPool2d(3, stride=2, padding=1)
 
         self.a4 = Inception(480, 192, 96, 208, 16, 48, 64)
         self.b4 = Inception(512, 160, 112, 224, 24, 64, 64)
