@@ -6,7 +6,7 @@ from torch import nn, optim
 from torchvision import transforms
 import torch.utils.data
 
-from research.CIFAR.cifar10.net import GoogLeNet
+from research.CIFAR.cifar10.net import ResNet18
 
 
 # Device configuration
@@ -26,7 +26,7 @@ if not os.path.exists(MODEL_PATH):
     os.makedirs(MODEL_PATH)
 
 transform = transforms.Compose([
-    transforms.Resize(96),  # 调整图片大小
+    transforms.RandomCrop(32, padding=4),  # 先四周填充0，在吧图像随机裁剪成32*32
     transforms.RandomHorizontalFlip(),  # 几率随机旋转
     transforms.ToTensor(),  # 将numpy数据类型转化为Tensor
     transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])  # 归一化
@@ -46,7 +46,7 @@ train_loader = torch.utils.data.DataLoader(dataset=train_dataset,
 def main():
     print(f"Train numbers:{len(train_dataset)}")
 
-    model = GoogLeNet()
+    model = ResNet18().to(device)
     # cast
     cast = nn.CrossEntropyLoss().to(device)
     # Optimization
