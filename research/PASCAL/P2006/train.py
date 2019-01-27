@@ -53,7 +53,6 @@ def main():
     # first train run this line
     # model = GoogLeNet()
     # load model
-    # Load model
     if torch.cuda.is_available():
         model = torch.load(MODEL_PATH + MODEL_NAME).to(device)
     else:
