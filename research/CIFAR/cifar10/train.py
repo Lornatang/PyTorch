@@ -1,5 +1,7 @@
 import os
 
+import time
+
 import torch
 import torchvision
 from torch import nn, optim
@@ -57,6 +59,10 @@ def main():
     step = 1
     for epoch in range(1, NUM_EPOCHS + 1):
         model.train()
+
+        # cal one epoch time
+        start = time.time()
+
         for images, labels in train_loader:
             images = images.to(device)
             labels = labels.to(device)
@@ -73,6 +79,11 @@ def main():
             print(f"Step [{step * BATCH_SIZE}/{NUM_EPOCHS * len(train_dataset)}], "
                   f"Loss: {loss.item():.8f}.")
             step += 1
+
+        # cal train one epoch time
+        end = time.time()
+        print(f"Epoch [{epoch}/{NUM_EPOCHS}], "
+              f"time: {end - start} sec!")
 
         # Save the model checkpoint
         torch.save(model, MODEL_PATH + MODEL_NAME)
