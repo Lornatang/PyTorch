@@ -86,7 +86,7 @@ class GoogLeNet(nn.Module):
         self.a5 = Inception(832, 256, 160, 320, 32, 128, 128)
         self.b5 = Inception(832, 384, 192, 384, 48, 128, 128)
 
-        self.avgpool = nn.AvgPool2d(8, stride=1)
+        self.avgpool = nn.AvgPool2d(7, stride=1)
 
         self.classifier = nn.Linear(1024, num_classes)
 
