@@ -5,7 +5,7 @@ import torchvision
 from torch.utils import data
 from torchvision import transforms
 
-from research.CIFAR.cifar10.net import GoogLeNet
+# from research.CIFAR.cifar10.net import ResNet18
 
 # Device configuration
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -21,15 +21,16 @@ if not os.path.exists(MODEL_PATH):
     os.makedirs(MODEL_PATH)
 
 transform = transforms.Compose([
-    transforms.Resize(96),  # 96 * 96
+    transforms.RandomCrop(32, padding=4),
     transforms.ToTensor(),
     transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])  # lrn
 ])
 
 
 # Load data
-val_dataset = torchvision.datasets.ImageFolder(root=WORK_DIR + 'val/',
-                                               transform=transform)
+val_dataset = torchvision.datasets.CIFAR10(root='train',
+                                           download=True,
+                                           transform=transform)
 
 val_loader = torch.utils.data.DataLoader(dataset=val_dataset,
                                          batch_size=BATCH_SIZE,
