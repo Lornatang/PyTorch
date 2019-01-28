@@ -1,38 +1,40 @@
+import os
+
 import torch
 import torchvision
 from torchvision import transforms
 
-from research.CIFAR.cifar10.net import GoogLeNet
+from research.CIFAR.cifar10.net import ResNet18
 
+WORK_DIR = '../../../../../data/CIFAR/cifar10'
 BATCH_SIZE = 1
 
-MODEL_PATH = '../../../../models/pytorch/CIFAR/'
+MODEL_PATH = '../../../../models/pytorch/CIFAR10/'
 MODEL_NAME = '10.pth'
 
 
 # Device configuration
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
+# Tensor image transforms to PIL image
+to_pil_image = transforms.ToPILImage()
 
-transform = transforms.Compose([
-    transforms.Resize(96),  # 将图像转化为224 * 224
-    transforms.ToTensor(),  # 将numpy数据类型转化为Tensor
-    transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])  # 归一化
-])
+label = ['bicycle', 'bus', 'car', 'cat', 'cow', 'dog', 'horse', 'sheep', 'motorbike', 'person']
 
+# check file name is exist
+for dir_index in range(0, 10):
+    if not os.path.exists(WORK_DIR + '/' + 'val' + '/' + label[dir_index]):
+        os.makedirs(WORK_DIR + '/' + 'val' + '/' + label[dir_index])
+
+transform = transforms.ToTensor()
 
 # Load data
-test_dataset = torchvision.datasets.ImageFolder(root='test',
+test_dataset = torchvision.datasets.ImageFolder(root=WORK_DIR + '/' + 'val',
                                                 transform=transform)
 
 test_loader = torch.utils.data.DataLoader(dataset=test_dataset,
                                           batch_size=BATCH_SIZE,
                                           shuffle=True)
-
-
-def label_name(index):
-    label = ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
-    return label[index]
 
 
 def main():
@@ -44,9 +46,8 @@ def main():
     else:
         model = torch.load(MODEL_PATH + MODEL_NAME, map_location='cpu')
 
-    model.eval()
-
-    for images, labels in test_loader:
+    index = 0
+    for images, _ in test_loader:
         # to GPU
         images = images.to(device)
         # print prediction
@@ -54,8 +55,9 @@ def main():
         # equal prediction and acc
         _, predicted = torch.max(outputs.data, 1)
 
-        print(f"Classifier is {label_name(predicted)}.")
-        print(predicted)
+        img = to_pil_image(images[0])
+        img.save(str(WORK_DIR + '/' + 'val' + '/' + label[predicted]) + '/' + str(index) + '.jpg')
+        index += 1
 
 
 if __name__ == '__main__':
