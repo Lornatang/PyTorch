@@ -7,7 +7,9 @@ import torchvision
 from torch import nn, optim
 from torchvision import transforms
 
-from research.PASCAL.P2005.net import GoogLeNet
+# first train run this code
+# from research.PASCAL.P2005.net import GoogLeNet
+# incremental training comments out that line of code.
 
 
 # Device configuration
@@ -48,7 +50,6 @@ def main():
 
     # first train run this line
     # model = GoogLeNet()
-    # load model
     # Load model
     if torch.cuda.is_available():
         model = torch.load(MODEL_PATH + MODEL_NAME).to(device)
