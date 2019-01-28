@@ -8,8 +8,7 @@ from torch import nn, optim
 from torchvision import transforms
 
 # first train run this code
-from research.PASCAL.P2006.net import GoogLeNet
-
+# from research.PASCAL.P2006.net import GoogLeNet
 # incremental training comments out that line of code.
 
 
@@ -51,12 +50,12 @@ def main():
     print(f"Train numbers:{len(train_dataset)}")
 
     # first train run this line
-    model = GoogLeNet().to(device)
+    # model = GoogLeNet().to(device)
     # load model
-    # if torch.cuda.is_available():
-    #     model = torch.load(MODEL_PATH + MODEL_NAME).to(device)
-    # else:
-    #     model = torch.load(MODEL_PATH + MODEL_NAME, map_location='cpu')
+    if torch.cuda.is_available():
+        model = torch.load(MODEL_PATH + MODEL_NAME).to(device)
+    else:
+        model = torch.load(MODEL_PATH + MODEL_NAME, map_location='cpu')
     # cast
     cast = nn.CrossEntropyLoss().to(device)
     # Optimization
