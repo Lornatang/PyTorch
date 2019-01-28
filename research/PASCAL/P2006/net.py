@@ -55,11 +55,11 @@ class GoogLeNet(nn.Module):
     def __init__(self, num_classes=NUM_CLASSES):
         super(GoogLeNet, self).__init__()
 
-        self.pre_layer1 = BasicConv2d(3, 64, kernel_size=7, stride=2, padding=3)
+        self.conv1 = BasicConv2d(3, 64, kernel_size=7, stride=2, padding=3)
 
         self.max_pool1 = nn.MaxPool2d(3, stride=2)
 
-        self.pre_layer2 = BasicConv2d(64, 192, kernel_size=3, stride=1, padding=1)
+        self.conv2 = BasicConv2d(64, 192, kernel_size=3, stride=1, padding=1)
 
         self.max_pool2 = nn.MaxPool2d(3, stride=2)
 
@@ -86,9 +86,9 @@ class GoogLeNet(nn.Module):
         self.classifier = nn.Linear(1024, num_classes)
 
     def forward(self, x):
-        x = self.pre_layer1(x)
+        x = self.conv1(x)
         x = self.max_pool1(x)
-        x = self.pre_layer2(x)
+        x = self.conv2(x)
         x = self.max_pool2(x)
         x = self.a3(x)
         x = self.b3(x)

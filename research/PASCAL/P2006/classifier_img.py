@@ -26,12 +26,7 @@ for dir_index in range(0, 10):
     if not os.path.exists(WORK_DIR + '/' + 'val' + '/' + label[dir_index]):
         os.makedirs(WORK_DIR + '/' + 'val' + '/' + label[dir_index])
 
-transform = transforms.Compose([
-    transforms.Resize(224),
-    transforms.RandomHorizontalFlip(),
-    transforms.RandomResizedCrop(224),
-    transforms.ToTensor(),
-])
+transform = transforms.ToTensor()
 
 # Load data
 test_dataset = torchvision.datasets.ImageFolder(root=WORK_DIR + '/' + 'val',
