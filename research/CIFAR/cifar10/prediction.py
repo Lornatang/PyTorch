@@ -5,13 +5,11 @@ import torchvision
 from torch.utils import data
 from torchvision import transforms
 
-# from research.CIFAR.cifar10.net import ResNet18
-
 # Device configuration
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-WORK_DIR = '../../../../../data/CIFAR/cifar10/'
-BATCH_SIZE = 128
+WORK_DIR = '../../../../../data/CIFAR/cifar10'
+BATCH_SIZE = 16
 
 MODEL_PATH = '../../../../models/pytorch/CIFAR/'
 MODEL_NAME = '10.pth'
@@ -22,8 +20,9 @@ if not os.path.exists(MODEL_PATH):
 
 transform = transforms.Compose([
     transforms.RandomCrop(32, padding=4),
+    transforms.RandomHorizontalFlip(),
     transforms.ToTensor(),
-    transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])  # lrn
+    transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
 ])
 
 

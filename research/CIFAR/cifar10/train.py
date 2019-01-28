@@ -8,8 +8,9 @@ from torch import nn, optim
 from torchvision import transforms
 import torch.utils.data
 
-from research.CIFAR.cifar10.net import ResNet18
-
+# first train run this code
+# from research.CIFAR.cifar10.net import ResNet18
+# incremental training comments out that line of code.
 
 # Device configuration
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -28,17 +29,16 @@ if not os.path.exists(MODEL_PATH):
     os.makedirs(MODEL_PATH)
 
 transform = transforms.Compose([
-    transforms.RandomCrop(32, padding=4),  # 先四周填充0，在吧图像随机裁剪成32*32
-    transforms.RandomHorizontalFlip(),  # 几率随机旋转
-    transforms.ToTensor(),  # 将numpy数据类型转化为Tensor
-    transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])  # 归一化
+    transforms.RandomCrop(32, padding=4),
+    transforms.RandomHorizontalFlip(),
+    transforms.ToTensor(),
+    transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
 ])
 
 
 # Load data
-train_dataset = torchvision.datasets.CIFAR10(root='train',
-                                             download=True,
-                                             transform=transform)
+train_dataset = torchvision.datasets.ImageFolder(root=WORK_DIR + '/' + 'train',
+                                                 transform=transform)
 
 train_loader = torch.utils.data.DataLoader(dataset=train_dataset,
                                            batch_size=BATCH_SIZE,
@@ -48,7 +48,13 @@ train_loader = torch.utils.data.DataLoader(dataset=train_dataset,
 def main():
     print(f"Train numbers:{len(train_dataset)}")
 
-    model = ResNet18().to(device)
+    # first train run this line
+    # model = ResNet18().to(device)
+    # Load model
+    if torch.cuda.is_available():
+        model = torch.load(MODEL_PATH + MODEL_NAME).to(device)
+    else:
+        model = torch.load(MODEL_PATH + MODEL_NAME, map_location='cpu')
     # cast
     cast = nn.CrossEntropyLoss().to(device)
     # Optimization
