@@ -28,9 +28,8 @@ transform = transforms.Compose([
 
 
 # Load data
-val_dataset = torchvision.datasets.CIFAR10(root='train',
-                                           download=True,
-                                           transform=transform)
+val_dataset = torchvision.datasets.ImageFolder(root=WORK_DIR + '/' + 'val',
+                                               transform=transform)
 
 val_loader = torch.utils.data.DataLoader(dataset=val_dataset,
                                          batch_size=BATCH_SIZE,
