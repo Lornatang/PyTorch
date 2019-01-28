@@ -9,7 +9,7 @@ from torchvision import transforms
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 WORK_DIR = '../../../../../data/PASCAL/P2006'
-BATCH_SIZE = 32
+BATCH_SIZE = 16
 
 MODEL_PATH = '../../../../models/pytorch/PASCAL/'
 MODEL_NAME = 'P2006.pth'
@@ -20,6 +20,7 @@ if not os.path.exists(MODEL_PATH):
 
 transform = transforms.Compose([
     transforms.Resize(224),
+    transforms.RandomResizedCrop(224),
     transforms.ToTensor(),
     transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
 ])
