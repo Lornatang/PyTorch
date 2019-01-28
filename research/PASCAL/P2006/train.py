@@ -6,7 +6,7 @@ import torch
 import torchvision
 from torch import nn, optim
 from torchvision import transforms
-torchvision.models.inception_v3()
+
 # first train run this code
 from research.PASCAL.P2006.net import GoogLeNet
 
