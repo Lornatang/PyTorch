@@ -1,7 +1,7 @@
 import torch
 from torch import nn
 
-NUM_CLASSES = 10
+NUM_CLASSES = 4
 
 
 class BasicConv2d(nn.Module):
