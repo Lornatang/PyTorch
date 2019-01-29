@@ -1,5 +1,4 @@
 import os
-
 import time
 
 import torch
@@ -8,7 +7,7 @@ from torch import nn, optim
 from torchvision import transforms
 
 # first train run this code
-from research.PASCAL.P2006.net import GoogLeNet
+from net import GoogLeNet
 # incremental training comments out that line of code.
 
 
@@ -56,7 +55,7 @@ def main():
     #     model = torch.load(MODEL_PATH + MODEL_NAME).to(device)
     # else:
     #     model = torch.load(MODEL_PATH + MODEL_NAME, map_location='cpu')
-    # cast
+    # # cast
     cast = nn.CrossEntropyLoss().to(device)
     # Optimization
     optimizer = optim.Adam(
