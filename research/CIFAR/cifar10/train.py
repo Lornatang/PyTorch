@@ -9,14 +9,14 @@ from torchvision import transforms
 import torch.utils.data
 
 # first train run this code
-# from net import ResNet18
+# from research.CIFAR.cifar10.net import ResNet18
 # incremental training comments out that line of code.
 
 # Device configuration
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 WORK_DIR = '../../../../../data/CIFAR/cifar10/'
-NUM_EPOCHS = 10
+NUM_EPOCHS = 50
 BATCH_SIZE = 128
 LEARNING_RATE = 1e-4
 NUM_CLASSES = 10
