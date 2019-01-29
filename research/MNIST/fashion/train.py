@@ -7,15 +7,17 @@ from torch import nn, optim
 from torch.utils import data
 from torchvision import transforms
 
-from research.MNIST.mnist.net import Net
+# first train run this code
+from research.MNIST.fashion.net import Net
+# incremental training comments out that line of code.
 
 # Device configuration
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 WORK_DIR = '../../../../../data/MNIST/fashion'
-NUM_EPOCHS = 10
+NUM_EPOCHS = 50
 BATCH_SIZE = 128
-LEARNING_RATE = 1e-4
+LEARNING_RATE = 2e-5
 NUM_CLASSES = 10
 
 MODEL_PATH = '../../../../models/pytorch/MNIST'
@@ -45,7 +47,13 @@ train_loader = torch.utils.data.DataLoader(dataset=train_dataset,
 def main():
     print(f"Train numbers:{len(train_dataset)}")
 
-    model = Net()
+    # load model
+    model = Net().to(device)
+    # add train data
+    # if torch.cuda.is_available():
+    #     model = torch.load(MODEL_PATH + MODEL_NAME).to(device)
+    # else:
+    #     model = torch.load(MODEL_PATH + MODEL_NAME, map_location='cpu')
     # cast
     cast = nn.CrossEntropyLoss().to(device)
     # Optimization

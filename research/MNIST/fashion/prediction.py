@@ -5,16 +5,12 @@ import torchvision
 from torch.utils import data
 from torchvision import transforms
 
-from research.MNIST.mnist.net import Net
 
 # Device configuration
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-WORK_DIR = '../../../../../data/MNIST/mnist'
-NUM_EPOCHS = 10
+WORK_DIR = '../../../../../data/MNIST/fashion'
 BATCH_SIZE = 128
-LEARNING_RATE = 1e-4
-NUM_CLASSES = 10
 
 MODEL_PATH = '../../../../models/pytorch/MNIST'
 MODEL_NAME = 'fashion.pth'
