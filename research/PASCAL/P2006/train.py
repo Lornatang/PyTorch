@@ -7,7 +7,7 @@ from torch import nn, optim
 from torchvision import transforms
 
 # first train run this code
-from net import GoogLeNet
+# from net import GoogLeNet
 # incremental training comments out that line of code.
 
 
@@ -15,9 +15,9 @@ from net import GoogLeNet
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 WORK_DIR = '../../../../../data/PASCAL/P2006'
-NUM_EPOCHS = 50
+NUM_EPOCHS = 500
 BATCH_SIZE = 64
-LEARNING_RATE = 1e-4
+LEARNING_RATE = 2e-5
 NUM_CLASSES = 10
 
 MODEL_PATH = '../../../../models/pytorch/PASCAL/'
@@ -49,13 +49,13 @@ def main():
     print(f"Train numbers:{len(train_dataset)}")
 
     # first train run this line
-    model = GoogLeNet().to(device)
+    # model = GoogLeNet().to(device)
     # load model
-    # if torch.cuda.is_available():
-    #     model = torch.load(MODEL_PATH + MODEL_NAME).to(device)
-    # else:
-    #     model = torch.load(MODEL_PATH + MODEL_NAME, map_location='cpu')
-    # # cast
+    if torch.cuda.is_available():
+        model = torch.load(MODEL_PATH + MODEL_NAME).to(device)
+    else:
+        model = torch.load(MODEL_PATH + MODEL_NAME, map_location='cpu')
+    # cast
     cast = nn.CrossEntropyLoss().to(device)
     # Optimization
     optimizer = optim.Adam(
