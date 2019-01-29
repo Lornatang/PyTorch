@@ -9,7 +9,7 @@ from torchvision import transforms
 import torch.utils.data
 
 # first train run this code
-# from research.CIFAR.cifar10.net import ResNet18
+# from net import ResNet18
 # incremental training comments out that line of code.
 
 # Device configuration
