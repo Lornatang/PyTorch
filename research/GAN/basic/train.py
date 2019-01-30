@@ -142,10 +142,10 @@ def main():
                 fake_images = fake_images.reshape(fake_images.size(0), 1, 28, 28)
                 save_image(fake_images, WORK_DIR + '/' + 'gen' + '/' + str(epoch) + '.jpg')
 
-                # Save the model checkpoint
-                torch.save(D, MODEL_PATH + MODEL_D)
-                torch.save(G, MODEL_PATH + MODEL_G)
-        print(f"Model save to {MODEL_PATH}!")
+        # Save the model checkpoint
+        torch.save(D, MODEL_PATH + MODEL_D)
+        torch.save(G, MODEL_PATH + MODEL_G)
+    print(f"Model save to {MODEL_PATH}!")
 
 
 if __name__ == '__main__':
