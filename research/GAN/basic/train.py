@@ -4,6 +4,7 @@ import torch
 import torchvision
 from torch import utils, optim, nn
 from torchvision import transforms
+from torchvision.utils import save_image
 
 # first train run this code
 from research.GAN.basic.net import Discriminator, Generator
@@ -14,26 +15,33 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 WORK_DIR = '../../../../../data/GAN/basic'
 NUM_EPOCHS = 50
-BATCH_SIZE = 128
+BATCH_SIZE = 100
 LEARNING_RATE = 1e-4
 OPTIM_BETAS = (0.5, 0.999)
 
-LATENT_SIZE = 100
+LATENT_SIZE = 64
 
 NUM_CLASSES = 10
 
-MODEL_PATH = '../../../../models/pytorch/GAN/'
-MODEL_NAME = 'basic.pth'
+MODEL_PATH = '../../../../models/pytorch/GAN/basic/'
+MODEL_D = 'D.pth'
+MODEL_G = 'G.pth'
 
 # Create model
 if not os.path.exists(MODEL_PATH):
     os.makedirs(MODEL_PATH)
 
+if not os.path.exists(WORK_DIR + '/' + 'gen'):
+    os.makedirs(WORK_DIR + '/' + 'gen')
+
 transform = transforms.Compose([
+    transforms.Grayscale(),
     transforms.Resize(28),
     transforms.ToTensor(),
     transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
 ])
+
+to_pil_image = transforms.ToPILImage()
 
 # CIFAR10 train_dataset
 train_dataset = torchvision.datasets.ImageFolder(root=WORK_DIR + '/' + 'train',
@@ -44,12 +52,19 @@ train_loader = torch.utils.data.DataLoader(dataset=train_dataset,
                                            batch_size=BATCH_SIZE,
                                            shuffle=True)
 
-# Device setting
+# first train run this line
 D = Discriminator().to(device)
 G = Generator().to(device)
+# load model
+# if torch.cuda.is_available():
+#     D = torch.load(MODEL_PATH + MODEL_NAME + 'D.pth').to(device)
+#     G = torch.load(MODEL_PATH + MODEL_NAME + 'G.pth').to(device)
+# else:
+#     D = torch.load(MODEL_PATH + MODEL_NAME + 'D.pth', map_location='cpu')
+#     G = torch.load(MODEL_PATH + MODEL_NAME + 'G.pth', map_location='cpu')
 
 # Binary cross entropy loss and optimizer
-criterion = nn.BCEWithLogitsLoss()
+criterion = nn.BCELoss().to(device)
 d_optimizer = optim.Adam(D.parameters(), lr=LEARNING_RATE)
 g_optimizer = optim.Adam(G.parameters(), lr=LEARNING_RATE)
 
@@ -115,11 +130,22 @@ def main():
             step += 1
 
             if step % 10 == 0:
-                print(f"Step [{step}/{NUM_EPOCHS * len(train_dataset)}], "
-                      f"d_loss: {d_loss:.4f}, "
-                      f"g_loss: {g_loss:.4f}, "
-                      f"D(x): {real_score.mean():.2f}, "
-                      f"D(G(z)): {fake_score.mean():.2f}.")
+                print(f"Step [{step * BATCH_SIZE}/{NUM_EPOCHS * len(train_dataset)}], "
+                      f"d_loss: {d_loss:.8f}, "
+                      f"g_loss: {g_loss:.8f}, "
+                      f"D(x): {real_score.mean():.4f}, "
+                      f"D(G(z)): {fake_score.mean():.4f}.")
+
+            if epoch % 1 == 0:
+                images = images.reshape(images.size(0), 1, 28, 28)
+                save_image(images, WORK_DIR + '/' + 'gen' + '/' + 'real' + '.jpg')
+                fake_images = fake_images.reshape(fake_images.size(0), 1, 28, 28)
+                save_image(fake_images, WORK_DIR + '/' + 'gen' + '/' + str(epoch) + '.jpg')
+
+                # Save the model checkpoint
+                torch.save(D, MODEL_PATH + MODEL_D)
+                torch.save(G, MODEL_PATH + MODEL_G)
+        print(f"Model save to {MODEL_PATH}!")
 
 
 if __name__ == '__main__':
