@@ -14,7 +14,7 @@ from torchvision.utils import save_image
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 WORK_DIR = '../../../../../data/GAN/basic'
-NUM_EPOCHS = 50
+NUM_EPOCHS = 200
 BATCH_SIZE = 100
 LEARNING_RATE = 1e-4
 OPTIM_BETAS = (0.5, 0.999)
@@ -145,7 +145,7 @@ def main():
         # Save the model checkpoint
         torch.save(D, MODEL_PATH + MODEL_D)
         torch.save(G, MODEL_PATH + MODEL_G)
-    print(f"Model save to {MODEL_PATH}!")
+    print(f"Model save to '{MODEL_PATH}'!")
 
 
 if __name__ == '__main__':
