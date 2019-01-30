@@ -1,7 +1,7 @@
 from torch import nn
 
 IMAGE_SIZE = 28 * 28 * 1
-HIDDEN_SIZE = 1024
+HIDDEN_SIZE = 256
 
 NOISE = 64
 

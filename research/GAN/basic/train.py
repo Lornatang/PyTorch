@@ -57,16 +57,16 @@ D = Discriminator().to(device)
 G = Generator().to(device)
 # load model
 # if torch.cuda.is_available():
-#     D = torch.load(MODEL_PATH + MODEL_NAME + 'D.pth').to(device)
-#     G = torch.load(MODEL_PATH + MODEL_NAME + 'G.pth').to(device)
+#     D = torch.load(MODEL_PATH + 'D.pth').to(device)
+#     G = torch.load(MODEL_PATH + 'G.pth').to(device)
 # else:
-#     D = torch.load(MODEL_PATH + MODEL_NAME + 'D.pth', map_location='cpu')
-#     G = torch.load(MODEL_PATH + MODEL_NAME + 'G.pth', map_location='cpu')
+#     D = torch.load(MODEL_PATH + 'D.pth', map_location='cpu')
+#     G = torch.load(MODEL_PATH + 'G.pth', map_location='cpu')
 
 # Binary cross entropy loss and optimizer
 criterion = nn.BCELoss().to(device)
-d_optimizer = optim.Adam(D.parameters(), lr=LEARNING_RATE)
-g_optimizer = optim.Adam(G.parameters(), lr=LEARNING_RATE)
+d_optimizer = optim.Adam(D.parameters(), lr=LEARNING_RATE, betas=OPTIM_BETAS)
+g_optimizer = optim.Adam(G.parameters(), lr=LEARNING_RATE, betas=OPTIM_BETAS)
 
 
 def reset_grad():
