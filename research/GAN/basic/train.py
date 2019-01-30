@@ -7,7 +7,7 @@ from torchvision import transforms
 from torchvision.utils import save_image
 
 # first train run this code
-from research.GAN.basic.net import Discriminator, Generator
+# from research.GAN.basic.net import Discriminator, Generator
 # incremental training comments out that line of code.
 
 # Device configuration
@@ -53,15 +53,15 @@ train_loader = torch.utils.data.DataLoader(dataset=train_dataset,
                                            shuffle=True)
 
 # first train run this line
-D = Discriminator().to(device)
-G = Generator().to(device)
+# D = Discriminator().to(device)
+# G = Generator().to(device)
 # load model
-# if torch.cuda.is_available():
-#     D = torch.load(MODEL_PATH + 'D.pth').to(device)
-#     G = torch.load(MODEL_PATH + 'G.pth').to(device)
-# else:
-#     D = torch.load(MODEL_PATH + 'D.pth', map_location='cpu')
-#     G = torch.load(MODEL_PATH + 'G.pth', map_location='cpu')
+if torch.cuda.is_available():
+    D = torch.load(MODEL_PATH + 'D.pth').to(device)
+    G = torch.load(MODEL_PATH + 'G.pth').to(device)
+else:
+    D = torch.load(MODEL_PATH + 'D.pth', map_location='cpu')
+    G = torch.load(MODEL_PATH + 'G.pth', map_location='cpu')
 
 # Binary cross entropy loss and optimizer
 criterion = nn.BCELoss().to(device)
