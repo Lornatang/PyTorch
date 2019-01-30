@@ -8,7 +8,7 @@ from torch.utils import data
 from torchvision import transforms
 
 # first train run this code
-from research.MNIST.fashion.net import Net
+# from research.MNIST.fashion.net import Net
 # incremental training comments out that line of code.
 
 # Device configuration
@@ -48,12 +48,12 @@ def main():
     print(f"Train numbers:{len(train_dataset)}")
 
     # load model
-    model = Net().to(device)
+    # model = Net().to(device)
     # add train data
-    # if torch.cuda.is_available():
-    #     model = torch.load(MODEL_PATH + MODEL_NAME).to(device)
-    # else:
-    #     model = torch.load(MODEL_PATH + MODEL_NAME, map_location='cpu')
+    if torch.cuda.is_available():
+        model = torch.load(MODEL_PATH + MODEL_NAME).to(device)
+    else:
+        model = torch.load(MODEL_PATH + MODEL_NAME, map_location='cpu')
     # cast
     cast = nn.CrossEntropyLoss().to(device)
     # Optimization
