@@ -14,7 +14,7 @@ from torchvision.utils import save_image
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 WORK_DIR = '../../../../../data/GAN/basic'
-NUM_EPOCHS = 20
+NUM_EPOCHS = 50
 BATCH_SIZE = 50
 LEARNING_RATE = 1e-4
 OPTIM_BETAS = (0.5, 0.999)
