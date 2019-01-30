@@ -7,7 +7,7 @@ from torchvision import transforms
 from torchvision.utils import save_image
 
 # first train run this code
-# from research.GAN.dcgan.net import Discriminator, Generator
+from research.GAN.dcgan.net import Discriminator, Generator
 # incremental training comments out that line of code.
 
 # Device configuration
@@ -33,6 +33,7 @@ if not os.path.exists(WORK_DIR + '/' + 'gen'):
     os.makedirs(WORK_DIR + '/' + 'gen')
 
 transform = transforms.Compose([
+    transforms.Grayscale(),
     transforms.RandomCrop(32, padding=4),
     transforms.ToTensor(),
     transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
@@ -50,15 +51,15 @@ train_loader = torch.utils.data.DataLoader(dataset=train_dataset,
                                            shuffle=True)
 
 # first train run this line
-# D = Discriminator().to(device)
-# G = Generator().to(device)
+D = Discriminator().to(device)
+G = Generator().to(device)
 # load model
-if torch.cuda.is_available():
-    D = torch.load(MODEL_PATH + 'D.pth').to(device)
-    G = torch.load(MODEL_PATH + 'G.pth').to(device)
-else:
-    D = torch.load(MODEL_PATH + 'D.pth', map_location='cpu')
-    G = torch.load(MODEL_PATH + 'G.pth', map_location='cpu')
+# if torch.cuda.is_available():
+#     D = torch.load(MODEL_PATH + 'D.pth').to(device)
+#     G = torch.load(MODEL_PATH + 'G.pth').to(device)
+# else:
+#     D = torch.load(MODEL_PATH + 'D.pth', map_location='cpu')
+#     G = torch.load(MODEL_PATH + 'G.pth', map_location='cpu')
 
 # Binary cross entropy loss and optimizer
 criterion = nn.BCEWithLogitsLoss().to(device)
@@ -135,9 +136,9 @@ def main():
                       f"D(G(z)): {fake_score.mean():.4f}.")
 
             if epoch % 1 == 0:
-                images = images.reshape(images.size(0), 3, 32, 32)
+                images = images.reshape(images.size(0), 1, 32, 32)
                 save_image(images, WORK_DIR + '/' + 'gen' + '/' + 'real' + '.jpg')
-                fake_images = fake_images.reshape(fake_images.size(0), 3, 32, 32)
+                fake_images = fake_images.reshape(fake_images.size(0), 1, 32, 32)
                 save_image(fake_images, WORK_DIR + '/' + 'gen' + '/' + str(epoch) + '.jpg')
 
         # Save the model checkpoint
