@@ -19,10 +19,7 @@ class Generator(nn.Module):
             nn.Linear(G_HIDDEN_SIZE, G_HIDDEN_SIZE),
             nn.ReLU(True)
         )
-        self.layer3 = nn.Sequential(
-            nn.Linear(G_HIDDEN_SIZE, IMAGE_SIZE),
-            nn.Tanh()
-        )
+        self.layer3 = nn.Linear(G_HIDDEN_SIZE, IMAGE_SIZE)
 
     def forward(self, x):
         x = self.layer1(x)
