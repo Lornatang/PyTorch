@@ -30,6 +30,7 @@ if not os.path.exists(MODEL_PATH):
     os.makedirs(MODEL_PATH)
 
 transform = transforms.Compose([
+    transforms.Resize(28),
     transforms.ToTensor(),
     transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
 ])
@@ -98,7 +99,7 @@ def main():
             # ================================================================== #
 
             # Compute loss with fake images
-            z = torch.randn(LATENT_SIZE, 1024).to(device)
+            z = torch.randn(BATCH_SIZE, LATENT_SIZE).to(device)
             fake_images = G(z)
             outputs = D(fake_images)
 
@@ -113,12 +114,12 @@ def main():
 
             step += 1
 
-            if step % 200 == 0:
+            if step % 10 == 0:
                 print(f"Step [{step}/{NUM_EPOCHS * len(train_dataset)}], "
-                      f"d_loss: {d_loss.item():.4f}, "
-                      f"g_loss: {g_loss.item():.4f}, "
-                      f"D(x): {real_score.mean().item():.2f}, "
-                      f"D(G(z)): {fake_score.mean().item():.2f}.")
+                      f"d_loss: {d_loss:.4f}, "
+                      f"g_loss: {g_loss:.4f}, "
+                      f"D(x): {real_score.mean():.2f}, "
+                      f"D(G(z)): {fake_score.mean():.2f}.")
 
 
 if __name__ == '__main__':

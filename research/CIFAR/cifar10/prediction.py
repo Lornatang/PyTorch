@@ -9,7 +9,7 @@ from torchvision import transforms
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 WORK_DIR = '../../../../../data/CIFAR/cifar10'
-BATCH_SIZE = 16
+BATCH_SIZE = 128
 
 MODEL_PATH = '../../../../models/pytorch/CIFAR/'
 MODEL_NAME = '10.pth'
