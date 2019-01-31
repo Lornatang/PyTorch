@@ -9,15 +9,15 @@ from torchvision.utils import save_image
 # Device configuration
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-WORK_DIR = '../../../../../data/PASCAL/P2005'
-NUM_EPOCHS = 300
-BATCH_SIZE = 32
+WORK_DIR = '../../../../../data/CIFAR/cifar10'
+NUM_EPOCHS = 500
+BATCH_SIZE = 50
 LEARNING_RATE = 2e-4
 OPTIM_BETAS = (0.5, 0.999)
 
-NOISE = 100
+NOISE = 128
 
-MODEL_PATH = '../../../../models/pytorch/PASCAL/P2005/'
+MODEL_PATH = '../../../../models/pytorch/CIFAR/cifar10/'
 MODEL_D = 'D.pth'
 MODEL_G = 'G.pth'
 
