@@ -6,22 +6,18 @@ from torch import utils, optim, nn
 from torchvision import transforms
 from torchvision.utils import save_image
 
-# first train run this code
-# from research.GAN.dcgan.net import Discriminator, Generator
-# incremental training comments out that line of code.
-
 # Device configuration
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-WORK_DIR = '../../../../../data/GAN/basic'
+WORK_DIR = '../../../../../data/PASCAL/P2005'
 NUM_EPOCHS = 50
-BATCH_SIZE = 100
+BATCH_SIZE = 16
 LEARNING_RATE = 2e-4
 OPTIM_BETAS = (0.5, 0.999)
 
-NOISE = 100
+NOISE = 512
 
-MODEL_PATH = '../../../../models/pytorch/GAN/dcgan/'
+MODEL_PATH = '../../../../models/pytorch/PASCAL/P2005/'
 MODEL_D = 'D.pth'
 MODEL_G = 'G.pth'
 
@@ -33,15 +29,14 @@ if not os.path.exists(WORK_DIR + '/' + 'gen'):
     os.makedirs(WORK_DIR + '/' + 'gen')
 
 transform = transforms.Compose([
-    transforms.Grayscale(),
-    transforms.RandomCrop(32, padding=4),
+    transforms.Resize(224),
     transforms.ToTensor(),
     transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
 ])
 
 to_pil_image = transforms.ToPILImage()
 
-# mnist train_dataset
+# pascal voc 2005 train_dataset
 train_dataset = torchvision.datasets.ImageFolder(root=WORK_DIR + '/' + 'train',
                                                  transform=transform)
 
@@ -50,16 +45,91 @@ train_loader = torch.utils.data.DataLoader(dataset=train_dataset,
                                            batch_size=BATCH_SIZE,
                                            shuffle=True)
 
+
+class Generator(nn.Module):
+    def __init__(self, noise=NOISE):
+        super(Generator, self).__init__()
+        self.layer1 = nn.Sequential(
+            nn.ConvTranspose2d(noise, 224 * 8, kernel_size=4, stride=2, padding=1, bias=False),
+            nn.BatchNorm2d(224 * 8),
+            nn.ReLU(True)
+        )
+        self.layer2 = nn.Sequential(
+            nn.ConvTranspose2d(224 * 8, 224 * 4, kernel_size=4, stride=2, padding=1, bias=False),
+            nn.BatchNorm2d(224 * 4),
+            nn.ReLU(True)
+        )
+        self.layer3 = nn.Sequential(
+            nn.ConvTranspose2d(224 * 4, 224 * 2, kernel_size=4, stride=2, padding=1, bias=False),
+            nn.BatchNorm2d(224 * 2),
+            nn.ReLU(True)
+        )
+        self.layer4 = nn.Sequential(
+            nn.ConvTranspose2d(224 * 2, 224, kernel_size=4, stride=2, padding=1, bias=False),
+            nn.BatchNorm2d(224),
+            nn.ReLU(True)
+        )
+        self.classifier = nn.Sequential(
+            nn.ConvTranspose2d(224, 3, kernel_size=4, stride=2, padding=1, bias=False),
+            nn.Tanh()
+        )
+
+    def forward(self, x):
+        x = self.layer1(x)
+        x = self.layer2(x)
+        x = self.layer3(x)
+        x = self.layer4(x)
+        x = self.classifier(x)
+        return x
+
+
+class Discriminator(nn.Module):
+    def __init__(self):
+        super(Discriminator, self).__init__()
+        self.layer1 = nn.Sequential(
+            nn.Conv2d(3, 224, kernel_size=4, stride=2, padding=1, bias=False),
+            nn.LeakyReLU(0.2, True)
+        )
+        self.layer2 = nn.Sequential(
+            nn.Conv2d(224, 224 * 2, kernel_size=4, stride=2, padding=1, bias=False),
+            nn.BatchNorm2d(224 * 2),
+            nn.LeakyReLU(0.2, True)
+        )
+        self.layer3 = nn.Sequential(
+            nn.Conv2d(224 * 2, 224 * 4, kernel_size=4, stride=2, padding=1, bias=False),
+            nn.BatchNorm2d(224 * 4),
+            nn.LeakyReLU(0.2, True)
+        )
+        self.layer4 = nn.Sequential(
+            nn.Conv2d(224 * 4, 224 * 8, kernel_size=4, stride=2, padding=1, bias=False),
+            nn.BatchNorm2d(224 * 8),
+            nn.LeakyReLU(0.2, True)
+        )
+        self.classifier = nn.Sequential(
+            nn.Conv2d(224 * 8, 1, kernel_size=4, stride=1, padding=0, bias=False),
+            nn.Sigmoid()
+        )
+
+    def forward(self, x):
+        x = self.layer1(x)
+        x = self.layer2(x)
+        x = self.layer3(x)
+        x = self.layer4(x)
+        x = self.classifier(x)
+        out = x.view(-1, 1).squeeze(1)
+        return out
+
+
 # first train run this line
-# D = Discriminator().to(device)
-# G = Generator().to(device)
+D = Discriminator().to(device)
+G = Generator().to(device)
 # load model
-if torch.cuda.is_available():
-    D = torch.load(MODEL_PATH + 'D.pth').to(device)
-    G = torch.load(MODEL_PATH + 'G.pth').to(device)
-else:
-    D = torch.load(MODEL_PATH + 'D.pth', map_location='cpu')
-    G = torch.load(MODEL_PATH + 'G.pth', map_location='cpu')
+# if torch.cuda.is_available():
+#     D = torch.load(MODEL_PATH + 'D.pth').to(device)
+#     G = torch.load(MODEL_PATH + 'G.pth').to(device)
+# else:
+#     D = torch.load(MODEL_PATH + 'D.pth', map_location='cpu')
+#     G = torch.load(MODEL_PATH + 'G.pth', map_location='cpu')
 
 # Binary cross entropy loss and optimizer
 criterion = nn.BCELoss().to(device)
@@ -123,10 +193,10 @@ def main():
                   f"D(x): {real_score:.4f}, "
                   f"D(G(z)): {fake_score_z1:.4f} / {fake_score_z2:.4f}.")
 
-            images = images.reshape(images.size(0), 1, 32, 32)
+            images = images.reshape(-1, 1, 32, 32)
             save_image(images, WORK_DIR + '/' + 'gen' + '/' + 'real' + '.jpg')
-            fake_images = fake.reshape(fake.size(0), 1, 32, 32)
-            save_image(fake_images, WORK_DIR + '/' + 'gen' + '/' + str(epoch) + '.jpg')
+            fake_images = fake.reshape(-1, 1, 32, 32)
+            save_image(fake_images, WORK_DIR + '/' + 'gen' + '/' + str(step) + '.jpg')
 
         # Save the model checkpoint
         torch.save(D, MODEL_PATH + MODEL_D)

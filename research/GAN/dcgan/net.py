@@ -11,17 +11,17 @@ class Generator(nn.Module):
         self.layer1 = nn.Sequential(
             nn.ConvTranspose2d(noise, 32 * 4, kernel_size=4, stride=1, padding=0, bias=False),
             nn.BatchNorm2d(32 * 4),
-            nn.ReLU(True),
+            nn.ReLU(True)
         )
         self.layer2 = nn.Sequential(
             nn.ConvTranspose2d(32 * 4, 32 * 2, kernel_size=4, stride=2, padding=1, bias=False),
             nn.BatchNorm2d(32 * 2),
-            nn.ReLU(True),
+            nn.ReLU(True)
         )
         self.layer3 = nn.Sequential(
             nn.ConvTranspose2d(32 * 2, 32, kernel_size=4, stride=2, padding=1, bias=False),
             nn.BatchNorm2d(32),
-            nn.ReLU(True),
+            nn.ReLU(True)
         )
         self.classifier = nn.Sequential(
             nn.ConvTranspose2d(32, 1, kernel_size=4, stride=2, padding=1),
