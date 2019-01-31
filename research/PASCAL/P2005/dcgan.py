@@ -15,7 +15,7 @@ BATCH_SIZE = 16
 LEARNING_RATE = 2e-4
 OPTIM_BETAS = (0.5, 0.999)
 
-NOISE = 512
+NOISE = 100
 
 MODEL_PATH = '../../../../models/pytorch/PASCAL/P2005/'
 MODEL_D = 'D.pth'
@@ -29,9 +29,8 @@ if not os.path.exists(WORK_DIR + '/' + 'gen'):
     os.makedirs(WORK_DIR + '/' + 'gen')
 
 transform = transforms.Compose([
-    transforms.Resize(224),
+    transforms.Resize(256),
     transforms.ToTensor(),
-    transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
 ])
 
 to_pil_image = transforms.ToPILImage()
@@ -50,27 +49,37 @@ class Generator(nn.Module):
     def __init__(self, noise=NOISE):
         super(Generator, self).__init__()
         self.layer1 = nn.Sequential(
-            nn.ConvTranspose2d(noise, 224 * 8, kernel_size=4, stride=2, padding=1, bias=False),
-            nn.BatchNorm2d(224 * 8),
+            nn.ConvTranspose2d(noise, 64 * 32, kernel_size=4, stride=1, padding=0, bias=False),
+            nn.BatchNorm2d(64 * 32),
             nn.ReLU(True)
         )
         self.layer2 = nn.Sequential(
-            nn.ConvTranspose2d(224 * 8, 224 * 4, kernel_size=4, stride=2, padding=1, bias=False),
-            nn.BatchNorm2d(224 * 4),
+            nn.ConvTranspose2d(64 * 32, 64 * 16, kernel_size=4, stride=2, padding=1, bias=False),
+            nn.BatchNorm2d(64 * 16),
             nn.ReLU(True)
         )
         self.layer3 = nn.Sequential(
-            nn.ConvTranspose2d(224 * 4, 224 * 2, kernel_size=4, stride=2, padding=1, bias=False),
-            nn.BatchNorm2d(224 * 2),
+            nn.ConvTranspose2d(64 * 16, 64 * 8, kernel_size=4, stride=2, padding=1, bias=False),
+            nn.BatchNorm2d(64 * 8),
             nn.ReLU(True)
         )
         self.layer4 = nn.Sequential(
-            nn.ConvTranspose2d(224 * 2, 224, kernel_size=4, stride=2, padding=1, bias=False),
-            nn.BatchNorm2d(224),
+            nn.ConvTranspose2d(64 * 8, 64 * 4, kernel_size=4, stride=2, padding=1, bias=False),
+            nn.BatchNorm2d(64 * 4),
+            nn.ReLU(True)
+        )
+        self.layer5 = nn.Sequential(
+            nn.ConvTranspose2d(64 * 4, 64 * 2, kernel_size=4, stride=2, padding=1, bias=False),
+            nn.BatchNorm2d(64 * 2),
+            nn.ReLU(True)
+        )
+        self.layer6 = nn.Sequential(
+            nn.ConvTranspose2d(64 * 2, 64, kernel_size=4, stride=2, padding=1, bias=False),
+            nn.BatchNorm2d(64),
             nn.ReLU(True)
         )
         self.classifier = nn.Sequential(
-            nn.ConvTranspose2d(224, 3, kernel_size=4, stride=2, padding=1, bias=False),
+            nn.ConvTranspose2d(64, 3, kernel_size=4, stride=2, padding=1, bias=False),
             nn.Tanh()
         )
 
@@ -79,6 +88,8 @@ class Generator(nn.Module):
         x = self.layer2(x)
         x = self.layer3(x)
         x = self.layer4(x)
+        x = self.layer5(x)
+        x = self.layer6(x)
         x = self.classifier(x)
         return x
 
@@ -87,26 +98,37 @@ class Discriminator(nn.Module):
     def __init__(self):
         super(Discriminator, self).__init__()
         self.layer1 = nn.Sequential(
-            nn.Conv2d(3, 224, kernel_size=4, stride=2, padding=1, bias=False),
+            nn.Conv2d(3, 64, kernel_size=4, stride=2, padding=1, bias=False),
+            nn.BatchNorm2d(64),
             nn.LeakyReLU(0.2, True)
         )
         self.layer2 = nn.Sequential(
-            nn.Conv2d(224, 224 * 2, kernel_size=4, stride=2, padding=1, bias=False),
-            nn.BatchNorm2d(224 * 2),
+            nn.Conv2d(64, 64 * 2, kernel_size=4, stride=2, padding=1, bias=False),
+            nn.BatchNorm2d(64 * 2),
             nn.LeakyReLU(0.2, True)
         )
         self.layer3 = nn.Sequential(
-            nn.Conv2d(224 * 2, 224 * 4, kernel_size=4, stride=2, padding=1, bias=False),
-            nn.BatchNorm2d(224 * 4),
+            nn.Conv2d(64 * 2, 64 * 4, kernel_size=4, stride=2, padding=1, bias=False),
+            nn.BatchNorm2d(64 * 4),
             nn.LeakyReLU(0.2, True)
         )
         self.layer4 = nn.Sequential(
-            nn.Conv2d(224 * 4, 224 * 8, kernel_size=4, stride=2, padding=1, bias=False),
-            nn.BatchNorm2d(224 * 8),
+            nn.Conv2d(64 * 4, 64 * 8, kernel_size=4, stride=2, padding=1, bias=False),
+            nn.BatchNorm2d(64 * 8),
+            nn.LeakyReLU(0.2, True)
+        )
+        self.layer5 = nn.Sequential(
+            nn.Conv2d(64 * 8, 64 * 16, kernel_size=4, stride=2, padding=1, bias=False),
+            nn.BatchNorm2d(64 * 16),
+            nn.LeakyReLU(0.2, True)
+        )
+        self.layer6 = nn.Sequential(
+            nn.Conv2d(64 * 16, 64 * 32, kernel_size=4, stride=2, padding=1, bias=False),
+            nn.BatchNorm2d(64 * 32),
             nn.LeakyReLU(0.2, True)
         )
         self.classifier = nn.Sequential(
-            nn.Conv2d(224 * 8, 1, kernel_size=4, stride=1, padding=0, bias=False),
+            nn.Conv2d(64 * 32, 1, kernel_size=4, stride=1, padding=0, bias=False),
             nn.Sigmoid()
         )
 
@@ -115,6 +137,8 @@ class Discriminator(nn.Module):
         x = self.layer2(x)
         x = self.layer3(x)
         x = self.layer4(x)
+        x = self.layer5(x)
+        x = self.layer6(x)
         x = self.classifier(x)
         out = x.view(-1, 1).squeeze(1)
         return out
@@ -145,8 +169,8 @@ def main():
             D.zero_grad()
 
             # Create the labels which are later used as input for the BCE loss
-            real_labels = torch.ones(BATCH_SIZE,).to(device)
-            fake_labels = torch.zeros(BATCH_SIZE,).to(device)
+            real_labels = torch.ones(images.size(0),).to(device)
+            fake_labels = torch.zeros(images.size(0),).to(device)
 
             # ================================================================== #
             #                      Train the discriminator                       #
@@ -161,7 +185,7 @@ def main():
 
             # Compute BCELoss using fake images
             # First term of the loss is always zero since fake_labels == 0
-            noise = torch.randn(BATCH_SIZE, NOISE, 1, 1).to(device)
+            noise = torch.randn(images.size(0), NOISE, 1, 1).to(device)
             fake = G(noise)
             outputs = D(fake.detach())
             d_loss_fake = criterion(outputs, fake_labels)
@@ -193,9 +217,9 @@ def main():
                   f"D(x): {real_score:.4f}, "
                   f"D(G(z)): {fake_score_z1:.4f} / {fake_score_z2:.4f}.")
 
-            images = images.reshape(-1, 1, 32, 32)
+            images = images.reshape(images.size(0), 3, 256, 256)
             save_image(images, WORK_DIR + '/' + 'gen' + '/' + 'real' + '.jpg')
-            fake_images = fake.reshape(-1, 1, 32, 32)
+            fake_images = fake.reshape(images.size(0), 3, 256, 256)
             save_image(fake_images, WORK_DIR + '/' + 'gen' + '/' + str(step) + '.jpg')
 
         # Save the model checkpoint
