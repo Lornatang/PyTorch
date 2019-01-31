@@ -7,7 +7,7 @@ from torchvision import transforms
 from torchvision.utils import save_image
 
 # first train run this code
-# from research.GAN.dcgan.net import Discriminator, Generator
+from research.GAN.dcgan.net import Discriminator, Generator
 # incremental training comments out that line of code.
 
 # Device configuration
@@ -51,25 +51,20 @@ train_loader = torch.utils.data.DataLoader(dataset=train_dataset,
                                            shuffle=True)
 
 # first train run this line
-# D = Discriminator().to(device)
-# G = Generator().to(device)
+D = Discriminator().to(device)
+G = Generator().to(device)
 # load model
-if torch.cuda.is_available():
-    D = torch.load(MODEL_PATH + 'D.pth').to(device)
-    G = torch.load(MODEL_PATH + 'G.pth').to(device)
-else:
-    D = torch.load(MODEL_PATH + 'D.pth', map_location='cpu')
-    G = torch.load(MODEL_PATH + 'G.pth', map_location='cpu')
+# if torch.cuda.is_available():
+#     D = torch.load(MODEL_PATH + 'D.pth').to(device)
+#     G = torch.load(MODEL_PATH + 'G.pth').to(device)
+# else:
+#     D = torch.load(MODEL_PATH + 'D.pth', map_location='cpu')
+#     G = torch.load(MODEL_PATH + 'G.pth', map_location='cpu')
 
 # Binary cross entropy loss and optimizer
-criterion = nn.BCEWithLogitsLoss().to(device)
+criterion = nn.BCELoss().to(device)
 d_optimizer = optim.Adam(D.parameters(), lr=LEARNING_RATE, betas=OPTIM_BETAS)
 g_optimizer = optim.Adam(G.parameters(), lr=LEARNING_RATE, betas=OPTIM_BETAS)
-
-
-def reset_grad():
-    d_optimizer.zero_grad()
-    g_optimizer.zero_grad()
 
 
 # Start training
@@ -77,8 +72,7 @@ def main():
     step = 1
     for epoch in range(1, NUM_EPOCHS + 1):
         for images, _ in train_loader:
-            # D.zero_grad()
-            # images = images.reshape(BATCH_SIZE, -1).to(device)
+            D.zero_grad()
 
             # Create the labels which are later used as input for the BCE loss
             real_labels = torch.ones(BATCH_SIZE,).to(device)
@@ -92,20 +86,20 @@ def main():
             # Second term of the loss is always zero since real_labels == 1
             outputs = D(images)
             d_loss_real = criterion(outputs, real_labels)
-            real_score = outputs
+            d_loss_real.backward()
+            real_score = outputs.mean().item()
 
             # Compute BCELoss using fake images
             # First term of the loss is always zero since fake_labels == 0
-            z = torch.randn(BATCH_SIZE, NOISE, 1, 1).to(device)
-            fake_images = G(z)
-            outputs = D(fake_images)
+            noise = torch.randn(BATCH_SIZE, NOISE, 1, 1).to(device)
+            fake = G(noise)
+            outputs = D(fake.detach())
             d_loss_fake = criterion(outputs, fake_labels)
-            fake_score = outputs
+            d_loss_fake.backward()
+            fake_score_z1 = outputs.mean().item()
 
             # Backprop and optimize
             d_loss = d_loss_real + d_loss_fake
-            reset_grad()
-            d_loss.backward()
             d_optimizer.step()
 
             # ================================================================== #
@@ -113,32 +107,26 @@ def main():
             # ================================================================== #
 
             # Compute loss with fake images
-            z = torch.randn(BATCH_SIZE, NOISE, 1, 1).to(device)
-            fake_images = G(z)
-            outputs = D(fake_images)
-
-            # We train G to maximize log(D(G(z)) instead of minimizing log(1-D(G(z)))
-            # For the reason, see the last paragraph of section 3. https://arxiv.org/pdf/1406.2661.pdf
+            G.zero_grad()
+            outputs = D(fake)
             g_loss = criterion(outputs, real_labels)
-
-            # Backprop and optimize
-            reset_grad()
             g_loss.backward()
+            fake_score_z2 = outputs.mean().item()
             g_optimizer.step()
 
             step += 1
 
-            if step % 10 == 0:
-                print(f"Step [{step * BATCH_SIZE}/{NUM_EPOCHS * len(train_dataset)}], "
-                      f"d_loss: {d_loss:.8f}, "
-                      f"g_loss: {g_loss:.8f}, "
-                      f"D(x): {real_score.mean():.4f}, "
-                      f"D(G(z)): {fake_score.mean():.4f}.")
+            # func (item): Tensor turns into an int
+            print(f"Step [{step * BATCH_SIZE}/{NUM_EPOCHS * len(train_dataset)}], "
+                  f"d_loss: {d_loss.item():.4f}, "
+                  f"g_loss: {g_loss.item():.4f}, "
+                  f"D(x): {real_score:.4f}, "
+                  f"D(G(z)): {fake_score_z1:.4f} / {fake_score_z2:.4f}.")
 
-            if epoch % 1 == 0:
+            if step % 200 == 0:
                 images = images.reshape(images.size(0), 1, 32, 32)
                 save_image(images, WORK_DIR + '/' + 'gen' + '/' + 'real' + '.jpg')
-                fake_images = fake_images.reshape(fake_images.size(0), 1, 32, 32)
+                fake_images = fake.reshape(fake.size(0), 1, 32, 32)
                 save_image(fake_images, WORK_DIR + '/' + 'gen' + '/' + str(epoch) + '.jpg')
 
         # Save the model checkpoint
