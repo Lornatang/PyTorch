@@ -15,7 +15,7 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 WORK_DIR = '../../../../../data/GAN/basic'
 NUM_EPOCHS = 300
-BATCH_SIZE = 100
+BATCH_SIZE = 1
 LEARNING_RATE = 2e-4
 OPTIM_BETAS = (0.5, 0.999)
 
@@ -126,12 +126,12 @@ def main():
             images = images.reshape(images.size(0), 1, 32, 32)
             save_image(images, WORK_DIR + '/' + 'gen' + '/' + 'real' + '.jpg')
             fake_images = fake.reshape(fake.size(0), 1, 32, 32)
-            save_image(fake_images, WORK_DIR + '/' + 'gen' + '/' + str(epoch) + '.jpg')
+            save_image(fake_images, WORK_DIR + '/' + 'gen' + '/' + str(step) + '.jpg')
 
-        # Save the model checkpoint
-        torch.save(D, MODEL_PATH + MODEL_D)
-        torch.save(G, MODEL_PATH + MODEL_G)
-    print(f"Model save to '{MODEL_PATH}'!")
+    #     # Save the model checkpoint
+    #     torch.save(D, MODEL_PATH + MODEL_D)
+    #     torch.save(G, MODEL_PATH + MODEL_G)
+    # print(f"Model save to '{MODEL_PATH}'!")
 
 
 if __name__ == '__main__':
