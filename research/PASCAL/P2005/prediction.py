@@ -21,7 +21,7 @@ if not os.path.exists(MODEL_PATH):
     os.makedirs(MODEL_PATH)
 
 transform = transforms.Compose([
-    transforms.Resize(32),
+    transforms.Resize(224),
     transforms.ToTensor()
 ])
 
