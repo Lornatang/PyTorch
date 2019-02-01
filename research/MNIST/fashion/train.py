@@ -28,7 +28,8 @@ if not os.path.exists(MODEL_PATH):
     os.makedirs(MODEL_PATH)
 
 transform = transforms.Compose([
-    transforms.Resize(28),  # 将图像转化为28 * 28
+    transforms.RandomCrop(36, padding=4),
+    transforms.CenterCrop(32),
     transforms.RandomHorizontalFlip(),  # 几率随机旋转
     transforms.ToTensor(),  # 将numpy数据类型转化为Tensor
     transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])  # 归一化
