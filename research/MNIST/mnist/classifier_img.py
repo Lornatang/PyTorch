@@ -6,7 +6,7 @@ from torchvision import transforms
 
 # from research.MNIST.mnist.net import Net
 
-WORK_DIR = '../../../../../data/MNIST/mnist'
+WORK_DIR = '../../../../../data/GAN/basic'
 BATCH_SIZE = 1
 
 MODEL_PATH = '../../../../models/pytorch/MNIST/'
@@ -23,13 +23,16 @@ label = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
 
 # check file name is exist
 for dir_index in range(0, 10):
-    if not os.path.exists(WORK_DIR + '/' + 'test' + '/' + label[dir_index]):
-        os.makedirs(WORK_DIR + '/' + 'test' + '/' + label[dir_index])
+    if not os.path.exists(WORK_DIR + '/' + 'gen' + '/' + label[dir_index]):
+        os.makedirs(WORK_DIR + '/' + 'gen' + '/' + label[dir_index])
 
-transform = transforms.ToTensor()
+transform = transforms.Compose([
+    transforms.Resize(28),
+    transforms.ToTensor()
+])
 
 # Load data
-test_dataset = torchvision.datasets.ImageFolder(root=WORK_DIR + '/' + 'test',
+test_dataset = torchvision.datasets.ImageFolder(root=WORK_DIR + '/' + 'gen',
                                                 transform=transform)
 
 test_loader = torch.utils.data.DataLoader(dataset=test_dataset,
@@ -56,7 +59,7 @@ def main():
         _, predicted = torch.max(outputs.data, 1)
 
         img = to_pil_image(images[0])
-        img.save(str(WORK_DIR + '/' + 'test' + '/' + label[predicted]) + '/' + str(index) + '.jpg')
+        img.save(str(WORK_DIR + '/' + 'gen' + '/' + label[predicted]) + '/' + str(index) + '.jpg')
         index += 1
 
 
