@@ -57,16 +57,16 @@ class GoogLeNet(nn.Module):
 
         self.conv1 = BasicConv2d(3, 64, kernel_size=7, stride=2, padding=3)
 
-        self.max_pool1 = nn.MaxPool2d(3, stride=1)
+        self.max_pool1 = nn.MaxPool2d(3, stride=2)
 
         self.conv2 = BasicConv2d(64, 192, kernel_size=3, stride=1, padding=1)
 
-        self.max_pool2 = nn.MaxPool2d(3, stride=1)
+        self.max_pool2 = nn.MaxPool2d(3, stride=2)
 
         self.a3 = Inception(192, 64, 96, 128, 16, 32, 32)
         self.b3 = Inception(256, 128, 128, 192, 32, 96, 64)
 
-        self.max_pool3 = nn.MaxPool2d(3, stride=1)
+        self.max_pool3 = nn.MaxPool2d(3, stride=2)
 
         self.a4 = Inception(480, 192, 96, 208, 16, 48, 64)
         self.b4 = Inception(512, 160, 112, 224, 24, 64, 64)
@@ -74,12 +74,12 @@ class GoogLeNet(nn.Module):
         self.d4 = Inception(512, 112, 144, 288, 32, 64, 64)
         self.e4 = Inception(528, 256, 160, 320, 32, 128, 128)
 
-        self.max_pool4 = nn.MaxPool2d(3, stride=1)
+        self.max_pool4 = nn.MaxPool2d(3, stride=2)
 
         self.a5 = Inception(832, 256, 160, 320, 32, 128, 128)
         self.b5 = Inception(832, 384, 192, 384, 48, 128, 128)
 
-        self.avg_pool = nn.AvgPool2d(8)
+        self.avg_pool = nn.AvgPool2d(7)
 
         self.classifier = nn.Linear(1024, num_classes)
 
