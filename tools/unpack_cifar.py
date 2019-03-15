@@ -5,8 +5,8 @@ import cv2
 import numpy as np
 
 # source directory
-CIFAR10_DIR = '/Users/mac/data/CIFAR/cifar10'
-CIFAR100_DIR = '/Users/mac/data/CIFAR/cifar100'
+CIFAR10_DIR = '/tmp/cifar10'
+CIFAR100_DIR = '/tmp/cifar100'
 
 # extract cifar img in here.
 CIFAR10_TRAIN_DIR = CIFAR10_DIR + '/' + 'train'
