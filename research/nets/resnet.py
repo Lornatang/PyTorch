@@ -23,14 +23,14 @@ MODEL_NAME = 'ResNet.pth'
 
 # Create model
 if not os.path.exists(MODEL_PATH):
-    os.makedirs(MODEL_PATH)
+  os.makedirs(MODEL_PATH)
 
 transform = transforms.Compose([
-    transforms.RandomCrop(36, padding=4),
-    transforms.RandomResizedCrop(32),
-    transforms.RandomHorizontalFlip(),
-    transforms.ToTensor(),
-    transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
+  transforms.RandomCrop(36, padding=4),
+  transforms.RandomResizedCrop(32),
+  transforms.RandomHorizontalFlip(),
+  transforms.ToTensor(),
+  transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
 ])
 
 # Load data
@@ -43,52 +43,52 @@ train_loader = torch.utils.data.DataLoader(dataset=train_dataset,
 
 
 def main():
-    print(f"Train numbers:{len(train_dataset)}")
-
-    # load model
-    model = resnet152().to(device)
-    # if img size (32, 32) run this code. else img (224, 224) annotation this code.
-    model.avgpool = nn.AvgPool2d(kernel_size=1, stride=1)
-    # cast
-    cast = nn.CrossEntropyLoss().to(device)
-    # Optimization
-    optimizer = optim.Adam(
-        model.parameters(),
-        lr=LEARNING_RATE,
-        weight_decay=1e-8)
-    step = 1
-    for epoch in range(1, NUM_EPOCHS + 1):
-        model.train()
-
-        # cal one epoch time
-        start = time.time()
-
-        for images, labels in train_loader:
-            images = images.to(device)
-            labels = labels.to(device)
-
-            # Forward pass
-            outputs = model(images)
-            loss = cast(outputs, labels)
-
-            # Backward and optimize
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
-
-            print(f"Step [{step * BATCH_SIZE}/{NUM_EPOCHS * len(train_dataset)}], "
-                  f"Loss: {loss.item():.8f}.")
-            step += 1
-
-        # cal train one epoch time
-        end = time.time()
-        print(f"Epoch [{epoch}/{NUM_EPOCHS}], "
-              f"time: {end - start} sec!")
-
-        # Save the model checkpoint
-        torch.save(model, MODEL_PATH + '/' + MODEL_NAME)
-    print(f"Model save to {MODEL_PATH + '/' + MODEL_NAME}.")
+  print(f"Train numbers:{len(train_dataset)}")
+  
+  # load model
+  model = resnet152().to(device)
+  # if img size (32, 32) run this code. else img (224, 224) annotation this code.
+  model.avgpool = nn.AvgPool2d(kernel_size=1, stride=1)
+  # cast
+  cast = nn.CrossEntropyLoss().to(device)
+  # Optimization
+  optimizer = optim.Adam(
+    model.parameters(),
+    lr=LEARNING_RATE,
+    weight_decay=1e-8)
+  step = 1
+  for epoch in range(1, NUM_EPOCHS + 1):
+    model.train()
+    
+    # cal one epoch time
+    start = time.time()
+    
+    for images, labels in train_loader:
+      images = images.to(device)
+      labels = labels.to(device)
+      
+      # Forward pass
+      outputs = model(images)
+      loss = cast(outputs, labels)
+      
+      # Backward and optimize
+      optimizer.zero_grad()
+      loss.backward()
+      optimizer.step()
+      
+      print(f"Step [{step * BATCH_SIZE}/{NUM_EPOCHS * len(train_dataset)}], "
+            f"Loss: {loss.item():.8f}.")
+      step += 1
+    
+    # cal train one epoch time
+    end = time.time()
+    print(f"Epoch [{epoch}/{NUM_EPOCHS}], "
+          f"time: {end - start} sec!")
+    
+    # Save the model checkpoint
+    torch.save(model, MODEL_PATH + '/' + MODEL_NAME)
+  print(f"Model save to {MODEL_PATH + '/' + MODEL_NAME}.")
 
 
 if __name__ == '__main__':
-    main()
+  main()
