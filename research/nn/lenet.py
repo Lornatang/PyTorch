@@ -25,7 +25,7 @@ if not os.path.exists(MODEL_PATH):
 
 transform = transforms.Compose([
   transforms.RandomCrop(36, padding=4),
-  transforms.RandomSizedCrop(32),
+  transforms.RandomResizedCrop(32),
   transforms.RandomHorizontalFlip(),
   transforms.ToTensor(),
   transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
