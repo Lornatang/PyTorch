@@ -23,6 +23,22 @@ MODEL_NAME = 'AlexNet.pth'
 if not os.path.exists(MODEL_PATH):
   os.makedirs(MODEL_PATH)
 
+transform = transforms.Compose([
+  transforms.RandomCrop(36, padding=4),
+  transforms.RandomSizedCrop(32),
+  transforms.RandomHorizontalFlip(),
+  transforms.ToTensor(),
+  transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
+])
+
+# Load data
+train_dataset = torchvision.datasets.ImageFolder(root=WORK_DIR + '/' + 'train',
+                                                 transform=transform)
+
+train_loader = torch.utils.data.DataLoader(dataset=train_dataset,
+                                           batch_size=BATCH_SIZE,
+                                           shuffle=True)
+
 
 class AlexNet(nn.Module):
   
@@ -58,23 +74,6 @@ class AlexNet(nn.Module):
     x = x.view(x.size(0), -1)
     x = self.classifier(x)
     return x
-
-
-transform = transforms.Compose([
-  transforms.RandomCrop(36, padding=4),
-  transforms.RandomSizedCrop(32),
-  transforms.RandomHorizontalFlip(),
-  transforms.ToTensor(),
-  transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
-])
-
-# Load data
-train_dataset = torchvision.datasets.ImageFolder(root=WORK_DIR + '/' + 'train',
-                                                 transform=transform)
-
-train_loader = torch.utils.data.DataLoader(dataset=train_dataset,
-                                           batch_size=BATCH_SIZE,
-                                           shuffle=True)
 
 
 def main():
