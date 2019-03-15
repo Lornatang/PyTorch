@@ -17,7 +17,7 @@ LEARNING_RATE = 1e-4
 NUM_CLASSES = 10
 
 MODEL_PATH = './models'
-MODEL_NAME = 'LeNet.pth'
+MODEL_NAME = 'AlexNet.pth'
 
 # Create model
 if not os.path.exists(MODEL_PATH):
@@ -55,7 +55,7 @@ class AlexNet(nn.Module):
   
   def forward(self, x):
     x = self.features(x)
-    x = x.view(x.size(0), 256 * 3 * 3)
+    x = x.view(x.size(0), -1)
     x = self.classifier(x)
     return x
 
@@ -81,7 +81,7 @@ def main():
   print(f"Train numbers:{len(train_dataset)}")
   
   # load model
-  model = AlexNet()
+  model = AlexNet().to(device)
   # cast
   cast = nn.CrossEntropyLoss().to(device)
   # Optimization
