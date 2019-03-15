@@ -3,11 +3,11 @@ import time
 
 import torch
 import torchvision
-from torch import optim
+from torch import nn, optim
 from torch.utils import data
 from torchvision import transforms
 
-from research.nets.vgg_util import *
+from official.nets.resnet_util import *
 
 # Device configuration
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -16,9 +16,10 @@ WORK_DIR = '/tmp/cifar10'
 NUM_EPOCHS = 10
 BATCH_SIZE = 128
 LEARNING_RATE = 1e-4
+NUM_CLASSES = 10
 
 MODEL_PATH = './models'
-MODEL_NAME = 'VGGNet.pth'
+MODEL_NAME = 'ResNet.pth'
 
 # Create model
 if not os.path.exists(MODEL_PATH):
@@ -45,7 +46,9 @@ def main():
   print(f"Train numbers:{len(train_dataset)}")
   
   # load model
-  model = vgg19_bn().to(device)
+  model = resnet152().to(device)
+  # if img size (32, 32) run this code. else img (224, 224) annotation this code.
+  model.avgpool = nn.AvgPool2d(kernel_size=1, stride=1)
   # cast
   cast = nn.CrossEntropyLoss().to(device)
   # Optimization
@@ -89,5 +92,3 @@ def main():
 
 if __name__ == '__main__':
   main()
-
-
