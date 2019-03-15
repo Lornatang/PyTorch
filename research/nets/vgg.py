@@ -7,7 +7,7 @@ from torch import optim
 from torch.utils import data
 from torchvision import transforms
 
-from research.nn.vgg_util import *
+from research.nets.vgg_util import *
 
 # Device configuration
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
