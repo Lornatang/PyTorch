@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 from collections import OrderedDict
 
-
+from torchvision import models
 def densenet121(**kwargs):
   r"""Densenet-121 model from
   `"Densely Connected Convolutional Networks" <https://arxiv.org/pdf/1608.06993.pdf>`_
@@ -134,7 +134,7 @@ class DenseNet(nn.Module):
   def forward(self, x):
     x = self.features(x)
     nn.ReLU(inplace=True)
-    nn.AvgPool2d(kernel_size=1, stride=1)
+    nn.AvgPool2d(kernel_size=7, stride=1)
     x = x.view(x.size(0), -1)
     x = self.classifier(x)
     return x

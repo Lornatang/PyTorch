@@ -11,7 +11,7 @@ from torchvision import transforms
 # Device configuration
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-WORK_DIR = '/tmp/cifar10'
+WORK_DIR = '/tmp/imagenet'
 NUM_EPOCHS = 10
 BATCH_SIZE = 128
 LEARNING_RATE = 1e-4
@@ -25,7 +25,7 @@ if not os.path.exists(MODEL_PATH):
   os.makedirs(MODEL_PATH)
 
 transform = transforms.Compose([
-  transforms.RandomCrop(227, padding=195),
+  transforms.RandomCrop(256, padding=32),
   transforms.RandomResizedCrop(224),
   transforms.RandomHorizontalFlip(),
   transforms.ToTensor(),
