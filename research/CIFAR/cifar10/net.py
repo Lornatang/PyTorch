@@ -41,7 +41,7 @@ class ResNet(nn.Module):
         self.fc = nn.Linear(512, num_classes)
 
     def make_layer(self, block, channels, num_blocks, stride):
-        strides = [stride] + [1] * (num_blocks - 1)   #strides=[1,1]
+        strides = [stride] + [1] * (num_blocks - 1)   # strides=[1,1]
         layers = []
         for stride in strides:
             layers.append(block(self.inchannel, channels, stride))
