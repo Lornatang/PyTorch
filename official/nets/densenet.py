@@ -1,33 +1,31 @@
 import os
 import time
 
-import torch
 import torchvision
-from torch import nn, optim
+from torch import optim
 from torch.utils import data
 from torchvision import transforms
 
-from research.nets.resnet_util import *
+from official.nets.denset_util import *
 
 # Device configuration
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-WORK_DIR = '/tmp/cifar10'
+WORK_DIR = '/tmp/imagenet'
 NUM_EPOCHS = 10
 BATCH_SIZE = 128
 LEARNING_RATE = 1e-4
-NUM_CLASSES = 10
 
 MODEL_PATH = './models'
-MODEL_NAME = 'ResNet.pth'
+MODEL_NAME = 'DenseNet.pth'
 
 # Create model
 if not os.path.exists(MODEL_PATH):
   os.makedirs(MODEL_PATH)
 
 transform = transforms.Compose([
-  transforms.RandomCrop(36, padding=4),
-  transforms.RandomResizedCrop(32),
+  transforms.RandomCrop(256, padding=32),
+  transforms.RandomSizedCrop(224),
   transforms.RandomHorizontalFlip(),
   transforms.ToTensor(),
   transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
@@ -46,9 +44,7 @@ def main():
   print(f"Train numbers:{len(train_dataset)}")
   
   # load model
-  model = resnet152().to(device)
-  # if img size (32, 32) run this code. else img (224, 224) annotation this code.
-  model.avgpool = nn.AvgPool2d(kernel_size=1, stride=1)
+  model = densenet201().to(device)
   # cast
   cast = nn.CrossEntropyLoss().to(device)
   # Optimization

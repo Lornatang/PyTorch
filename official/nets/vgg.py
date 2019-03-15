@@ -1,31 +1,32 @@
 import os
 import time
 
+import torch
 import torchvision
 from torch import optim
 from torch.utils import data
 from torchvision import transforms
 
-from research.nets.denset_util import *
+from official.nets.vgg_util import *
 
 # Device configuration
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-WORK_DIR = '/tmp/imagenet'
+WORK_DIR = '/tmp/cifar10'
 NUM_EPOCHS = 10
 BATCH_SIZE = 128
 LEARNING_RATE = 1e-4
 
 MODEL_PATH = './models'
-MODEL_NAME = 'DenseNet.pth'
+MODEL_NAME = 'VGGNet.pth'
 
 # Create model
 if not os.path.exists(MODEL_PATH):
   os.makedirs(MODEL_PATH)
 
 transform = transforms.Compose([
-  transforms.RandomCrop(256, padding=32),
-  transforms.RandomSizedCrop(224),
+  transforms.RandomCrop(36, padding=4),
+  transforms.RandomResizedCrop(32),
   transforms.RandomHorizontalFlip(),
   transforms.ToTensor(),
   transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
@@ -44,7 +45,7 @@ def main():
   print(f"Train numbers:{len(train_dataset)}")
   
   # load model
-  model = densenet201().to(device)
+  model = vgg19_bn().to(device)
   # cast
   cast = nn.CrossEntropyLoss().to(device)
   # Optimization
@@ -88,3 +89,5 @@ def main():
 
 if __name__ == '__main__':
   main()
+
+
