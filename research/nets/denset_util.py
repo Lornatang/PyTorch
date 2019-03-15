@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 from collections import OrderedDict
 
-from torchvision import models
+
 def densenet121(**kwargs):
   r"""Densenet-121 model from
   `"Densely Connected Convolutional Networks" <https://arxiv.org/pdf/1608.06993.pdf>`_
