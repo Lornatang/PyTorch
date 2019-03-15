@@ -11,7 +11,7 @@ from research.nets.denset_util import *
 # Device configuration
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-WORK_DIR = '/tmp/cifar10'
+WORK_DIR = '/tmp/imagenet'
 NUM_EPOCHS = 10
 BATCH_SIZE = 128
 LEARNING_RATE = 1e-4
@@ -24,8 +24,8 @@ if not os.path.exists(MODEL_PATH):
   os.makedirs(MODEL_PATH)
 
 transform = transforms.Compose([
-  transforms.RandomCrop(36, padding=4),
-  transforms.RandomSizedCrop(32),
+  transforms.RandomCrop(256, padding=32),
+  transforms.RandomSizedCrop(224),
   transforms.RandomHorizontalFlip(),
   transforms.ToTensor(),
   transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
