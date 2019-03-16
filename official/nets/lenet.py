@@ -42,7 +42,7 @@ train_loader = torch.utils.data.DataLoader(dataset=train_dataset,
 
 class LeNet(nn.Module):
   """use myself network.
-  input img size is 32 * 32
+  inputs img size is 32 * 32
 
   Args:
     num_classes: img classes.

@@ -82,7 +82,7 @@ for epoch in range(num_epochs):
     for i, (images, _) in enumerate(data_loader):
         images = images.reshape(batch_size, -1).to(device)
 
-        # Create the labels which are later used as input for the BCE loss
+        # Create the labels which are later used as inputs for the BCE loss
         real_labels = torch.ones(batch_size, 1).to(device)
         fake_labels = torch.zeros(batch_size, 1).to(device)
 

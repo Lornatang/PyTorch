@@ -28,7 +28,7 @@ test_dataset = torchvision.datasets.MNIST(root='../data',
                                           transform=transforms.ToTensor(),
                                           download=False)
 
-# Data loader (input pipeline)
+# Data loader (inputs pipeline)
 train_loader = torch.utils.data.DataLoader(dataset=train_dataset,
                                            batch_size=batch_size,
                                            shuffle=True)

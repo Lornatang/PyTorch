@@ -114,7 +114,7 @@ with torch.no_grad():
             prob = output.exp()
             word_id = torch.multinomial(prob, num_samples=1).item()
 
-            # Fill input with sampled word id for the next time step
+            # Fill inputs with sampled word id for the next time step
             input.fill_(word_id)
 
             # File write

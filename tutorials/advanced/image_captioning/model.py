@@ -23,7 +23,7 @@ class EncoderCNN(nn.Module):
         self.bn = nn.BatchNorm1d(embed_size, momentum=0.01)
         
     def forward(self, images):
-        """Extract feature vectors from input images."""
+        """Extract feature vectors from inputs images."""
         with torch.no_grad():
             features = self.resnet(images)
         features = features.reshape(features.size(0), -1)
