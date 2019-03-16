@@ -317,7 +317,7 @@ print(device)
 # Where do I go next?
 # -------------------
 #
-# -  :doc:`Train neural nets to play video games </intermediate/reinforcement_q_learning>`
+# -  :doc:`Train neural net to play video games </intermediate/reinforcement_q_learning>`
 # -  `Train a state-of-the-art ResNet network on imagenet`_
 # -  `Train a face generator using Generative Adversarial Networks`_
 # -  `Train a word-level language model using Recurrent LSTM networks`_

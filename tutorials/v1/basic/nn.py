@@ -1,7 +1,7 @@
 """
 # author: shiyipaisizuo
 # contact: shiyipaisizuo@gmail.com
-# file: nets.py
+# file: net.py
 # time: 2018/7/29 09:24
 # license: MIT
 """

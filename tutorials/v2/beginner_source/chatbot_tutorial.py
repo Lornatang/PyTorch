@@ -577,7 +577,7 @@ print("max_target_len:", max_target_len)
 # fixed-sized model.
 #
 # `Sutskever et al. <https://arxiv.org/abs/1409.3215>`__ discovered that
-# by using two separate recurrent neural nets together, we can accomplish
+# by using two separate recurrent neural net together, we can accomplish
 # this task. One RNN acts as an **encoder**, which encodes a variable
 # length input sequence to a fixed-length context vector. In theory, this
 # context vector (the final hidden layer of the RNN) will contain semantic
