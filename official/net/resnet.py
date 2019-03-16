@@ -3,7 +3,7 @@ import time
 
 import torch
 import torchvision
-from torch import nn, optim
+from torch import optim
 from torch.utils import data
 from torchvision import transforms
 
