@@ -210,7 +210,7 @@ err.backward()
 # Example 2: Recurrent Net
 # ------------------------
 #
-# Next, let’s look at building recurrent nets with PyTorch.
+# Next, let’s look at building recurrent net with PyTorch.
 #
 # Since the state of the network is held in the graph and not in the
 # layers, you can simply create an nn.Linear and reuse it over and over

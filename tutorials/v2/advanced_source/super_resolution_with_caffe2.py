@@ -209,7 +209,7 @@ c2_model = prepared_backend.predict_net
 # Now import the caffe2 mobile exporter
 from caffe2.python.predictor import mobile_exporter
 
-# call the Export to get the predict_net, init_net. These nets are needed for running things on mobile
+# call the Export to get the predict_net, init_net. These net are needed for running things on mobile
 init_net, predict_net = mobile_exporter.Export(c2_workspace, c2_model, c2_model.external_input)
 
 # Let's also save the init_net and predict_net to a file that we will later use for running them on mobile
@@ -275,7 +275,7 @@ img = Image.open("./_static/img/cat_224x224.jpg")
 img_ycbcr = img.convert('YCbCr')
 img_y, img_cb, img_cr = img_ycbcr.split()
 
-# Let's run the mobile nets that we generated above so that caffe2 workspace is properly initialized
+# Let's run the mobile net that we generated above so that caffe2 workspace is properly initialized
 workspace.RunNetOnce(init_net)
 workspace.RunNetOnce(predict_net)
 
@@ -323,7 +323,7 @@ final_img.save("./_static/img/cat_superres.jpg")
 
 
 ######################################################################
-# We have finished running our mobile nets in pure Caffe2 backend and now,
+# We have finished running our mobile net in pure Caffe2 backend and now,
 # let's execute the model on an Android device and get the model output.
 #
 # ``NOTE``: for Android development, ``adb`` shell is needed otherwise the

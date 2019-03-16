@@ -41,7 +41,7 @@ test_loader = torch.utils.data.DataLoader(dataset=test_dataset,
 model = nn.Linear(input_size, num_classes)
 
 # Loss and optimizer
-# nets.CrossEntropyLoss() computes softmax internally
+# net.CrossEntropyLoss() computes softmax internally
 criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
 

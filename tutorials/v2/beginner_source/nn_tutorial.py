@@ -257,7 +257,7 @@ print(loss_func(model(xb), yb), accuracy(model(xb), yb))
 # contains all the functions in the ``torch.nn`` library (whereas other parts of the
 # library contain classes). As well as a wide range of loss and activation
 # functions, you'll also find here some convenient functions for creating neural
-# nets, such as pooling functions. (There are also functions for doing convolutions,
+# net, such as pooling functions. (There are also functions for doing convolutions,
 # linear layers, etc, but as we'll see, these are usually better handled using
 # other parts of the library.)
 #
