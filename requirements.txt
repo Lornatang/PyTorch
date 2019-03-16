@@ -5,3 +5,5 @@ pillow
 torchvision
 torch
 lmdb
+gym
+torchtext
