@@ -14,8 +14,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--dataset', required=True, help='cifar10 | lsun | mnist |imagenet | folder | lfw | fake')
 parser.add_argument('--dataroot', required=True, help='path to dataset')
 parser.add_argument('--workers', type=int, help='number of data loading workers', default=2)
-parser.add_argument('--batchSize', type=int, default=64, help='input batch size')
-parser.add_argument('--imageSize', type=int, default=64, help='the height / width of the input image to network')
+parser.add_argument('--batchSize', type=int, default=64, help='inputs batch size')
+parser.add_argument('--imageSize', type=int, default=64, help='the height / width of the inputs image to network')
 parser.add_argument('--nz', type=int, default=100, help='size of the latent z vector')
 parser.add_argument('--ngf', type=int, default=64)
 parser.add_argument('--ndf', type=int, default=64)
@@ -116,7 +116,7 @@ class Generator(nn.Module):
     super(Generator, self).__init__()
     self.ngpu = ngpu
     self.main = nn.Sequential(
-      # input is Z, going into a convolution
+      # inputs is Z, going into a convolution
       nn.ConvTranspose2d(nz, ngf * 8, 4, 1, 0, bias=False),
       nn.BatchNorm2d(ngf * 8),
       nn.ReLU(True),
@@ -158,7 +158,7 @@ class Discriminator(nn.Module):
     super(Discriminator, self).__init__()
     self.ngpu = ngpu
     self.main = nn.Sequential(
-      # input is (nc) x 64 x 64
+      # inputs is (nc) x 64 x 64
       nn.Conv2d(nc, ndf, 4, 2, 1, bias=False),
       nn.LeakyReLU(0.2, inplace=True),
       # state size. (ndf) x 32 x 32
