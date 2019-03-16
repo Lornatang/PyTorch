@@ -1,4 +1,3 @@
-from __future__ import print_function
 import argparse
 from math import log10
 
@@ -6,8 +5,8 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
-from model import Net
-from data import get_training_set, get_test_set
+from samples.super_resolution.model import Net
+from samples.super_resolution.data import get_training_set, get_test_set
 
 # Training settings
 parser = argparse.ArgumentParser(description='PyTorch Super Res Example')
@@ -24,7 +23,7 @@ opt = parser.parse_args()
 print(opt)
 
 if opt.cuda and not torch.cuda.is_available():
-    raise Exception("No GPU found, please run without --cuda")
+  raise Exception("No GPU found, please run without --cuda")
 
 torch.manual_seed(opt.seed)
 
@@ -43,41 +42,42 @@ criterion = nn.MSELoss()
 optimizer = optim.Adam(model.parameters(), lr=opt.lr)
 
 
-def train(epoch):
-    epoch_loss = 0
-    for iteration, batch in enumerate(training_data_loader, 1):
-        input, target = batch[0].to(device), batch[1].to(device)
-
-        optimizer.zero_grad()
-        loss = criterion(model(input), target)
-        epoch_loss += loss.item()
-        loss.backward()
-        optimizer.step()
-
-        print("===> Epoch[{}]({}/{}): Loss: {:.4f}".format(epoch, iteration, len(training_data_loader), loss.item()))
-
-    print("===> Epoch {} Complete: Avg. Loss: {:.4f}".format(epoch, epoch_loss / len(training_data_loader)))
+def train(epochs):
+  epoch_loss = 0
+  for iteration, batch in enumerate(training_data_loader, 1):
+    inputs, target = batch[0].to(device), batch[1].to(device)
+    
+    optimizer.zero_grad()
+    loss = criterion(model(inputs), target)
+    epoch_loss += loss.item()
+    loss.backward()
+    optimizer.step()
+    
+    print("===> Epoch[{}]({}/{}): Loss: {:.4f}".format(epochs, iteration, len(training_data_loader), loss.item()))
+  
+  print("===> Epoch {} Complete: Avg. Loss: {:.4f}".format(epochs, epoch_loss / len(training_data_loader)))
 
 
 def test():
-    avg_psnr = 0
-    with torch.no_grad():
-        for batch in testing_data_loader:
-            input, target = batch[0].to(device), batch[1].to(device)
+  avg_psnr = 0
+  with torch.no_grad():
+    for batch in testing_data_loader:
+      inputs, target = batch[0].to(device), batch[1].to(device)
+      
+      prediction = model(inputs)
+      mse = criterion(prediction, target)
+      psnr = 10 * log10(1 / mse.item())
+      avg_psnr += psnr
+  print("===> Avg. PSNR: {:.4f} dB".format(avg_psnr / len(testing_data_loader)))
 
-            prediction = model(input)
-            mse = criterion(prediction, target)
-            psnr = 10 * log10(1 / mse.item())
-            avg_psnr += psnr
-    print("===> Avg. PSNR: {:.4f} dB".format(avg_psnr / len(testing_data_loader)))
 
+def checkpoint():
+  model_out_path = "model_epoch_{}.pth".format(epoch)
+  torch.save(model, model_out_path)
+  print("Checkpoint saved to {}".format(model_out_path))
 
-def checkpoint(epoch):
-    model_out_path = "model_epoch_{}.pth".format(epoch)
-    torch.save(model, model_out_path)
-    print("Checkpoint saved to {}".format(model_out_path))
 
 for epoch in range(1, opt.nEpochs + 1):
-    train(epoch)
-    test()
-    checkpoint(epoch)
+  train(epoch)
+  test()
+  checkpoint()

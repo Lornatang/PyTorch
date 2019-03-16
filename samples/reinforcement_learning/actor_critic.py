@@ -32,20 +32,20 @@ SavedAction = namedtuple('SavedAction', ['log_prob', 'value'])
 
 
 class Policy(nn.Module):
-    def __init__(self):
-        super(Policy, self).__init__()
-        self.affine1 = nn.Linear(4, 128)
-        self.action_head = nn.Linear(128, 2)
-        self.value_head = nn.Linear(128, 1)
-
-        self.saved_actions = []
-        self.rewards = []
-
-    def forward(self, x):
-        x = F.relu(self.affine1(x))
-        action_scores = self.action_head(x)
-        state_values = self.value_head(x)
-        return F.softmax(action_scores, dim=-1), state_values
+  def __init__(self):
+    super(Policy, self).__init__()
+    self.affine1 = nn.Linear(4, 128)
+    self.action_head = nn.Linear(128, 2)
+    self.value_head = nn.Linear(128, 1)
+    
+    self.saved_actions = []
+    self.rewards = []
+  
+  def forward(self, x):
+    x = F.relu(self.affine1(x))
+    action_scores = self.action_head(x)
+    state_values = self.value_head(x)
+    return F.softmax(action_scores, dim=-1), state_values
 
 
 model = Policy()
@@ -54,61 +54,62 @@ eps = np.finfo(np.float32).eps.item()
 
 
 def select_action(state):
-    state = torch.from_numpy(state).float()
-    probs, state_value = model(state)
-    m = Categorical(probs)
-    action = m.sample()
-    model.saved_actions.append(SavedAction(m.log_prob(action), state_value))
-    return action.item()
+  state = torch.from_numpy(state).float()
+  probs, state_value = model(state)
+  m = Categorical(probs)
+  action = m.sample()
+  model.saved_actions.append(SavedAction(m.log_prob(action), state_value))
+  return action.item()
 
 
 def finish_episode():
-    R = 0
-    saved_actions = model.saved_actions
-    policy_losses = []
-    value_losses = []
-    returns = []
-    for r in model.rewards[::-1]:
-        R = r + args.gamma * R
-        returns.insert(0, R)
-    returns = torch.tensor(returns)
-    returns = (returns - returns.mean()) / (returns.std() + eps)
-    for (log_prob, value), R in zip(saved_actions, returns):
-        advantage = R - value.item()
-        policy_losses.append(-log_prob * advantage)
-        value_losses.append(F.smooth_l1_loss(value, torch.tensor([R])))
-    optimizer.zero_grad()
-    loss = torch.stack(policy_losses).sum() + torch.stack(value_losses).sum()
-    loss.backward()
-    optimizer.step()
-    del model.rewards[:]
-    del model.saved_actions[:]
+  R = 0
+  saved_actions = model.saved_actions
+  policy_losses = []
+  value_losses = []
+  returns = []
+  for r in model.rewards[::-1]:
+    R = r + args.gamma * R
+    returns.insert(0, R)
+  returns = torch.tensor(returns)
+  returns = (returns - returns.mean()) / (returns.std() + eps)
+  for (log_prob, value), R in zip(saved_actions, returns):
+    advantage = R - value.item()
+    policy_losses.append(-log_prob * advantage)
+    value_losses.append(F.smooth_l1_loss(value, torch.tensor([R])))
+  optimizer.zero_grad()
+  loss = torch.stack(policy_losses).sum() + torch.stack(value_losses).sum()
+  loss.backward()
+  optimizer.step()
+  del model.rewards[:]
+  del model.saved_actions[:]
 
 
 def main():
-    running_reward = 10
-    for i_episode in count(1):
-        state, ep_reward = env.reset(), 0
-        for t in range(1, 10000):  # Don't infinite loop while learning
-            action = select_action(state)
-            state, reward, done, _ = env.step(action)
-            if args.render:
-                env.render()
-            model.rewards.append(reward)
-            ep_reward += reward
-            if done:
-                break
-
-        running_reward = 0.05 * ep_reward + (1 - 0.05) * running_reward
-        finish_episode()
-        if i_episode % args.log_interval == 0:
-            print('Episode {}\tLast reward: {:.2f}\tAverage reward: {:.2f}'.format(
-                  i_episode, ep_reward, running_reward))
-        if running_reward > env.spec.reward_threshold:
-            print("Solved! Running reward is now {} and "
-                  "the last episode runs to {} time steps!".format(running_reward, t))
-            break
+  global t
+  running_reward = 10
+  for i_episode in count(1):
+    state, ep_reward = env.reset(), 0
+    for t in range(1, 10000):  # Don't infinite loop while learning
+      action = select_action(state)
+      state, reward, done, _ = env.step(action)
+      if args.render:
+        env.render()
+      model.rewards.append(reward)
+      ep_reward += reward
+      if done:
+        break
+    
+    running_reward = 0.05 * ep_reward + (1 - 0.05) * running_reward
+    finish_episode()
+    if i_episode % args.log_interval == 0:
+      print('Episode {}\tLast reward: {:.2f}\tAverage reward: {:.2f}'.format(
+        i_episode, ep_reward, running_reward))
+    if running_reward > env.spec.reward_threshold:
+      print("Solved! Running reward is now {} and "
+            "the last episode runs to {} time steps!".format(running_reward, t))
+      break
 
 
 if __name__ == '__main__':
-    main()
+  main()
