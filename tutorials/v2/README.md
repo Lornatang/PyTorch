@@ -3,7 +3,7 @@
 
 All the tutorials are now presented as sphinx style documentation at:
 
-## [https://pytorch.org/tutorials](https://pytorch.org/tutorials)
+## [https://github.com/lornatang/pytorch/tutorials/](https://github.com/Lornatang/pytorch/tree/master/tutorials/v2)
 
 
 
