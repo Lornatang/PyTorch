@@ -3,11 +3,11 @@ import urllib.parse
 import requests
 
 
-def getPage(keyword, page, n):
+def get_page(key, page, n):
     page = page * n
-    keyword = urllib.parse.quote(keyword, safe='/')
+    word = urllib.parse.quote(key, safe='/')
     url_begin = "http://image.baidu.com/search/flip?tn=baiduimage&ie=utf-8&word="
-    url = url_begin + keyword + "&pn=" + str(page) + "&gsm=" + str(hex(page)) + "&ct=&ic=0&lm=-1&width=0&height=0"
+    url = url_begin + word + "&pn=" + str(page) + "&gsm=" + str(hex(page)) + "&ct=&ic=0&lm=-1&width=0&height=0"
     return url
 
 
@@ -46,7 +46,7 @@ if __name__ == '__main__':
         if page_begin > image_number:
             break
         print(f"第{page_begin+1}次请求数据.")
-        url = getPage(keyword, page_begin, page_number)
+        url = get_page(keyword, page_begin, page_number)
         onepage_urls = get_onepage_urls(url)
         page_begin += 1
 
