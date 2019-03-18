@@ -101,8 +101,10 @@ single valued torch tensor.
 
 import torch
 
+
 def fn(x):
-    return torch.abs(2*x)
+  return torch.abs(2 * x)
+
 
 # This is how you define a traced function
 # Pass in both the function to be traced and an example input to ``torch.jit.trace``
@@ -121,12 +123,14 @@ traced_fn = torch.jit.trace(fn, torch.rand(()))
 
 # This is how you define a script function
 # Apply this decorator directly to the function
+
+
 @torch.jit.script
 def script_fn(x):
-    z = torch.ones([1], dtype=torch.int64)
-    for i in range(int(x)):
-        z = z * (i + 1)
-    return z
+  z = torch.ones([1], dtype=torch.int64)
+  for i in range(int(x)):
+    z = z * (i + 1)
+  return z
 
 
 ######################################################################
@@ -141,9 +145,9 @@ def script_fn(x):
 
 # This is a normal module that can be traced.
 class TracedModule(torch.nn.Module):
-    def forward(self, x):
-        x = x.type(torch.float32)
-        return torch.floor(torch.sqrt(x) / 5.)
+  def forward(self, x):
+    x = x.type(torch.float32)
+    return torch.floor(torch.sqrt(x) / 5.)
 
 
 ######################################################################
@@ -160,12 +164,12 @@ class TracedModule(torch.nn.Module):
 # The module should inherit from ScriptModule and the forward should have the
 #   script_method decorator applied to it.
 class ScriptModule(torch.jit.ScriptModule):
-    @torch.jit.script_method
-    def forward(self, x):
-        r = -x
-        if int(torch.fmod(x, 2.0)) == 0.0:
-            r = x / 2.0
-        return r
+  @torch.jit.script_method
+  def forward(self, x):
+    r = -x
+    if int(torch.fmod(x, 2.0)) == 0.0:
+      r = x / 2.0
+    return r
 
 
 ######################################################################
@@ -196,33 +200,33 @@ class ScriptModule(torch.jit.ScriptModule):
 # This is a demonstration net that calls all of the different types of
 # methods and functions
 class Net(torch.nn.Module):
-    def __init__(self):
-        super(Net, self).__init__()
-        # Modules must be attributes on the Module because if you want to trace
-        # or script this Module, we must be able to inherit the submodules'
-        # params.
-        self.traced_module = torch.jit.trace(TracedModule(), torch.rand(()))
-        self.script_module = ScriptModule()
-
-        print('traced_fn graph', traced_fn.graph)
-        print('script_fn graph', script_fn.graph)
-        print('TracedModule graph', self.traced_module.__getattr__('forward').graph)
-        print('ScriptModule graph', self.script_module.__getattr__('forward').graph)
-
-    def forward(self, x):
-        # Call a traced function
-        x = traced_fn(x)
-
-        # Call a script function
-        x = script_fn(x)
-
-        # Call a traced submodule
-        x = self.traced_module(x)
-
-        # Call a scripted submodule
-        x = self.script_module(x)
-
-        return x
+  def __init__(self):
+    super(Net, self).__init__()
+    # Modules must be attributes on the Module because if you want to trace
+    # or script this Module, we must be able to inherit the submodules'
+    # params.
+    self.traced_module = torch.jit.trace(TracedModule(), torch.rand(()))
+    self.script_module = ScriptModule()
+    
+    print('traced_fn graph', traced_fn.graph)
+    print('script_fn graph', script_fn.graph)
+    print('TracedModule graph', self.traced_module.__getattr__('forward').graph)
+    print('ScriptModule graph', self.script_module.__getattr__('forward').graph)
+  
+  def forward(self, x):
+    # Call a traced function
+    x = traced_fn(x)
+    
+    # Call a script function
+    x = script_fn(x)
+    
+    # Call a traced submodule
+    x = self.traced_module(x)
+    
+    # Call a scripted submodule
+    x = self.script_module(x)
+    
+    return x
 
 
 ######################################################################
@@ -237,7 +241,7 @@ class Net(torch.nn.Module):
 
 # Instantiate this net and run it
 n = Net()
-print(n(torch.tensor([5]))) # 190.
+print(n(torch.tensor([5])))  # 190.
 
 
 ######################################################################

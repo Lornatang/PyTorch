@@ -1,3 +1,13 @@
+from skimage import io, transform
+from matplotlib import pyplot
+from PIL import Image
+import subprocess
+import os
+from caffe2.python import core, net_drawer, net_printer, visualize, workspace, utils
+from caffe2.proto import caffe2_pb2
+from caffe2.python.predictor import mobile_exporter
+import caffe2.python.onnx.backend as onnx_caffe2_backend
+import onnx
 """
 Transfering a Model from PyTorch to Caffe2 and Mobile using ONNX
 ================================================================
@@ -44,30 +54,31 @@ import torch.nn.init as init
 
 
 class SuperResolutionNet(nn.Module):
-    def __init__(self, upscale_factor, inplace=False):
-        super(SuperResolutionNet, self).__init__()
+  def __init__(self, upscale_factor, inplace=False):
+    super(SuperResolutionNet, self).__init__()
+    
+    self.relu = nn.ReLU(inplace=inplace)
+    self.conv1 = nn.Conv2d(1, 64, (5, 5), (1, 1), (2, 2))
+    self.conv2 = nn.Conv2d(64, 64, (3, 3), (1, 1), (1, 1))
+    self.conv3 = nn.Conv2d(64, 32, (3, 3), (1, 1), (1, 1))
+    self.conv4 = nn.Conv2d(32, upscale_factor ** 2, (3, 3), (1, 1), (1, 1))
+    self.pixel_shuffle = nn.PixelShuffle(upscale_factor)
+    
+    self._initialize_weights()
+  
+  def forward(self, x):
+    x = self.relu(self.conv1(x))
+    x = self.relu(self.conv2(x))
+    x = self.relu(self.conv3(x))
+    x = self.pixel_shuffle(self.conv4(x))
+    return x
+  
+  def _initialize_weights(self):
+    init.orthogonal_(self.conv1.weight, init.calculate_gain('relu'))
+    init.orthogonal_(self.conv2.weight, init.calculate_gain('relu'))
+    init.orthogonal_(self.conv3.weight, init.calculate_gain('relu'))
+    init.orthogonal_(self.conv4.weight)
 
-        self.relu = nn.ReLU(inplace=inplace)
-        self.conv1 = nn.Conv2d(1, 64, (5, 5), (1, 1), (2, 2))
-        self.conv2 = nn.Conv2d(64, 64, (3, 3), (1, 1), (1, 1))
-        self.conv3 = nn.Conv2d(64, 32, (3, 3), (1, 1), (1, 1))
-        self.conv4 = nn.Conv2d(32, upscale_factor ** 2, (3, 3), (1, 1), (1, 1))
-        self.pixel_shuffle = nn.PixelShuffle(upscale_factor)
-
-        self._initialize_weights()
-
-    def forward(self, x):
-        x = self.relu(self.conv1(x))
-        x = self.relu(self.conv2(x))
-        x = self.relu(self.conv3(x))
-        x = self.pixel_shuffle(self.conv4(x))
-        return x
-
-    def _initialize_weights(self):
-        init.orthogonal_(self.conv1.weight, init.calculate_gain('relu'))
-        init.orthogonal_(self.conv2.weight, init.calculate_gain('relu'))
-        init.orthogonal_(self.conv3.weight, init.calculate_gain('relu'))
-        init.orthogonal_(self.conv4.weight)
 
 # Create the super-resolution model by using the above model definition.
 torch_model = SuperResolutionNet(upscale_factor=3)
@@ -85,9 +96,13 @@ model_url = 'https://s3.amazonaws.com/pytorch/test_data/export/superres_epoch100
 batch_size = 1    # just a random number
 
 # Initialize model with the pretrained weights
-map_location = lambda storage, loc: storage
+
+
+def map_location(storage, loc): return storage
+
+
 if torch.cuda.is_available():
-    map_location = None
+  map_location = None
 torch_model.load_state_dict(model_zoo.load_url(model_url, map_location=map_location))
 
 # set the train mode to false since we will only run the forward pass.
@@ -112,7 +127,7 @@ x = torch.randn(batch_size, 1, 224, 224, requires_grad=True)
 # Export the model
 torch_out = torch.onnx._export(torch_model,             # model being run
                                x,                       # model input (or a tuple for multiple inputs)
-                               "super_resolution.onnx", # where to save the model (can be a file or file-like object)
+                               "super_resolution.onnx",  # where to save the model (can be a file or file-like object)
                                export_params=True)      # store the trained parameter weights inside the model file
 
 
@@ -127,8 +142,6 @@ torch_out = torch.onnx._export(torch_model,             # model being run
 # PyTorch are computing the same value for the network:
 #
 
-import onnx
-import caffe2.python.onnx.backend as onnx_caffe2_backend
 
 # Load the ONNX ModelProto object. model is a standard Python protobuf object
 model = onnx.load("super_resolution.onnx")
@@ -207,16 +220,15 @@ c2_workspace = prepared_backend.workspace
 c2_model = prepared_backend.predict_net
 
 # Now import the caffe2 mobile exporter
-from caffe2.python.predictor import mobile_exporter
 
 # call the Export to get the predict_net, init_net. These net are needed for running things on mobile
 init_net, predict_net = mobile_exporter.Export(c2_workspace, c2_model, c2_model.external_input)
 
 # Let's also save the init_net and predict_net to a file that we will later use for running them on mobile
 with open('init_net.pb', "wb") as fopen:
-    fopen.write(init_net.SerializeToString())
+  fopen.write(init_net.SerializeToString())
 with open('predict_net.pb', "wb") as fopen:
-    fopen.write(predict_net.SerializeToString())
+  fopen.write(predict_net.SerializeToString())
 
 
 ######################################################################
@@ -235,15 +247,6 @@ with open('predict_net.pb', "wb") as fopen:
 #
 
 # Some standard imports
-from caffe2.proto import caffe2_pb2
-from caffe2.python import core, net_drawer, net_printer, visualize, workspace, utils
-
-import numpy as np
-import os
-import subprocess
-from PIL import Image
-from matplotlib import pyplot
-from skimage import io, transform
 
 
 ######################################################################
@@ -312,11 +315,11 @@ img_out_y = Image.fromarray(np.uint8((img_out[0, 0]).clip(0, 255)), mode='L')
 
 # get the output image follow post-processing step from PyTorch implementation
 final_img = Image.merge(
-    "YCbCr", [
-        img_out_y,
-        img_cb.resize(img_out_y.size, Image.BICUBIC),
-        img_cr.resize(img_out_y.size, Image.BICUBIC),
-    ]).convert("RGB")
+  "YCbCr", [
+    img_out_y,
+    img_cb.resize(img_out_y.size, Image.BICUBIC),
+    img_cr.resize(img_out_y.size, Image.BICUBIC),
+  ]).convert("RGB")
 
 # Save the image, we will compare this with the output image from mobile device
 final_img.save("./_static/img/cat_superres.jpg")
@@ -353,22 +356,22 @@ os.system('adb push predict_net.pb /data/local/tmp')
 
 # Let's serialize the input image blob to a blob proto and then send it to mobile for execution.
 with open("input.blobproto", "wb") as fid:
-    fid.write(workspace.SerializeBlob("9"))
+  fid.write(workspace.SerializeBlob("9"))
 
 # push the input image blob to adb
 os.system('adb push input.blobproto /data/local/tmp/')
 
 # Now we run the net on mobile, look at the speed_benchmark --help for what various options mean
 os.system(
-    'adb shell /data/local/tmp/speed_benchmark '                     # binary to execute
-    '--init_net=/data/local/tmp/super_resolution_mobile_init.pb '    # mobile init_net
-    '--net=/data/local/tmp/super_resolution_mobile_predict.pb '      # mobile predict_net
-    '--input=9 '                                                     # name of our input image blob
-    '--input_file=/data/local/tmp/input.blobproto '                  # serialized input image
-    '--output_folder=/data/local/tmp '                               # destination folder for saving mobile output
-    '--output=27,9 '                                                 # output blobs we are interested in
-    '--iter=1 '                                                      # number of net iterations to execute
-    '--caffe2_log_level=0 '
+  'adb shell /data/local/tmp/speed_benchmark '                     # binary to execute
+  '--init_net=/data/local/tmp/super_resolution_mobile_init.pb '    # mobile init_net
+  '--net=/data/local/tmp/super_resolution_mobile_predict.pb '      # mobile predict_net
+  '--input=9 '                                                     # name of our input image blob
+  '--input_file=/data/local/tmp/input.blobproto '                  # serialized input image
+  '--output_folder=/data/local/tmp '                               # destination folder for saving mobile output
+  '--output=27,9 '                                                 # output blobs we are interested in
+  '--iter=1 '                                                      # number of net iterations to execute
+  '--caffe2_log_level=0 '
 )
 
 # get the model output from adb and save to a file
@@ -379,13 +382,13 @@ os.system('adb pull /data/local/tmp/27 ./output.blobproto')
 blob_proto = caffe2_pb2.BlobProto()
 blob_proto.ParseFromString(open('./output.blobproto').read())
 img_out = utils.Caffe2TensorToNumpyArray(blob_proto.tensor)
-img_out_y = Image.fromarray(np.uint8((img_out[0,0]).clip(0, 255)), mode='L')
+img_out_y = Image.fromarray(np.uint8((img_out[0, 0]).clip(0, 255)), mode='L')
 final_img = Image.merge(
-    "YCbCr", [
-        img_out_y,
-        img_cb.resize(img_out_y.size, Image.BICUBIC),
-        img_cr.resize(img_out_y.size, Image.BICUBIC),
-    ]).convert("RGB")
+  "YCbCr", [
+    img_out_y,
+    img_cb.resize(img_out_y.size, Image.BICUBIC),
+    img_cr.resize(img_out_y.size, Image.BICUBIC),
+  ]).convert("RGB")
 final_img.save("./_static/img/cat_superres_mobile.jpg")
 
 
