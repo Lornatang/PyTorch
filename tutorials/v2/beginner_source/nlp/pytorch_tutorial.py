@@ -279,6 +279,4 @@ print(x.requires_grad)
 print((x ** 2).requires_grad)
 
 with torch.no_grad():
-	print((x ** 2).requires_grad)
-
-
+    print((x ** 2).requires_grad)
