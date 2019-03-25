@@ -138,12 +138,12 @@ class Generator(nn.Module):
       # state size. (nc) x 64 x 64
     )
   
-  def forward(self, input):
-    if input.is_cuda and self.ngpu > 1:
-      output = nn.parallel.data_parallel(self.main, input, range(self.ngpu))
+  def forward(self, inputs):
+    if inputs.is_cuda and self.ngpu > 1:
+      outputs = nn.parallel.data_parallel(self.main, inputs, range(self.ngpu))
     else:
-      output = self.main(input)
-    return output
+      outputs = self.main(inputs)
+    return outputs
 
 
 netG = Generator(ngpu).to(device)
@@ -178,13 +178,13 @@ class Discriminator(nn.Module):
       nn.Sigmoid()
     )
   
-  def forward(self, input):
-    if input.is_cuda and self.ngpu > 1:
-      output = nn.parallel.data_parallel(self.main, input, range(self.ngpu))
+  def forward(self, inputs):
+    if inputs.is_cuda and self.ngpu > 1:
+      outputs = nn.parallel.data_parallel(self.main, inputs, range(self.ngpu))
     else:
-      output = self.main(input)
+      outputs = self.main(inputs)
     
-    return output.view(-1, 1).squeeze(1)
+    return outputs.view(-1, 1).squeeze(1)
 
 
 netD = Discriminator(ngpu).to(device)
