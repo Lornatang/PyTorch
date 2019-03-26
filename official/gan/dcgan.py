@@ -112,9 +112,9 @@ def weights_init(m):
 
 
 class Generator(nn.Module):
-  def __init__(self, ngpu):
+  def __init__(self, gpus):
     super(Generator, self).__init__()
-    self.ngpu = ngpu
+    self.ngpu = gpus
     self.main = nn.Sequential(
       # inputs is Z, going into a convolution
       nn.ConvTranspose2d(nz, ngf * 8, 4, 1, 0, bias=False),
@@ -154,9 +154,9 @@ print(netG)
 
 
 class Discriminator(nn.Module):
-  def __init__(self, ngpu):
+  def __init__(self, gpus):
     super(Discriminator, self).__init__()
-    self.ngpu = ngpu
+    self.ngpu = gpus
     self.main = nn.Sequential(
       # inputs is (nc) x 64 x 64
       nn.Conv2d(nc, ndf, 4, 2, 1, bias=False),
