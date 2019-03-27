@@ -113,7 +113,7 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# Tool generated files
+# my files
 .idea/
 .vscode/
 *.DS_Store
