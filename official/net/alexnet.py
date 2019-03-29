@@ -130,11 +130,11 @@ def train():
   
   for epoch in range(opt.niter):
     model.train()
-    for batch_idx, (data, labels) in enumerate(dataloader, 0):
+    for batch_idx, (data, target) in enumerate(dataloader, 0):
       # Forward pass
       optimizer.zero_grad()
       outputs = model(data)
-      loss = F.nll_loss(outputs, labels)
+      loss = F.nll_loss(outputs, target)
 
       # Backward and update paras
       loss.backward()
