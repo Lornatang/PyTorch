@@ -14,7 +14,7 @@ parser.add_argument('--dataset', required=True, help='cifar10 | mnist | folder')
 parser.add_argument('--dataroot', required=True, help='path to dataset')
 parser.add_argument('--workers', type=int, help='number of data loading workers', default=2)
 parser.add_argument('--batchSize', type=int, default=32, help='inputs batch size')
-parser.add_argument('--imageSize', type=int, default=224, help='the height / width of the inputs image to network')
+parser.add_argument('--imageSize', type=int, default=32, help='the height / width of the inputs image to network')
 parser.add_argument('--niter', type=int, default=25, help='number of epochs to train for')
 parser.add_argument('--lr', type=float, default=0.0001, help='learning rate, default=0.0001')
 parser.add_argument('--beta1', type=float, default=0.5, help='beta1 for adam. default=0.5')
@@ -85,7 +85,7 @@ class AlexNet(nn.Module):
     super(AlexNet, self).__init__()
     self.ngpu = ngpus
     self.features = nn.Sequential(
-      nn.Conv2d(3, 64, kernel_size=11, stride=4, padding=2),
+      nn.Conv2d(3, 64, kernel_size=3, stride=2, padding=1),
       nn.ReLU(inplace=True),
       nn.MaxPool2d(kernel_size=3, stride=2),
       nn.Conv2d(64, 192, kernel_size=5, padding=2),
@@ -101,7 +101,7 @@ class AlexNet(nn.Module):
     )
     self.classifier = nn.Sequential(
       nn.Dropout(),
-      nn.Linear(256 * 6 * 6, 4096),
+      nn.Linear(256 * 1 * 1, 4096),
       nn.ReLU(inplace=True),
       nn.Dropout(),
       nn.Linear(4096, 4096),
@@ -147,7 +147,7 @@ def main():
             f"Loss: {loss.item()}")
     
     # Save the model checkpoint
-    torch.save(model, '%s/netG_epoch_%d.pth' % (opt.outf, epoch))
+    torch.save(model, '%s/AlexNet_epoch_%d.pth' % (opt.outf, epoch))
   print(f"Model save to {opt.outf}.")
 
 
