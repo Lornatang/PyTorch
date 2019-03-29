@@ -117,3 +117,4 @@ dmypy.json
 .idea/
 .vscode/
 *.DS_Store
+*.pth
