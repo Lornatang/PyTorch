@@ -12,9 +12,9 @@ from torchvision import datasets
 from torchvision import transforms
 import torch.onnx
 
-import utils
-from transformer_net import TransformerNet
-from vgg import Vgg16
+from samples.fast_neural_style.neural_style import utils
+from samples.fast_neural_style.neural_style.transformer_net import TransformerNet
+from samples.fast_neural_style.neural_style.vgg import Vgg16
 
 
 def check_paths(args):
@@ -214,7 +214,8 @@ def main():
   eval_arg_parser.add_argument("--output-image", type=str, required=True,
                                help="path for saving the output image")
   eval_arg_parser.add_argument("--model", type=str, required=True,
-                               help="saved model to be used for stylizing the image. If file ends in .pth - PyTorch path is used, if in .onnx - Caffe2 path")
+                               help="saved model to be used for stylizing the image. If file ends in .pth - PyTorch "
+                                    "path is used, if in .onnx - Caffe2 path")
   eval_arg_parser.add_argument("--cuda", type=int, required=True,
                                help="set it to 1 for running on GPU, 0 for CPU")
   eval_arg_parser.add_argument("--export_onnx", type=str,
