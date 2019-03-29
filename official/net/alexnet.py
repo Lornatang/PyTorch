@@ -2,7 +2,6 @@ import os
 import argparse
 import random
 
-import torch
 import torch.nn as nn
 import torch.optim as optim
 import torch.utils.data
@@ -116,40 +115,35 @@ class AlexNet(nn.Module):
     return inputs
 
 
-def main():
-  print(f"Train numbers:{len(dataset)}")
+print(f"Train numbers:{len(dataset)}")
   
-  # load model
-  model = AlexNet(ngpu).to(device)
-  # cast
-  cast = nn.CrossEntropyLoss().to(device)
-  # Optimization
-  optimizer = optim.Adam(
-    model.parameters(),
-    lr=opt.lr,
-    betas=(opt.beta1, 0.999),
-    weight_decay=1e-8)
+# load model
+model = AlexNet(ngpu).to(device)
+# cast
+cast = nn.CrossEntropyLoss().to(device)
+# Optimization
+optimizer = optim.Adam(
+  model.parameters(),
+  lr=opt.lr,
+  betas=(opt.beta1, 0.999),
+  weight_decay=1e-8)
 
-  for epoch in range(opt.niter):
-    for i, (data, labels) in enumerate(dataloader, 0):
-      model.train()
-      # Forward pass
-      outputs = model(data)
-      loss = cast(outputs, labels)
+for epoch in range(opt.niter):
+  for i, (data, labels) in enumerate(dataloader, 0):
+    model.train()
+    # Forward pass
+    outputs = model(data)
+    loss = cast(outputs, labels)
       
-      # Backward and optimize
-      optimizer.zero_grad()
-      loss.backward()
-      optimizer.step()
+    # Backward and optimize
+    optimizer.zero_grad()
+    loss.backward()
+    optimizer.step()
 
-      print(f"Epoch [{epoch}/{opt.niter}] "
-            f"Step [{i}/{len(dataloader)}] "
-            f"Loss: {loss.item()}")
+    print(f"Epoch [{epoch}/{opt.niter}] "
+          f"Step [{i}/{len(dataloader)}] "
+          f"Loss: {loss.item()}")
     
-    # Save the model checkpoint
-    torch.save(model, '%s/AlexNet_epoch_%d.pth' % (opt.outf, epoch))
-  print(f"Model save to {opt.outf}.")
-
-
-if __name__ == '__main__':
-  main()
+  # Save the model checkpoint
+  torch.save(model, '%s/AlexNet_epoch_%d.pth' % (opt.outf, epoch))
+print(f"Model save to {opt.outf}.")
