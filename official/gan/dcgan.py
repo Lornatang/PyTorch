@@ -149,7 +149,7 @@ class Generator(nn.Module):
 netG = Generator(ngpu).to(device)
 netG.apply(weights_init)
 if opt.netG != '':
-  netG.load_state_dict(torch.load(opt.netG))
+  torch.load(opt.netG)
 print(netG)
 
 
@@ -190,7 +190,7 @@ class Discriminator(nn.Module):
 netD = Discriminator(ngpu).to(device)
 netD.apply(weights_init)
 if opt.netD != '':
-  netD.load_state_dict(torch.load(opt.netD))
+  torch.load(opt.netD)
 print(netD)
 
 criterion = nn.BCELoss()
@@ -254,5 +254,5 @@ for epoch in range(opt.niter):
                         normalize=True)
   
   # do checkpointing
-  torch.save(netG.state_dict(), '%s/netG_epoch_%d.pth' % (opt.outf, epoch))
-  torch.save(netD.state_dict(), '%s/netD_epoch_%d.pth' % (opt.outf, epoch))
+  torch.save(netG, '%s/netG_epoch_%d.pth' % (opt.outf, epoch))
+  torch.save(netD, '%s/netD_epoch_%d.pth' % (opt.outf, epoch))
