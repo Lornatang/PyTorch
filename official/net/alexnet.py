@@ -7,6 +7,7 @@ import torch.optim as optim
 import torch.utils.data
 import torchvision.transforms as transforms
 import torchvision.datasets as dset
+import torch.nn.functional as F
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--dataset', required=True, help='cifar10 | mnist | folder')
@@ -110,40 +111,64 @@ class AlexNet(nn.Module):
   
   def forward(self, inputs):
     inputs = self.features(inputs)
-    inputs = inputs.view(inputs.size(0), -1)
+    inputs = inputs.view(-1, 256 * 1 * 1)
     inputs = self.classifier(inputs)
-    return inputs
+    return F.log_softmax(inputs, dim=1)
 
 
-print(f"Train numbers:{len(dataset)}")
+def train():
+  print(f"Train numbers:{len(dataset)}")
   
-# load model
-model = AlexNet(ngpu).to(device)
-# cast
-cast = nn.CrossEntropyLoss().to(device)
-# Optimization
-optimizer = optim.Adam(
-  model.parameters(),
-  lr=opt.lr,
-  betas=(opt.beta1, 0.999),
-  weight_decay=1e-8)
-
-for epoch in range(opt.niter):
-  for i, (data, labels) in enumerate(dataloader, 0):
+  # load model
+  model = AlexNet(ngpu).to(device)
+  # Optimization
+  optimizer = optim.Adam(
+    model.parameters(),
+    lr=opt.lr,
+    betas=(opt.beta1, 0.999),
+    weight_decay=1e-8)
+  
+  for epoch in range(opt.niter):
     model.train()
-    # Forward pass
-    outputs = model(data)
-    loss = cast(outputs, labels)
-      
-    # Backward and optimize
-    optimizer.zero_grad()
-    loss.backward()
-    optimizer.step()
+    for batch_idx, (data, labels) in enumerate(dataloader, 0):
+      # Forward pass
+      optimizer.zero_grad()
+      outputs = model(data)
+      loss = F.nll_loss(outputs, labels)
 
-    print(f"Epoch [{epoch}/{opt.niter}] "
-          f"Step [{i}/{len(dataloader)}] "
-          f"Loss: {loss.item()}")
+      # Backward and update paras
+      loss.backward()
+      optimizer.step()
+      
+      if batch_idx % 10 == 0:
+        print(f"Train Epoch: {epoch} "
+              f"[{batch_idx * len(data)}/{len(dataloader.dataset)} "
+              f"({100. * batch_idx / len(dataloader):.0f}%)]\t"
+              f"Loss: {loss.item():.6f}")
     
-  # Save the model checkpoint
-  torch.save(model, '%s/AlexNet_epoch_%d.pth' % (opt.outf, epoch))
-print(f"Model save to {opt.outf}.")
+    # Save the model checkpoint
+    torch.save(model, f"{opt.outf}/AlexNet_epoch_{epoch + 1}.pth")
+  print(f"Model save to '{opt.outf}'.")
+  
+
+def test():
+  model = torch.load(f'{opt.outf}/AlexNet_epoch_{opt.niter}.pth')
+  model.eval()
+  test_loss = 0
+  correct = 0
+  with torch.no_grad():
+    for data, target in dataloader:
+      data, target = data.to(device), target.to(device)
+      output = model(data)
+      test_loss += F.nll_loss(output, target, reduction='sum').item()  # sum up batch loss
+      pred = output.argmax(dim=1, keepdim=True)  # get the index of the max log-probability
+      correct += pred.eq(target.view_as(pred)).sum().item()
+  
+  test_loss /= len(dataloader.dataset)
+  
+  print(f"\nTest set: Average loss: {test_loss:.4f}, "
+        f"Accuracy: {correct}/{len(dataloader)} ({100. * correct / len(dataloader):.0f}%)\n")
+
+
+train()
+test()
