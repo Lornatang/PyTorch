@@ -9,7 +9,6 @@ import torchvision.datasets as dset
 import torchvision.transforms as transforms
 import torchvision.utils as vutils
 
-
 parser = argparse.ArgumentParser()
 parser.add_argument('--dataset', required=True, help='cifar10 | lsun | mnist |imagenet | folder | lfw | fake')
 parser.add_argument('--dataroot', required=True, help='path to dataset')
@@ -112,9 +111,9 @@ def weights_init(m):
 
 
 class Generator(nn.Module):
-  def __init__(self, ngpu):
+  def __init__(self, gpus):
     super(Generator, self).__init__()
-    self.ngpu = ngpu
+    self.ngpu = gpus
     self.main = nn.Sequential(
       # inputs is Z, going into a convolution
       nn.ConvTranspose2d(nz, ngf * 8, 4, 1, 0, bias=False),
@@ -138,25 +137,25 @@ class Generator(nn.Module):
       # state size. (nc) x 64 x 64
     )
   
-  def forward(self, input):
-    if input.is_cuda and self.ngpu > 1:
-      output = nn.parallel.data_parallel(self.main, input, range(self.ngpu))
+  def forward(self, inputs):
+    if inputs.is_cuda and self.ngpu > 1:
+      outputs = nn.parallel.data_parallel(self.main, inputs, range(self.ngpu))
     else:
-      output = self.main(input)
-    return output
+      outputs = self.main(inputs)
+    return outputs
 
 
 netG = Generator(ngpu).to(device)
 netG.apply(weights_init)
 if opt.netG != '':
-  netG.load_state_dict(torch.load(opt.netG))
+  torch.load(opt.netG)
 print(netG)
 
 
 class Discriminator(nn.Module):
-  def __init__(self, ngpu):
+  def __init__(self, gpus):
     super(Discriminator, self).__init__()
-    self.ngpu = ngpu
+    self.ngpu = gpus
     self.main = nn.Sequential(
       # inputs is (nc) x 64 x 64
       nn.Conv2d(nc, ndf, 4, 2, 1, bias=False),
@@ -178,19 +177,19 @@ class Discriminator(nn.Module):
       nn.Sigmoid()
     )
   
-  def forward(self, input):
-    if input.is_cuda and self.ngpu > 1:
-      output = nn.parallel.data_parallel(self.main, input, range(self.ngpu))
+  def forward(self, inputs):
+    if inputs.is_cuda and self.ngpu > 1:
+      outputs = nn.parallel.data_parallel(self.main, inputs, range(self.ngpu))
     else:
-      output = self.main(input)
+      outputs = self.main(inputs)
     
-    return output.view(-1, 1).squeeze(1)
+    return outputs.view(-1, 1).squeeze(1)
 
 
 netD = Discriminator(ngpu).to(device)
 netD.apply(weights_init)
 if opt.netD != '':
-  netD.load_state_dict(torch.load(opt.netD))
+  torch.load(opt.netD)
 print(netD)
 
 criterion = nn.BCELoss()
@@ -254,5 +253,5 @@ for epoch in range(opt.niter):
                         normalize=True)
   
   # do checkpointing
-  torch.save(netG.state_dict(), '%s/netG_epoch_%d.pth' % (opt.outf, epoch))
-  torch.save(netD.state_dict(), '%s/netD_epoch_%d.pth' % (opt.outf, epoch))
+  torch.save(netG, '%s/netG_epoch_%d.pth' % (opt.outf, epoch))
+  torch.save(netD, '%s/netD_epoch_%d.pth' % (opt.outf, epoch))
