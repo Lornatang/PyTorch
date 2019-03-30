@@ -1,12 +1,11 @@
 import torch.nn as nn
+import torch.nn.functional as F
 import math
-
-NUM_CLASSES = 10
 
 
 class VGG(nn.Module):
   
-  def __init__(self, features, num_classes=NUM_CLASSES, init_weights=True):
+  def __init__(self, features, num_classes=101, init_weights=True):
     super(VGG, self).__init__()
     self.features = features
     self.classifier = nn.Sequential(
@@ -23,9 +22,9 @@ class VGG(nn.Module):
   
   def forward(self, x):
     x = self.features(x)
-    x = x.view(x.size(0), -1)
+    x = x.view(-1, 512 * 1 * 1)
     x = self.classifier(x)
-    return x
+    return F.log_softmax(x, dim=1)
   
   def _initialize_weights(self):
     for m in self.modules():
