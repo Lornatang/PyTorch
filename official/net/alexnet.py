@@ -170,5 +170,6 @@ def test():
         f"Accuracy: {correct}/{len(dataloader.dataset)} ({100. * correct / len(dataloader.dataset):.0f}%)\n")
 
 
-# train()
+train()
 test()
+# Test set: Average loss: 0.9984, Accuracy: 6185/8677 (71%)
