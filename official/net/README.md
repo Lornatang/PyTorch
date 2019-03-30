@@ -17,7 +17,7 @@
 
 # 2. Dataset
 
-## 2.1 Caltech_101
+## 2.1 Caltech_101/Caltech_256
 
 ### 2.1.1 Description
 Pictures of objects belonging to 101 categories. About 40 to 800 images per category. 
@@ -30,19 +30,20 @@ If you are using the Caltech 101 dataset for testing your recognition algorithm 
 When you report your results please keep track of which images you used and which were misclassified. We will soon publish a more detailed experimental protocol that allows you to report those details. See the Discussion section for more details.
 
 ### 2.1.3 Download
-Collection of pictures: [101_ObjectCategories.tar.gz (131Mbytes)](http://www.vision.caltech.edu/Image_Datasets/Caltech101/101_ObjectCategories.tar.gz)
+Collection of pictures: [101_ObjectCategories.tar.gz (131Mbytes)](http://www.vision.caltech.edu/Image_Datasets/Caltech101/101_ObjectCategories.tar.gz)[256_ObjectCategories.tar](http://www.vision.caltech.edu/Image_Datasets/Caltech256/256_ObjectCategories.tar) or 
 
 Outlines of the objects in the pictures: [1] [Annotations.tar](http://www.vision.caltech.edu/Image_Datasets/Caltech101/Annotations.tar) [2] [show_annotation.m](http://www.vision.caltech.edu/Image_Datasets/Caltech101/show_annotation.m)
 
+# Result
 
-|    Model    |Accuracy|Epoch|
-|:-----------:|:------:|:---:|
-|LeNet-5      |35%     |25
-|AlexNet      |71%     |25
-|VGG-11       |_       |25
-|VGG-11_bn    |96%     |25
-|SqueezeNet   |25%     |25
-|DenseNet-121 |97%     |25
-|ResNet-18    |99%     |25
+|    Model    |  DataSet  |Accuracy|Epoch|
+|:-----------:|:---------:|:------:|:---:|
+|LeNet-5      |Caltech-101|35%     |25
+|AlexNet      |Caltech-101|71%     |25
+|VGG-11       |Caltech-101|_       |25
+|VGG-11_bn    |Caltech-101|96%     |25
+|SqueezeNet   |Caltech-101|25%     |25
+|DenseNet-121 |Caltech-101|97%     |25
+|ResNet-18    |Caltech-101|99%     |25
 
 *Tips: **"_"** indicates that it has not been tested yet and will be tested later.*
