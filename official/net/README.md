@@ -30,7 +30,7 @@ If you are using the Caltech 101 dataset for testing your recognition algorithm 
 When you report your results please keep track of which images you used and which were misclassified. We will soon publish a more detailed experimental protocol that allows you to report those details. See the Discussion section for more details.
 
 ### 2.1.3 Download
-Collection of pictures: [101_ObjectCategories.tar.gz (131Mbytes)](http://www.vision.caltech.edu/Image_Datasets/Caltech101/101_ObjectCategories.tar.gz)[256_ObjectCategories.tar](http://www.vision.caltech.edu/Image_Datasets/Caltech256/256_ObjectCategories.tar) or 
+Collection of pictures: [101_ObjectCategories.tar.gz (131Mbytes)](http://www.vision.caltech.edu/Image_Datasets/Caltech101/101_ObjectCategories.tar.gz) or [256_ObjectCategories.tar](http://www.vision.caltech.edu/Image_Datasets/Caltech256/256_ObjectCategories.tar).
 
 Outlines of the objects in the pictures: [1] [Annotations.tar](http://www.vision.caltech.edu/Image_Datasets/Caltech101/Annotations.tar) [2] [show_annotation.m](http://www.vision.caltech.edu/Image_Datasets/Caltech101/show_annotation.m)
 
