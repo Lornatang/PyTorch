@@ -82,7 +82,7 @@ def train():
   print(f"Train numbers:{len(dataset)}")
   
   # load model
-  model = vgg_util.vgg11_bn().to(device)
+  model = vgg_util.vgg11().to(device)
   # Optimization
   optimizer = optim.Adam(
     model.parameters(),
@@ -109,12 +109,12 @@ def train():
               f"Loss: {loss.item():.6f}")
     
     # Save the model checkpoint
-    torch.save(model, f"{opt.outf}/VGG11_bn_epoch_{epoch + 1}.pth")
+    torch.save(model, f"{opt.outf}/VGG-11_epoch_{epoch + 1}.pth")
   print(f"Model save to '{opt.outf}'.")
 
 
 def test():
-  model = torch.load(f'{opt.outf}/VGG11_bn_epoch_{opt.niter}.pth')
+  model = torch.load(f'{opt.outf}/VGG-11_epoch_{opt.niter}.pth')
   model.eval()
   test_loss = 0
   correct = 0
@@ -134,4 +134,3 @@ def test():
 
 train()
 test()
-# Test set: Average loss: 0.1334, Accuracy: 8312/8677 (96%)
