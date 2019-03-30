@@ -167,7 +167,7 @@ def test():
   test_loss /= len(dataloader.dataset)
   
   print(f"\nTest set: Average loss: {test_loss:.4f}, "
-        f"Accuracy: {correct}/{len(dataloader)} ({100. * correct / len(dataloader):.0f}%)\n")
+        f"Accuracy: {correct}/{len(dataloader.dataset)} ({100. * correct / len(dataloader.dataset):.0f}%)\n")
 
 
 train()
