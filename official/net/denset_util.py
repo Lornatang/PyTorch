@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from collections import OrderedDict
 
 
@@ -88,10 +89,9 @@ class DenseNet(nn.Module):
       bn_size (int) - multiplicative factor for number of bottle neck layers
         (i.e. bn_size * k features in the bottleneck layer)
       drop_rate (float) - dropout rate after each dense layer
-      num_classes (int) - number of classification classes
   """
   def __init__(self, growth_rate=32, block_config=(6, 12, 24, 16),
-               num_init_features=64, bn_size=4, drop_rate=0, num_classes=1000):
+               num_init_features=64, bn_size=4, drop_rate=0):
     
     super(DenseNet, self).__init__()
     
@@ -119,12 +119,12 @@ class DenseNet(nn.Module):
     self.features.add_module('norm5', nn.BatchNorm2d(num_features))
     
     # Linear layer
-    self.classifier = nn.Linear(num_features, num_classes)
+    self.classifier = nn.Linear(num_features, 101)
     
     # Official init from torch repo.
     for m in self.modules():
       if isinstance(m, nn.Conv2d):
-        nn.init.kaiming_normal(m.weight.data)
+        nn.init.kaiming_normal_(m.weight.data)
       elif isinstance(m, nn.BatchNorm2d):
         m.weight.data.fill_(1)
         m.bias.data.zero_()
@@ -137,4 +137,4 @@ class DenseNet(nn.Module):
     nn.AvgPool2d(kernel_size=7, stride=1)
     x = x.view(x.size(0), -1)
     x = self.classifier(x)
-    return x
+    return F.log_softmax(x, dim=1)
