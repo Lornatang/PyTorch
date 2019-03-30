@@ -170,5 +170,5 @@ def test():
         f"Accuracy: {correct}/{len(dataloader.dataset)} ({100. * correct / len(dataloader.dataset):.0f}%)\n")
 
 
-train()
+# train()
 test()
