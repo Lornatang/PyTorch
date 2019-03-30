@@ -109,12 +109,12 @@ def train():
               f"Loss: {loss.item():.6f}")
     
     # Save the model checkpoint
-    torch.save(model, f"{opt.outf}/VGG11_bnNet_epoch_{epoch + 1}.pth")
+    torch.save(model, f"{opt.outf}/VGG11_bn_epoch_{epoch + 1}.pth")
   print(f"Model save to '{opt.outf}'.")
 
 
 def test():
-  model = torch.load(f'{opt.outf}/VGG11_bnNet_epoch_{opt.niter}.pth')
+  model = torch.load(f'{opt.outf}/VGG11_bn_epoch_{opt.niter}.pth')
   model.eval()
   test_loss = 0
   correct = 0
