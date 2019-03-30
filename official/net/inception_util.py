@@ -13,6 +13,7 @@ def inception_v3(**kwargs):
 class Inception3(nn.Module):
   
   def __init__(self,  aux_logits=True, transform_input=False):
+    # raw aux_logits=True, transform_input=False. For use img 299 * 299.
     super(Inception3, self).__init__()
     self.aux_logits = aux_logits
     self.transform_input = transform_input
@@ -95,7 +96,7 @@ class Inception3(nn.Module):
     # 8 x 8 x 2048
     x = self.Mixed_7c(x)
     # 8 x 8 x 2048
-    x = F.avg_pool2d(x, kernel_size=8)
+    x = F.avg_pool2d(x, kernel_size=8)  # raw kernel_size=8.For use img size 299 * 299.
     # 1 x 1 x 2048
     x = F.dropout(x, training=self.training)
     # 1 x 1 x 2048
@@ -276,6 +277,7 @@ class InceptionAux(nn.Module):
     super(InceptionAux, self).__init__()
     self.conv0 = BasicConv2d(in_channels, 128, kernel_size=1)
     self.conv1 = BasicConv2d(128, 768, kernel_size=5)
+    # raw kernel_size=5. For use img 299 * 299.
     self.conv1.stddev = 0.01
     self.fc = nn.Linear(768, num_classes)
     self.fc.stddev = 0.001
@@ -283,6 +285,7 @@ class InceptionAux(nn.Module):
   def forward(self, x):
     # 17 x 17 x 768
     x = F.avg_pool2d(x, kernel_size=5, stride=3)
+    # raw kernel_size=5, stride=3. For use img 299 * 299.
     # 5 x 5 x 768
     x = self.conv0(x)
     # 5 x 5 x 128
@@ -292,7 +295,7 @@ class InceptionAux(nn.Module):
     # 768
     x = self.fc(x)
     # 1000
-    return x
+    return F.log_softmax(x, dim=1)
 
 
 class BasicConv2d(nn.Module):
