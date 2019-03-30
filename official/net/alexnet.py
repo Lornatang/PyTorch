@@ -86,6 +86,7 @@ class AlexNet(nn.Module):
     self.ngpu = ngpus
     self.features = nn.Sequential(
       nn.Conv2d(3, 64, kernel_size=3, stride=2, padding=1),
+      # raw kernel_size=11, stride=4, padding=2. For use img size 224 * 224.
       nn.ReLU(inplace=True),
       nn.MaxPool2d(kernel_size=3, stride=2),
       nn.Conv2d(64, 192, kernel_size=5, padding=2),
