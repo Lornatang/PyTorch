@@ -141,12 +141,12 @@ def train():
               f"Loss: {loss.item():.6f}")
     
     # Save the model checkpoint
-    torch.save(model, f"{opt.outf}/AlexNet_epoch_{epoch + 1}.pth")
+    torch.save(model, f"{opt.outf}/LeNet_epoch_{epoch + 1}.pth")
   print(f"Model save to '{opt.outf}'.")
 
 
 def test():
-  model = torch.load(f'{opt.outf}/AlexNet_epoch_{opt.niter}.pth')
+  model = torch.load(f'{opt.outf}/LeNet_epoch_{opt.niter}.pth')
   model.eval()
   test_loss = 0
   correct = 0
@@ -161,8 +161,9 @@ def test():
   test_loss /= len(dataloader.dataset)
   
   print(f"\nTest set: Average loss: {test_loss:.4f}, "
-        f"Accuracy: {correct}/{len(dataloader)} ({100. * correct / len(dataloader):.0f}%)\n")
+        f"Accuracy: {correct}/{len(dataloader.dataset)} ({100. * correct / len(dataloader.dataset):.0f}%)\n")
 
 
 train()
 test()
+# Test set: Average loss: 2.8697, Accuracy: 3078/8677 (35%)
