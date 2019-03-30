@@ -134,4 +134,3 @@ def test():
 
 train()
 test()
-# Test set: Average loss: 0.1443, Accuracy: 8379/8677 (97%)
