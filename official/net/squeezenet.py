@@ -1,44 +1,81 @@
 import os
-import time
+import argparse
+import random
 
-import torch
-import torchvision
-from torch import nn, optim
-from torch.nn import init
-from torch.utils import data
-from torchvision import transforms
+import torch.nn as nn
+import torch.optim as optim
+import torch.utils.data
+import torchvision.transforms as transforms
+import torchvision.datasets as dset
+import torch.nn.functional as F
 
-# Device configuration
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+parser = argparse.ArgumentParser()
+parser.add_argument('--dataset', required=True, help='cifar10 | mnist | folder')
+parser.add_argument('--dataroot', required=True, help='path to dataset')
+parser.add_argument('--workers', type=int, help='number of data loading workers', default=2)
+parser.add_argument('--batchSize', type=int, default=32, help='inputs batch size')
+parser.add_argument('--imageSize', type=int, default=32, help='the height / width of the inputs image to network')
+parser.add_argument('--niter', type=int, default=25, help='number of epochs to train for')
+parser.add_argument('--lr', type=float, default=0.0001, help='learning rate, default=0.0001')
+parser.add_argument('--beta1', type=float, default=0.5, help='beta1 for adam. default=0.5')
+parser.add_argument('--cuda', action='store_true', help='enables cuda')
+parser.add_argument('--ngpu', type=int, default=1, help='number of GPUs to use')
+parser.add_argument('--net', default='', help="path to netD (to continue training)")
+parser.add_argument('--outf', default='.', help='folder to output images and model checkpoints')
+parser.add_argument('--manualSeed', type=int, help='manual seed')
 
-WORK_DIR = '/tmp/imagenet'
-NUM_EPOCHS = 10
-BATCH_SIZE = 128
-LEARNING_RATE = 1e-4
-NUM_CLASSES = 10
+opt = parser.parse_args()
+print(opt)
 
-MODEL_PATH = './models'
-MODEL_NAME = 'SqueezenNet.pth'
+try:
+  os.makedirs(opt.outf)
+except OSError:
+  pass
 
-# Create model
-if not os.path.exists(MODEL_PATH):
-  os.makedirs(MODEL_PATH)
+if opt.manualSeed is None:
+  opt.manualSeed = random.randint(1, 10000)
+print("Random Seed: ", opt.manualSeed)
+random.seed(opt.manualSeed)
+torch.manual_seed(opt.manualSeed)
 
-transform = transforms.Compose([
-  transforms.RandomCrop(256, padding=32),
-  transforms.RandomResizedCrop(224),
-  transforms.RandomHorizontalFlip(),
-  transforms.ToTensor(),
-  transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
-])
+if torch.cuda.is_available() and not opt.cuda:
+  print("WARNING: You have a CUDA device, so you should probably run with --cuda")
 
-# Load data
-train_dataset = torchvision.datasets.ImageFolder(root=WORK_DIR + '/' + 'train',
-                                                 transform=transform)
+if opt.dataset in 'folder':
+  # folder dataset
+  dataset = dset.ImageFolder(root=opt.dataroot,
+                             transform=transforms.Compose([
+                               transforms.Resize(opt.imageSize),
+                               transforms.CenterCrop(opt.imageSize),
+                               transforms.RandomHorizontalFlip(),
+                               transforms.ToTensor(),
+                               transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+                             ]))
+  nc = 3
+elif opt.dataset == 'cifar10':
+  dataset = dset.CIFAR10(root=opt.dataroot, download=True,
+                         transform=transforms.Compose([
+                           transforms.Resize(opt.imageSize),
+                           transforms.ToTensor(),
+                           transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+                         ]))
+  nc = 3
 
-train_loader = torch.utils.data.DataLoader(dataset=train_dataset,
-                                           batch_size=BATCH_SIZE,
-                                           shuffle=True)
+elif opt.dataset == 'mnist':
+  dataset = dset.MNIST(root=opt.dataroot, download=True,
+                       transform=transforms.Compose([
+                         transforms.Resize(opt.imageSize),
+                         transforms.ToTensor(),
+                         transforms.Normalize((0.5,), (0.5,)),
+                       ]))
+  nc = 1
+
+assert dataset
+dataloader = torch.utils.data.DataLoader(dataset, batch_size=opt.batchSize,
+                                         shuffle=True, num_workers=int(opt.workers))
+
+device = torch.device("cuda:0" if opt.cuda else "cpu")
+ngpu = int(opt.ngpu)
 
 
 class Fire(nn.Module):
@@ -66,10 +103,10 @@ class Fire(nn.Module):
 
 class SqueezeNet(nn.Module):
   
-  def __init__(self, num_classes=NUM_CLASSES):
+  def __init__(self, ngpus):
     super(SqueezeNet, self).__init__()
     
-    self.num_classes = num_classes
+    self.ngpu = ngpus
     self.features = nn.Sequential(
       nn.Conv2d(3, 64, kernel_size=3, stride=2),
       nn.ReLU(inplace=True),
@@ -97,9 +134,9 @@ class SqueezeNet(nn.Module):
     for m in self.modules():
       if isinstance(m, nn.Conv2d):
         if m is final_conv:
-          init.normal(m.weight.data, mean=0.0, std=0.01)
+          nn.init.normal_(m.weight.data, mean=0.0, std=0.01)
         else:
-          init.kaiming_uniform(m.weight.data)
+          nn.init.kaiming_uniform(m.weight.data)
         if m.bias is not None:
           m.bias.data.zero_()
   
@@ -109,51 +146,59 @@ class SqueezeNet(nn.Module):
     return x.view(x.size(0), self.num_classes)
 
 
-def main():
-  print(f"Train numbers:{len(train_dataset)}")
+def train():
+  print(f"Train numbers:{len(dataset)}")
   
   # load model
-  model = SqueezeNet().to(device)
-  # cast
-  cast = nn.CrossEntropyLoss().to(device)
+  model = SqueezeNet(ngpu).to(device)
   # Optimization
   optimizer = optim.Adam(
     model.parameters(),
-    lr=LEARNING_RATE,
+    lr=opt.lr,
+    betas=(opt.beta1, 0.999),
     weight_decay=1e-8)
-  step = 1
-  for epoch in range(1, NUM_EPOCHS + 1):
+  
+  for epoch in range(opt.niter):
     model.train()
-    
-    # cal one epoch time
-    start = time.time()
-    
-    for images, labels in train_loader:
-      images = images.to(device)
-      labels = labels.to(device)
-      
+    for batch_idx, (data, target) in enumerate(dataloader, 0):
       # Forward pass
-      outputs = model(images)
-      loss = cast(outputs, labels)
-      
-      # Backward and optimize
       optimizer.zero_grad()
+      outputs = model(data)
+      loss = F.nll_loss(outputs, target)
+      
+      # Backward and update paras
       loss.backward()
       optimizer.step()
       
-      print(f"Step [{step * BATCH_SIZE}/{NUM_EPOCHS * len(train_dataset)}], "
-            f"Loss: {loss.item():.8f}.")
-      step += 1
-    
-    # cal train one epoch time
-    end = time.time()
-    print(f"Epoch [{epoch}/{NUM_EPOCHS}], "
-          f"time: {end - start} sec!")
+      if batch_idx % 10 == 0:
+        print(f"Train Epoch: {epoch} "
+              f"[{batch_idx * len(data)}/{len(dataloader.dataset)} "
+              f"({100. * batch_idx / len(dataloader):.0f}%)]\t"
+              f"Loss: {loss.item():.6f}")
     
     # Save the model checkpoint
-    torch.save(model, MODEL_PATH + '/' + MODEL_NAME)
-  print(f"Model save to {MODEL_PATH + '/' + MODEL_NAME}.")
+    torch.save(model, f"{opt.outf}/SqueezeNet_epoch_{epoch + 1}.pth")
+  print(f"Model save to '{opt.outf}'.")
 
 
-if __name__ == '__main__':
-  main()
+def test():
+  model = torch.load(f'{opt.outf}/SqueezeNet_epoch_{opt.niter}.pth')
+  model.eval()
+  test_loss = 0
+  correct = 0
+  with torch.no_grad():
+    for data, target in dataloader:
+      data, target = data.to(device), target.to(device)
+      output = model(data)
+      test_loss += F.nll_loss(output, target, reduction='sum').item()  # sum up batch loss
+      pred = output.argmax(dim=1, keepdim=True)  # get the index of the max log-probability
+      correct += pred.eq(target.view_as(pred)).sum().item()
+  
+  test_loss /= len(dataloader.dataset)
+  
+  print(f"\nTest set: Average loss: {test_loss:.4f}, "
+        f"Accuracy: {correct}/{len(dataloader.dataset)} ({100. * correct / len(dataloader.dataset):.0f}%)\n")
+
+
+train()
+test()
