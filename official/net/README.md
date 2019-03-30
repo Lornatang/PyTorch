@@ -4,7 +4,7 @@
 
 2. **DenseNet**
 
-3. **Inception(GoogleNet_v3)**
+3. **[Inception(GoogleNet_v3)](https://www.jianshu.com/p/79ef7ed956ac)**
 
 4. **[LeNet](https://www.jianshu.com/p/05e562a8ed19)**
 
@@ -12,4 +12,4 @@
 
 6. **SqueezeNet**
 
-7. **VGG**
+7. **[VGG](https://www.jianshu.com/p/a52991ab86e0)**
