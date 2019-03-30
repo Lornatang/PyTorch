@@ -1,4 +1,4 @@
-# Introduction
+# 1. Introduction
 
 1. **[AlexNet](https://www.jianshu.com/p/c5510449e8a6)**
 
@@ -15,9 +15,25 @@
 7. **[VGG](https://www.jianshu.com/p/a52991ab86e0)**
 
 
-# Dataset Test
+# 2. Dataset
 
-- Caltech_101
+## 2.1 Caltech_101
+
+### 2.1.1 Description
+Pictures of objects belonging to 101 categories. About 40 to 800 images per category. 
+Most categories have about 50 images. Collected in September 2003 by Fei-Fei Li, Marco Andreetto, and Marc 'Aurelio Ranzato.  The size of each image is roughly 300 x 200 pixels.
+We have carefully clicked outlines of each object in these pictures, these are included under the 'Annotations.tar'. 
+There is also a matlab script to view the annotaitons, 'show_annotations.m'.
+
+### 2.1.2 How to use the dataset
+If you are using the Caltech 101 dataset for testing your recognition algorithm you should try and make your results comparable to the results of others. We suggest training and testing on fixed number of pictures and repeating the experiment with different random selections of pictures in order to obtain error bars. Popular number of training images: 1, 3, 5, 10, 15, 20, 30. Popular numbers of testing images: 20, 30. See also the discussion below.
+When you report your results please keep track of which images you used and which were misclassified. We will soon publish a more detailed experimental protocol that allows you to report those details. See the Discussion section for more details.
+
+### 2.1.3 Download
+Collection of pictures: [101_ObjectCategories.tar.gz (131Mbytes)](http://www.vision.caltech.edu/Image_Datasets/Caltech101/101_ObjectCategories.tar.gz)
+
+Outlines of the objects in the pictures: [1] [Annotations.tar](http://www.vision.caltech.edu/Image_Datasets/Caltech101/Annotations.tar) [2] [show_annotation.m](http://www.vision.caltech.edu/Image_Datasets/Caltech101/show_annotation.m)
+
 
 |    Model    |Accuracy|Epoch|
 |:-----------:|:------:|:---:|
