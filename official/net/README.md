@@ -13,3 +13,15 @@
 6. **SqueezeNet**
 
 7. **[VGG](https://www.jianshu.com/p/a52991ab86e0)**
+
+
+**|Caltech_101|**
+
+|    Model    |Accurary|Epoch|
+|:------------:|:------:|:----:|
+|LeNet-5      |35%     |25
+|AlexNet      |71%     |25
+|VGG-11_bn    |96%     |25
+|SqueezeNet   |25%     |25
+|DenseNet-121 |97%     |25
+|ResNet-18    |99%     |25
