@@ -128,7 +128,7 @@ class SqueezeNet(nn.Module):
       nn.Dropout(p=0.5),
       final_conv,
       nn.ReLU(inplace=True),
-      nn.AvgPool2d(1, stride=1)  # raw kernel_size=13, stride=1.
+      nn.AvgPool2d(1, stride=1)  # raw kernel_size=13, stride=1. For use img size 224 * 224.
     )
     
     for m in self.modules():
