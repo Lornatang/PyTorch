@@ -14,7 +14,7 @@ parser.add_argument('--dataset', required=True, help='cifar10 | mnist | folder')
 parser.add_argument('--dataroot', required=True, help='path to dataset')
 parser.add_argument('--workers', type=int, help='number of data loading workers', default=2)
 parser.add_argument('--batchSize', type=int, default=32, help='inputs batch size')
-parser.add_argument('--imageSize', type=int, default=32, help='the height / width of the inputs image to network')
+parser.add_argument('--imageSize', type=int, default=224, help='the height / width of the inputs image to network')
 parser.add_argument('--niter', type=int, default=25, help='number of epochs to train for')
 parser.add_argument('--lr', type=float, default=0.0001, help='learning rate, default=0.0001')
 parser.add_argument('--beta1', type=float, default=0.5, help='beta1 for adam. default=0.5')
@@ -123,7 +123,7 @@ class SqueezeNet(nn.Module):
       Fire(512, 64, 256, 256),
     )
     # Final convolution is initialized differently form the rest
-    final_conv = nn.Conv2d(512, self.num_classes, kernel_size=1)
+    final_conv = nn.Conv2d(512, 101, kernel_size=1)
     self.classifier = nn.Sequential(
       nn.Dropout(p=0.5),
       final_conv,
@@ -136,14 +136,15 @@ class SqueezeNet(nn.Module):
         if m is final_conv:
           nn.init.normal_(m.weight.data, mean=0.0, std=0.01)
         else:
-          nn.init.kaiming_uniform(m.weight.data)
+          nn.init.kaiming_uniform_(m.weight.data)
         if m.bias is not None:
           m.bias.data.zero_()
   
   def forward(self, x):
     x = self.features(x)
     x = self.classifier(x)
-    return x.view(x.size(0), self.num_classes)
+    x = x.view(x.size(0), 101)
+    return F.log_softmax(x, dim=1)
 
 
 def train():
