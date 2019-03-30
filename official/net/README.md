@@ -36,14 +36,19 @@ Outlines of the objects in the pictures: [1] [Annotations.tar](http://www.vision
 
 # Result
 
-|    Model    |  DataSet  |Accuracy|Epoch|
-|:-----------:|:---------:|:------:|:---:|
-|LeNet-5      |Caltech-101|35%     |25
-|AlexNet      |Caltech-101|71%     |25
-|VGG-11       |Caltech-101|_       |25
-|VGG-11_bn    |Caltech-101|96%     |25
-|SqueezeNet   |Caltech-101|25%     |25
-|DenseNet-121 |Caltech-101|97%     |25
-|ResNet-18    |Caltech-101|99%     |25
+|    Model       |  DataSet   |     Accuracy   |Epoch |
+|:--------------:|:----------:|:--------------:|:----:|
+|LeNet-5         |Caltech-101 |35%$\pm$5%      |25
+|LeNet-5         |Caltech-256 |_               |25
+|AlexNet[+]      |Caltech-101 |71%$\pm$3%      |25
+|AlexNet[+]      |Caltech-256 |_               |25
+|VGG-11[+]       |Caltech-101 |_               |25
+|VGG-11_bn[+]    |Caltech-101 |96%$\pm$%2      |25
+|SqueezeNet[+]   |Caltech-101 |25%$\pm$%3      |25
+|DenseNet-121[+] |Caltech-101 |97%$\pm$1%      |25
+|ResNet-18[+]    |Caltech-101 |99%$\pm$1%      |25
 
-*Tips: **"_"** indicates that it has not been tested yet and will be tested later.*
+*Tips:
+ 
+- **" _"** indicates that it has not been tested yet and will be tested later.*
+- **"[+]"** Represents fine tuning of the model. 
