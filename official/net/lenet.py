@@ -13,7 +13,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument(
   '--dataset',
   required=True,
-  help='cifar10 | cifar100 | mnist | fmnist | folder')
+  help='cifar10/100 | fmnist/mnist | folder')
 parser.add_argument('--dataroot', required=True, help='path to dataset')
 parser.add_argument(
   '--workers',
@@ -102,9 +102,9 @@ if opt.model == 'train':
                          transform=transform)
     nc = 1
   elif opt.dataset == 'fmnist':
-    dataset = dset.MNIST(root=opt.dataroot,
-                         download=True,
-                         transform=transform)
+    dataset = dset.FashionMNIST(root=opt.dataroot,
+                                download=True,
+                                transform=transform)
     nc = 1
 elif opt.model == 'test':
   if opt.dataset in 'folder':
@@ -131,10 +131,10 @@ elif opt.model == 'test':
                          transform=transform)
     nc = 1
   elif opt.dataset == 'fmnist':
-    dataset = dset.MNIST(root=opt.dataroot,
-                         download=True,
-                         train=False,
-                         transform=transform)
+    dataset = dset.FashionMNIST(root=opt.dataroot,
+                                download=True,
+                                train=False,
+                                transform=transform)
     nc = 1
 
 assert dataset
