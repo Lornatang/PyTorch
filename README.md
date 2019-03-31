@@ -122,3 +122,5 @@ on [website](https://pytorch.org/previous-versions).
 ### Visit the [official website](https://pytorch.org/) for more information.
 
 ### You can also visit [Google](https://www.google.com/) for online answers.
+
+**More dataSet to see: [publicDataSet.rst](https://github.com/Lornatang/pytorch/blob/master/publicDataSet.rst)**
