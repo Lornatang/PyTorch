@@ -85,9 +85,52 @@ Collection of pictures:
 
 *To learn more: [https://www.cs.toronto.edu/~kriz/cifar.html](https://www.cs.toronto.edu/~kriz/cifar.html)*
 
+## 2.5 Fruits 360 dataset: A dataset of images containing fruits
 
+### 2.5.1 Content
+The following fruits are included: Apples (different varieties: Golden, Red Yellow, Granny Smith, Red, Red Delicious), Apricot, Avocado, Avocado ripe, Banana (Yellow, Red, Lady Finger), Cactus fruit, Cantaloupe (2 varieties), Carambula, Cherry (different varieties, Rainier), Cherry Wax (Yellow, Red, Black), Chestnut, Clementine, Cocos, Dates, Granadilla, Grape (Blue, Pink, White (different varieties)), Grapefruit (Pink, White), Guava, Hazelnut, Huckleberry, Kiwi, Kaki, Kumsquats, Lemon (normal, Meyer), Lime, Lychee, Mandarine, Mango, Mangostan, Maracuja, Melon Piel de Sapo, Mulberry, Nectarine, Orange, Papaya, Passion fruit, Peach (different varieties), Pepino, Pear (different varieties, Abate, Kaiser, Monster, Williams), Physalis (normal, with Husk), Pineapple (normal, Mini), Pitahaya Red, Plums (different varieties), Pomegranate, Pomelo Sweetie, Quince, Rambutan, Raspberry, Redcurrant, Salak, Strawberry (normal, Wedge), Tamarillo, Tangelo, Tomato (different varieties, Maroon, Cherry Red), Walnut.
 
+### 2.5.2 Dataset properties
+Total number of images: 65429.
 
+Training set size: 48905 images (one fruit per image).
+
+Test set size: 16421 images (one fruit per image).
+
+Multi-fruits set size: 103 images (more than one fruit (or fruit class) per image)
+
+Number of classes: 95 (fruits).
+
+Image size: 100x100 pixels.
+
+Filename format: image_index_100.jpg (e.g. 32_100.jpg) or r_image_index_100.jpg (e.g. r_32_100.jpg) or r2_image_index_100.jpg or r3_image_index_100.jpg. "r" stands for rotated fruit. "r2" means that the fruit was rotated around the 3rd axis. "100" comes from image size (100x100 pixels).
+
+Different varieties of the same fruit (apple for instance) are stored as belonging to different classes.
+
+### 2.5.3 How we made it:
+
+- Fruits were planted in the shaft of a low speed motor (3 rpm) and a short movie of 20 seconds was recorded.
+
+- A Logitech C920 camera was used for filming the fruits. This is one of the best webcams available.
+
+- Behind the fruits we placed a white sheet of paper as background.
+
+- However due to the variations in the lighting conditions, the background was not uniform and we wrote a dedicated algorithm which extract the fruit from the background. This algorithm is of flood fill type: we start from each edge of the image and we mark all pixels there, then we mark all pixels found in the neighborhood of the already marked pixels for which the distance between colors is less than a prescribed value. We repeat the previous step until no more pixels can be marked.
+
+- All marked pixels are considered as being background (which is then filled with white) and the rest of pixels are considered as belonging to the object.
+
+- The maximum value for the distance between 2 neighbor pixels is a parameter of the algorithm and is set (by trial and error) for each movie.
+
+- Pictures from the test-multiple_fruits folder were taken with a Nexus 5X phone.
+
+### 2.5.4 How to cite:
+
+- Horea Muresan, Mihai Oltean, Fruit recognition from images using deep learning, Acta Univ. Sapientiae, Informatica Vol. 10, Issue 1, pp. 26-42, 2018.
+
+- The paper introduces the dataset and an implementation of a Neural Network trained to recognized the fruits in the dataset.
+
+### 2.5.5 Download
+Collection of pictures: [fruits.zip](https://www.kaggle.com/moltean/fruits/downloads/fruits.zip/44)
 
 
 
