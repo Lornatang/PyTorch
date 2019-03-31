@@ -21,9 +21,9 @@ parser.add_argument('--lr', type=float, default=0.0001, help='learning rate, def
 parser.add_argument('--beta1', type=float, default=0.5, help='beta1 for adam. default=0.5')
 parser.add_argument('--cuda', action='store_true', help='enables cuda')
 parser.add_argument('--ngpu', type=int, default=1, help='number of GPUs to use')
-parser.add_argument('--net', default='', help="path to netD (to continue training)")
 parser.add_argument('--outf', default='.', help='folder to output images and model checkpoints')
 parser.add_argument('--manualSeed', type=int, help='manual seed')
+parser.add_argument('--model', required=True, help='training models or testing models')
 
 opt = parser.parse_args()
 print(opt)
@@ -132,5 +132,7 @@ def test():
         f"Accuracy: {correct}/{len(dataloader.dataset)} ({100. * correct / len(dataloader.dataset):.0f}%)\n")
 
 
-train()
-test()
+if opt.model == 'train':
+  train()
+elif opt.model == 'test':
+  test()
