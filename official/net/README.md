@@ -143,20 +143,27 @@ Collection of pictures: [fruits.zip](https://www.kaggle.com/moltean/fruits/downl
 |LeNet-5         |MNIST        |98%        |25
 |LeNet-5         |Fashion-MNIST|86%        |25
 |LeNet-5         |CIFAR-10     |56%        |25
-|LeNet-5         |CIFAR-100    |-          |25
+|LeNet-5         |CIFAR-100    |19%        |25
 |LeNet-5         |NOT-MNIST    |89%        |25
 |LeNet-5[+]      |Caltech-101  |35%        |25
 |LeNet-5[+]      |Caltech-256  |_          |25
 |LeNet-5[+]      |Fruits       |91%        |25
+|----------------|-------------|-----------|--
 |AlexNet[+]      |MNIST        |_          |25
 |AlexNet[+]      |CIFAR-10     |_          |25
 |AlexNet         |Caltech-101  |71%        |25
 |AlexNet         |Caltech-256  |_          |25
+|----------------|-------------|-----------|--
 |VGG-11          |Caltech-101  |93%        |25
+|----------------|-------------|-----------|--
 |VGG-11_bn       |Caltech-101  |96%        |25
+|----------------|-------------|-----------|--
 |SqueezeNet      |Caltech-101  |25%        |25
+|----------------|-------------|-----------|--
 |DenseNet-121    |Caltech-101  |97%        |25
+|----------------|-------------|-----------|--
 |ResNet-18       |Caltech-101  |99%        |25
+|----------------|-------------|-----------|--
 
 *Tips:
  
