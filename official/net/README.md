@@ -150,10 +150,10 @@ Collection of pictures: [fruits.zip](https://www.kaggle.com/moltean/fruits/downl
 |LeNet-5[+]      |Fruits       |91%         |25
 |----------------|-------------|------------|--
 |AlexNet[+]      |MNIST        |_           |25
-|AlexNet         |Fashion-MNIST|_           |25
+|AlexNet[+]      |Fashion-MNIST|_           |25
 |AlexNet[+]      |CIFAR-10     |_           |25
-|AlexNet         |CIFAR-100    |_           |25
-|AlexNet         |NOT_MNIST    |_           |25
+|AlexNet[+]      |CIFAR-100    |_           |25
+|AlexNet[+]      |NOT_MNIST    |_           |25
 |AlexNet         |Caltech-101  |71%         |25
 |AlexNet         |Caltech-256  |_           |25
 |AlexNet         |Fruits       |_           |25
