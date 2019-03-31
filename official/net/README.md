@@ -138,25 +138,25 @@ Collection of pictures: [fruits.zip](https://www.kaggle.com/moltean/fruits/downl
 
 # Result
 
-|    Model       |   DataSet   |     Accuracy     |Epoch |
-|:--------------:|:-----------:|:----------------:|:----:|
-|LeNet-5         |MNIST        |98% $\pm$ 0.5%    |25
-|LeNet-5         |Fashion-MNIST|-                 |25
-|LeNet-5         |CIFAR-10     |56% $\pm$ 1.4%    |25
-|LeNet-5         |CIFAR-100    |-                 |25
-|LeNet-5         |NOT-MNIST    |89% $\pm$ 2%      |25
-|LeNet-5[+]      |Caltech-101  |35% $\pm$ 5%      |25
-|LeNet-5[+]      |Caltech-256  |_                 |25
-|LeNet-5[+]      |Fruits       |_                 |25
-|AlexNet[+]      |MNIST        |_                 |25
-|AlexNet[+]      |CIFAR-10     |_                 |25
-|AlexNet         |Caltech-101  |71% $\pm$ 3%      |25
-|AlexNet         |Caltech-256  |_                 |25
-|VGG-11          |Caltech-101  |93% $\pm$ 1%      |25
-|VGG-11_bn       |Caltech-101  |96% $\pm$ 2%      |25
-|SqueezeNet      |Caltech-101  |25% $\pm$ 3%      |25
-|DenseNet-121    |Caltech-101  |97% $\pm$ 1%      |25
-|ResNet-18       |Caltech-101  |99% $\pm$ 0.5%    |25
+|    Model       |   DataSet   | Accuracy  |Epoch |
+|:---------------|:------------|:---------:|:----:|
+|LeNet-5         |MNIST        |98%        |25
+|LeNet-5         |Fashion-MNIST|-          |25
+|LeNet-5         |CIFAR-10     |56%        |25
+|LeNet-5         |CIFAR-100    |-          |25
+|LeNet-5         |NOT-MNIST    |89%        |25
+|LeNet-5[+]      |Caltech-101  |35%        |25
+|LeNet-5[+]      |Caltech-256  |_          |25
+|LeNet-5[+]      |Fruits       |_          |25
+|AlexNet[+]      |MNIST        |_          |25
+|AlexNet[+]      |CIFAR-10     |_          |25
+|AlexNet         |Caltech-101  |71%        |25
+|AlexNet         |Caltech-256  |_          |25
+|VGG-11          |Caltech-101  |93%        |25
+|VGG-11_bn       |Caltech-101  |96%        |25
+|SqueezeNet      |Caltech-101  |25%        |25
+|DenseNet-121    |Caltech-101  |97%        |25
+|ResNet-18       |Caltech-101  |99%        |25
 
 *Tips:
  
