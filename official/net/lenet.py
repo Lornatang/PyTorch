@@ -91,7 +91,7 @@ if opt.model == 'train':
                            download=True,
                            transform=transform)
     nc = 3
-  elif opt.dataset == 'cifar10':
+  elif opt.dataset == 'cifar100':
     dataset = dset.CIFAR100(root=opt.dataroot,
                             download=True,
                             transform=transform)
@@ -118,7 +118,7 @@ elif opt.model == 'test':
                            train=False,
                            transform=transform)
     nc = 3
-  elif opt.dataset == 'cifar10':
+  elif opt.dataset == 'cifar100':
     dataset = dset.CIFAR100(root=opt.dataroot,
                             download=True,
                             train=False,
@@ -170,7 +170,7 @@ class LeNet(nn.Module):
       nn.Dropout(),
       nn.Linear(120, 84),
       nn.ReLU(inplace=True),
-      nn.Linear(84, 10)
+      nn.Linear(84, 100)
     )
 
   def forward(self, inputs):
