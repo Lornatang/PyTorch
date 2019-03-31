@@ -48,7 +48,7 @@ The dataset can be found on Tensorflow github page as well as on the blog from Y
 ### 2.2.4 Download
 Collection of pictures: [notMNIST_small.tar.gz](https://www.kaggle.com/lubaroli/notmnist/downloads/notMNIST_small.tar.gz/1)
 
-### 2.3 MNIST
+## 2.3 MNIST
 To learn more :[http://yann.lecun.com/exdb/mnist/](http://yann.lecun.com/exdb/mnist/)!
 
 ### 2.3.1 Download
