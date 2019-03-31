@@ -170,7 +170,7 @@ class LeNet(nn.Module):
       nn.Dropout(),
       nn.Linear(120, 84),
       nn.ReLU(inplace=True),
-      nn.Linear(84, 100)
+      nn.Linear(84, 256)
     )
 
   def forward(self, inputs):
