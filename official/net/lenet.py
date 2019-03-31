@@ -20,9 +20,9 @@ parser.add_argument('--lr', type=float, default=0.0001, help='learning rate, def
 parser.add_argument('--beta1', type=float, default=0.5, help='beta1 for adam. default=0.5')
 parser.add_argument('--cuda', action='store_true', help='enables cuda')
 parser.add_argument('--ngpu', type=int, default=1, help='number of GPUs to use')
-parser.add_argument('--net', default='', help="path to netD (to continue training)")
 parser.add_argument('--outf', default='.', help='folder to output images and model checkpoints')
 parser.add_argument('--manualSeed', type=int, help='manual seed')
+parser.add_argument('--model', required=True, help='training models or testing models')
 
 opt = parser.parse_args()
 print(opt)
@@ -62,12 +62,15 @@ elif opt.dataset == 'cifar10':
   nc = 3
 
 elif opt.dataset == 'mnist':
-  dataset = dset.MNIST(root=opt.dataroot, download=True,
-                       transform=transforms.Compose([
-                         transforms.Resize(opt.imageSize),
-                         transforms.ToTensor(),
-                         transforms.Normalize((0.5,), (0.5,)),
-                       ]))
+  dataset = dset.ImageFolder(root=opt.dataroot,
+                   transform=transforms.Compose([
+                     transforms.Resize(opt.imageSize),
+                     transforms.CenterCrop(opt.imageSize),
+                     transforms.RandomHorizontalFlip(),
+                     transforms.Grayscale(),
+                     transforms.ToTensor(),
+                     transforms.Normalize((0.5, ), (0.5, ))
+                   ]))
   nc = 1
 
 assert dataset
@@ -84,7 +87,7 @@ class LeNet(nn.Module):
     super(LeNet, self).__init__()
     self.ngpu = ngpus
     self.features = nn.Sequential(
-      nn.Conv2d(3, 6, kernel_size=5, stride=1, padding=1),
+      nn.Conv2d(nc, 6, kernel_size=5, stride=1, padding=1),
       nn.ReLU(inplace=True),
       nn.MaxPool2d(kernel_size=2, stride=2),
       nn.Conv2d(6, 16, kernel_size=5, stride=1, padding=0),
@@ -164,5 +167,7 @@ def test():
         f"Accuracy: {correct}/{len(dataloader.dataset)} ({100. * correct / len(dataloader.dataset):.0f}%)\n")
 
 
-train()
-test()
+if opt.model == 'train':
+  train()
+elif opt.model == 'test':
+  test()
