@@ -63,14 +63,14 @@ elif opt.dataset == 'cifar10':
 
 elif opt.dataset == 'mnist':
   dataset = dset.ImageFolder(root=opt.dataroot,
-                   transform=transforms.Compose([
-                     transforms.Resize(opt.imageSize),
-                     transforms.CenterCrop(opt.imageSize),
-                     transforms.RandomHorizontalFlip(),
-                     transforms.Grayscale(),
-                     transforms.ToTensor(),
-                     transforms.Normalize((0.5, ), (0.5, ))
-                   ]))
+                             transform=transforms.Compose([
+                                       transforms.Resize(opt.imageSize),
+                                       transforms.CenterCrop(opt.imageSize),
+                                       transforms.RandomHorizontalFlip(),
+                                       transforms.Grayscale(),
+                                       transforms.ToTensor(),
+                                       transforms.Normalize((0.5, ), (0.5, ))
+                             ]))
   nc = 1
 
 assert dataset
@@ -102,7 +102,7 @@ class LeNet(nn.Module):
       nn.Dropout(),
       nn.Linear(120, 84),
       nn.ReLU(inplace=True),
-      nn.Linear(84, 101)
+      nn.Linear(84, 10)
     )
   
   def forward(self, inputs):
