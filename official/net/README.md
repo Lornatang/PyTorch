@@ -141,13 +141,13 @@ Collection of pictures: [fruits.zip](https://www.kaggle.com/moltean/fruits/downl
 |    Model       |   DataSet   | Accuracy  |Epoch |
 |:---------------|:------------|:---------:|:----:|
 |LeNet-5         |MNIST        |98%        |25
-|LeNet-5         |Fashion-MNIST|-          |25
+|LeNet-5         |Fashion-MNIST|86%        |25
 |LeNet-5         |CIFAR-10     |56%        |25
 |LeNet-5         |CIFAR-100    |-          |25
 |LeNet-5         |NOT-MNIST    |89%        |25
 |LeNet-5[+]      |Caltech-101  |35%        |25
 |LeNet-5[+]      |Caltech-256  |_          |25
-|LeNet-5[+]      |Fruits       |_          |25
+|LeNet-5[+]      |Fruits       |91%        |25
 |AlexNet[+]      |MNIST        |_          |25
 |AlexNet[+]      |CIFAR-10     |_          |25
 |AlexNet         |Caltech-101  |71%        |25
