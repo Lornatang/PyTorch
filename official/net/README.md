@@ -34,14 +34,64 @@ Collection of pictures: [101_ObjectCategories.tar.gz (131Mbytes)](http://www.vis
 
 Outlines of the objects in the pictures: [1] [Annotations.tar](http://www.vision.caltech.edu/Image_Datasets/Caltech101/Annotations.tar) [2] [show_annotation.m](http://www.vision.caltech.edu/Image_Datasets/Caltech101/show_annotation.m)
 
+## 2.2 NotMNIST
+
+### 2.2.1 Context
+This dataset was created by Yaroslav Bulatov by taking some publicly available fonts and extracting glyphs from them to make a dataset similar to MNIST. There are 10 classes, with letters A-J.
+
+### 2.2.2 Content
+A set of training and test images of letters from A to J on various typefaces. The images size is 28x28 pixels.
+
+### 2.2.3 Acknowledgements
+The dataset can be found on Tensorflow github page as well as on the blog from Yaroslav, here.
+
+### 2.2.4 Download
+Collection of pictures: [notMNIST_small.tar.gz](https://www.kaggle.com/lubaroli/notmnist/downloads/notMNIST_small.tar.gz/1)
+
+### 2.3 MNIST
+To learn more :[http://yann.lecun.com/exdb/mnist/](http://yann.lecun.com/exdb/mnist/)!
+
+### 2.3.1 Download
+Collection of pictures: 
+
+- [train-images-idx3-ubyte.gz](http://yann.lecun.com/exdb/mnist/train-images-idx3-ubyte.gz):  training set images (9912422 bytes) 
+
+- [train-labels-idx1-ubyte.gz](http://yann.lecun.com/exdb/mnist/train-labels-idx1-ubyte.gz):  training set labels (28881 bytes) 
+
+- [t10k-images-idx3-ubyte.gz](http://yann.lecun.com/exdb/mnist/t10k-images-idx3-ubyte.gz):   test set images (1648877 bytes) 
+
+- [t10k-labels-idx1-ubyte.gz](http://yann.lecun.com/exdb/mnist/t10k-labels-idx1-ubyte.gz):   test set labels (4542 bytes)
+
+## 2.4 CIFAR-10/CIFAR-100
+
+### 2.4.1 Introduction
+The CIFAR-10 dataset consists of 60000 32x32 colour images in 10 classes, with 6000 images per class. There are 50000 training images and 10000 test images. 
+
+The dataset is divided into five training batches and one test batch, each with 10000 images. The test batch contains exactly 1000 randomly-selected images from each class. The training batches contain the remaining images in random order, but some training batches may contain more images from one class than another. Between them, the training batches contain exactly 5000 images from each class. 
+![CIFAR-10](https://github.com/Lornatang/pytorch/blob/master/img/CIFAR-10.png)
+
+### 2.4.2 Download
+Collection of pictures: [cifar-10-python.tar.gz](https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz)
+
+*To learn more: [https://www.cs.toronto.edu/~kriz/cifar.html](https://www.cs.toronto.edu/~kriz/cifar.html)*
+
+
+
+
+
+
+
+
+
 # Result
 
-|    Model       |  DataSet   |     Accuracy   |Epoch |
+|    Model       |  DataSet   |    Accuracy    |Epoch |
 |:--------------:|:----------:|:--------------:|:----:|
-|LeNet-5[+]      |MNIST       |98%$\pm$0.5%    |25
-|LeNet-5[+]      |CIFAR-10    |_               |25
-|LeNet-5         |Caltech-101 |35%$\pm$5%      |25
-|LeNet-5         |Caltech-256 |_               |25
+|LeNet-5         |MNIST       |98%$\pm$0.5%    |25
+|LeNet-5         |CIFAR-10    |56%$\pm$1.4%    |25
+|LeNet-5         |NOT-MNIST   |89%$\pm$2%      |25
+|LeNet-5[+]      |Caltech-101 |35%$\pm$5%      |25
+|LeNet-5[+]      |Caltech-256 |_               |25
 |AlexNet[+]      |MNIST       |_               |25
 |AlexNet[+]      |CIFAR-10    |_               |25
 |AlexNet         |Caltech-101 |71%$\pm$3%      |25
