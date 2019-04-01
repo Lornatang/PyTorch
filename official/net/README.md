@@ -152,12 +152,13 @@ Collection of pictures: [fruits.zip](https://www.kaggle.com/moltean/fruits/downl
 |:----|:-----:|:---:|:---:|:----|
 |LeNet-5|MNIST|97.21|99.97|25
 |LeNet-5|Fashion-MNIST|85.77|99.77|25
+|LeNet-5|NOT-MNIST|84.195|96.594|25
 |LeNet-5|CIFAR-10|55.01|94.98|25
 |LeNet-5|CIFAR-100|19.00|46.54|25
 |LeNet-5[+]|Caltech-101|27.198|43.794|25
-|LeNet-5[+]|Caltech-256| | |25
+|LeNet-5[+]|Caltech-256|10.175|21.662|25
 |LeNet-5[+]|Fruits|87.065|99.245|25
-|-----|-------|------|----|-----|
+|-----|-------|-----|-----|-----|
 
 
 *Tips:
