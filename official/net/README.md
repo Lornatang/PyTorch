@@ -175,7 +175,7 @@ Collection of pictures: [fruits.zip](https://www.kaggle.com/moltean/fruits)
 |VGG11_bn|CIFAR-10|82.187|99.241|25
 |VGG11_bn|Caltech_256|_|_|_
 |-----|-------|-----|-----|-----|
-|VGG19|CIFAR-10|_|_|25
+|VGG19|CIFAR-10|72.310|96.370|25
 |VGG19|Caltech_256|_|_|_
 |-----|-------|-----|-----|-----|
 |VGG19_bn|CIFAR-10|_|_|_
