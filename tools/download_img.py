@@ -1,6 +1,10 @@
 import re
 import urllib.parse
 import requests
+import os
+
+
+os.makedirs('./data')
 
 
 def get_page(key, page, n):
@@ -26,7 +30,7 @@ def down_pic(pic_urls):
     for i, pic_url in enumerate(pic_urls):
         try:
             pic = requests.get(pic_url, timeout=15)
-            string = 'cow' + '/' + str(i + 1) + '.jpg'
+            string = 'data' + '/' + str(i + 1) + '.jpg'
             with open(string, 'wb') as f:
                 f.write(pic.content)
                 print('成功下载第%s张图片: %s' % (str(i + 1), str(pic_url)))
@@ -37,7 +41,7 @@ def down_pic(pic_urls):
 
 
 if __name__ == '__main__':
-    keyword = '公牛'  # 关键词, 改为你想输入的词即可, 相当于在百度图片里搜索一样
+    keyword = '张杰'  # 关键词, 改为你想输入的词即可, 相当于在百度图片里搜索一样
     page_begin = 0
     page_number = 30
     image_number = 8
