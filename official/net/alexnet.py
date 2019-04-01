@@ -152,9 +152,8 @@ criterion = nn.CrossEntropyLoss().cuda()
 
 class AlexNet(nn.Module):
 
-  def __init__(self, ngpus):
+  def __init__(self):
     super(AlexNet, self).__init__()
-    self.ngpu = ngpus
     self.features = nn.Sequential(
       nn.Conv2d(nc, 64, kernel_size=3, stride=2, padding=1),
       # raw kernel_size=11, stride=4, padding=2. For use img size 224 * 224.
@@ -306,15 +305,15 @@ def train():
         progress.print(i)
     
     # Save the model checkpoint
-    torch.save(model, f"{opt.outf}/AlexNet_epoch_{epoch + 1}.pth")
+    torch.save(model, f"{opt.outf}/AlexNet_epoch_FashionMNIST{epoch + 1}.pth")
   print(f"Model save to '{opt.outf}'.")
 
 
 def test():
   if torch.cuda.is_available():
-    model = torch.load(f'{opt.outf}/AlexNet_epoch_{opt.niter}.pth')
+    model = torch.load(f'{opt.outf}/AlexNet_epoch_FashionMNIST{opt.niter}.pth')
   else:
-    model = torch.load(f'{opt.outf}/AlexNet_epoch_{opt.niter}.pth', map_location="cpu")
+    model = torch.load(f'{opt.outf}/AlexNet_epoch_FashionMNIST{opt.niter}.pth', map_location="cpu")
   model.eval()
   
   batch_time = AverageMeter('Time', ':6.3f')
