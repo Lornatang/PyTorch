@@ -190,7 +190,7 @@ class VGG(nn.Module):
 
 def make_layers(config, batch_norm=False):
   layers = []
-  in_channels = 3
+  in_channels = nc
   for v in config:
     if v == 'M':
       layers += [nn.MaxPool2d(kernel_size=2, stride=2)]
@@ -329,7 +329,7 @@ def train():
   print(f"Train numbers:{len(dataset)}")
   
   # load model
-  model = vgg11().cuda()
+  model = vgg19().cuda()
   
   # define optimizer
   optimizer = torch.optim.Adam(model.parameters(),
@@ -385,15 +385,15 @@ def train():
         progress.print(i)
     
     # Save the model checkpoint
-    torch.save(model, f"{opt.outf}/VGG11_epoch_{epoch + 1}.pth")
+    torch.save(model, f"{opt.outf}/VGG19_epoch_{epoch + 1}.pth")
   print(f"Model save to '{opt.outf}'.")
 
 
 def test():
   if torch.cuda.is_available():
-    model = torch.load(f'{opt.outf}/VGG11_epoch_{opt.niter}.pth')
+    model = torch.load(f'{opt.outf}/VGG19_epoch_{opt.niter}.pth')
   else:
-    model = torch.load(f'{opt.outf}/VGG11_epoch_{opt.niter}.pth', map_location="cpu")
+    model = torch.load(f'{opt.outf}/VGG19_epoch_{opt.niter}.pth', map_location="cpu")
   model.eval()
   
   batch_time = AverageMeter('Time', ':6.3f')
