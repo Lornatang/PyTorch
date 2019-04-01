@@ -119,3 +119,4 @@ dmypy.json
 *.DS_Store
 *.pth
 *.png
+*.jpg
