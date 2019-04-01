@@ -153,7 +153,7 @@ Collection of pictures: [fruits.zip](https://www.kaggle.com/moltean/fruits/downl
 # Result
 
 |Model|DataSet|Top-1|Top-5|Epoch|
-|:----|:------|:---:|:---:|:----|
+|:----|:-----:|:---:|:---:|:----|
 |LeNet-5|MNIST|97.21|99.97|25
 |LeNet-5|Fashion-MNIST|85.77|99.77|25
 
