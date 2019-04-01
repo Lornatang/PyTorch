@@ -159,7 +159,9 @@ Collection of pictures: [fruits.zip](https://www.kaggle.com/moltean/fruits/downl
 |LeNet-5[+]|Caltech-256|10.175|21.662|25
 |LeNet-5[+]|Fruits|87.065|99.245|25
 |-----|-------|-----|-----|-----|
-
+|AlexNet|MNIST|98.200|99.970|3
+|AlexNet|Fashion-MNIST|89.360|99.870|9
+|AlexNet|CIFAR-10|72.520|96.920|25
 
 *Tips:
  
