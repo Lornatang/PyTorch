@@ -164,6 +164,8 @@ Collection of pictures: [fruits.zip](https://www.kaggle.com/moltean/fruits)
 |AlexNet|NOT-MNIST|92.453|98.309|25
 |AlexNet|CIFAR-10|72.520|96.920|25
 |AlexNet|CIFAR-100|39.310|68.750|25
+|AlexNet|Caltech-101|58.322|79.703|25
+|AlexNet|Caltech-256|||25
 
 *Tips:
  
