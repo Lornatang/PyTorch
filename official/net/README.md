@@ -153,17 +153,12 @@ Collection of pictures: [fruits.zip](https://www.kaggle.com/moltean/fruits/downl
 
 # Result
 
-|    Model       |   DataSet   | Top-1 | Top-5 | Epoch |
-|:---------------|:------------|:-----:|:-----:|:------|
-|LeNet-5         |MNIST        |98.450 |99.910 |25     |
-|LeNet-5         |Fashion-MNIST|_      |_      |_      |
-|LeNet-5         |CIFAR-10     |_      |_      |_      |
-|LeNet-5         |CIFAR-100    |_      |_      |_      |
-|LeNet-5         |NOT-MNIST    |_      |_      |_      |
-|LeNet-5[+]      |Caltech-101  |_      |_      |_      |
-|LeNet-5[+]      |Caltech-256  |_      |_      |_      |
-|LeNet-5[+]      |Fruits       |_      |_      |_      |
-|----------------|-------------|-------|-------|-------|
+|Model|DataSet|Top-1|Top-5|Epoch|
+|:----|:------|:---:|:---:|:----|
+|LeNet-5|MNIST|97.21|99.97|25
+|LeNet-5|Fashion-MNIST|85.77|99.77|25
+
+
 
 
 *Tips:
