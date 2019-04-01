@@ -48,11 +48,15 @@ The dataset can be found on Tensorflow github page as well as on the blog from Y
 ### 2.2.4 Download
 Collection of pictures: [notMNIST_small.tar.gz](https://www.kaggle.com/lubaroli/notmnist/downloads/notMNIST_small.tar.gz/1)
 
-## 2.3 MNIST
-To learn more :[http://yann.lecun.com/exdb/mnist/](http://yann.lecun.com/exdb/mnist/)!
+## 2.3 MNIST/Fashion-MNIST
+To learn more for MNIST: [http://yann.lecun.com/exdb/mnist/](http://yann.lecun.com/exdb/mnist/)!
+
+To learn more for Fashion-MNIST: [https://github.com/rois-codh/kmnist](https://github.com/rois-codh/kmnist)!
 
 ### 2.3.1 Download
 Collection of pictures: 
+
+**MNIST**
 
 - [train-images-idx3-ubyte.gz](http://yann.lecun.com/exdb/mnist/train-images-idx3-ubyte.gz):  training set images (9912422 bytes) 
 
@@ -61,6 +65,17 @@ Collection of pictures:
 - [t10k-images-idx3-ubyte.gz](http://yann.lecun.com/exdb/mnist/t10k-images-idx3-ubyte.gz):   test set images (1648877 bytes) 
 
 - [t10k-labels-idx1-ubyte.gz](http://yann.lecun.com/exdb/mnist/t10k-labels-idx1-ubyte.gz):   test set labels (4542 bytes)
+
+**Fashion-MNIST**
+
+- [train-images-idx3-ubyte.gz](http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/train-images-idx3-ubyte.gz):  training set images (9912422 bytes) 
+  
+- [train-labels-idx1-ubyte.gz](http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/train-labels-idx1-ubyte.gz):  training set labels (28881 bytes) 
+
+- [t10k-images-idx3-ubyte.gz](http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/t10k-images-idx3-ubyte.gz):   test set images (1648877 bytes) 
+
+- [t10k-labels-idx1-ubyte.gz](http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/t10k-labels-idx1-ubyte.gz):   test set labels (4542 bytes)
+    
 
 ## 2.4 CIFAR-10/CIFAR-100
 
@@ -146,19 +161,25 @@ Collection of pictures: [fruits.zip](https://www.kaggle.com/moltean/fruits/downl
 |LeNet-5         |CIFAR-100    |19%         |25
 |LeNet-5         |NOT-MNIST    |89%         |25
 |LeNet-5[+]      |Caltech-101  |35%         |25
-|LeNet-5[+]      |Caltech-256  |_           |25
+|LeNet-5[+]      |Caltech-256  |14%         |25
 |LeNet-5[+]      |Fruits       |91%         |25
 |----------------|-------------|------------|--
-|AlexNet[+]      |MNIST        |_           |25
-|AlexNet[+]      |Fashion-MNIST|_           |25
-|AlexNet[+]      |CIFAR-10     |_           |25
-|AlexNet[+]      |CIFAR-100    |_           |25
-|AlexNet[+]      |NOT_MNIST    |_           |25
-|AlexNet         |Caltech-101  |71%         |25
-|AlexNet         |Caltech-256  |_           |25
-|AlexNet         |Fruits       |_           |25
+|AlexNet[+]      |MNIST        |99%         |14
+|AlexNet[+]      |Fashion-MNIST|90%         |14
+|AlexNet[+]      |CIFAR-10     |74%         |17
+|AlexNet[+]      |CIFAR-100    |39%         |17
+|AlexNet[+]      |NOT_MNIST    |_           |_
+|AlexNet         |Caltech-101  |71%         |_
+|AlexNet         |Caltech-256  |_           |_
+|AlexNet         |Fruits       |_           |_
 |----------------|-------------|------------|--
+|VGG-11          |MNIST        |_           |_
+|VGG-11          |Fashion-MNIST|_           |_
+|VGG-11          |CIFAR-10     |_           |_
+|VGG-11          |CIFAR-100    |_           |_
+|VGG-11          |NOT-MNIST    |_           |_
 |VGG-11          |Caltech-101  |93%         |25
+|VGG-11          |Caltech-256  |_           |_
 |----------------|-------------|------------|--
 |VGG-11_bn       |Caltech-101  |96%         |25
 |----------------|-------------|------------|--
@@ -173,4 +194,4 @@ Collection of pictures: [fruits.zip](https://www.kaggle.com/moltean/fruits/downl
  
 - **" _"** indicates that it has not been tested yet and will be tested later.*
 - **"[+]"** Represents fine tuning of the model. 
-- Caltech_101 was trained with 100% training and 100% testing! But that doesn't matter!
+- Caltech_101/Caltech_256 was trained with 100% training and 100% testing! But that doesn't matter!
