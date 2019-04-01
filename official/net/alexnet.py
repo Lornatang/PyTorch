@@ -9,7 +9,7 @@ import torchvision.transforms as transforms
 import torchvision.datasets as dset
 import torch.nn.functional as F
 
-parser = argparse.ArgumentParser()
+parser = argparse.ArgumentParser(description='PyTorch AlexNet Training')
 parser.add_argument(
   '--dataset',
   required=True,
@@ -146,6 +146,7 @@ dataloader = torch.utils.data.DataLoader(
     opt.workers))
 
 device = torch.device("cuda:0" if opt.cuda else "cpu")
+
 ngpu = int(opt.ngpu)
 
 
@@ -202,6 +203,7 @@ def train():
   for epoch in range(opt.niter):
     model.train()
     for batch_idx, (data, target) in enumerate(dataloader, 0):
+      data, target = data.to(device), target.to(device)
       # Forward pass
       optimizer.zero_grad()
       outputs = model(data)
