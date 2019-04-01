@@ -157,7 +157,7 @@ Collection of pictures: [fruits.zip](https://www.kaggle.com/moltean/fruits)
 |LeNet-5|CIFAR-100|19.00|46.54|25
 |LeNet-5[+]|Caltech-101|27.198|43.794|25
 |LeNet-5[+]|Caltech-256|10.175|21.662|25
-|LeNet-5[+]|Fruits-360|87.065|99.245|25
+|LeNet-5[+]|Fruits-360|67.065|94.245|25
 |-----|-------|-----|-----|-----|
 |AlexNet|MNIST|98.200|99.970|3
 |AlexNet|Fashion-MNIST|89.360|99.870|9
@@ -173,10 +173,12 @@ Collection of pictures: [fruits.zip](https://www.kaggle.com/moltean/fruits)
 |VGG11|CIFAR-10|74.110|97.800|17
 |-----|-------|-----|-----|-----|
 |VGG11_bn|CIFAR-10|82.187|99.241|25
+|VGG11_bn|Caltech_256|_|_|_
 |-----|-------|-----|-----|-----|
 |VGG19|CIFAR-10|_|_|25
+|VGG19|Caltech_256|_|_|_
 |-----|-------|-----|-----|-----|
-|VGG19_bn|CIFAR-10|_|_|25
+|VGG19_bn|CIFAR-10|_|_|_
 
 
 
