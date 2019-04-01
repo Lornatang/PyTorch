@@ -146,18 +146,14 @@ Different varieties of the same fruit (apple for instance) are stored as belongi
 ### 2.5.5 Download
 Collection of pictures: [fruits.zip](https://www.kaggle.com/moltean/fruits/downloads/fruits.zip/44)
 
-
-
-
-
 # Result
 
 |Model|DataSet|Top-1|Top-5|Epoch|
 |:----|:-----:|:---:|:---:|:----|
 |LeNet-5|MNIST|97.21|99.97|25
 |LeNet-5|Fashion-MNIST|85.77|99.77|25
-
-
+|LeNet-5|CIFAR-10|55.01|94.98|25
+|LeNet-5|CIFAR-100|19.00|46.54|25
 
 
 *Tips:
