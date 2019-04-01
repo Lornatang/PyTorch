@@ -78,7 +78,7 @@ if opt.model == 'train':
                            transforms.CenterCrop(opt.imageSize),
                            transforms.RandomHorizontalFlip(),
                            transforms.ToTensor(),
-                           transforms.Normalize((0.5, ), (0.5, )),
+                           transforms.Normalize((0.5,), (0.5,)),
                          ]))
     nc = 1
   elif opt.dataset == 'fmnist':
@@ -89,7 +89,7 @@ if opt.model == 'train':
                                   transforms.CenterCrop(opt.imageSize),
                                   transforms.RandomHorizontalFlip(),
                                   transforms.ToTensor(),
-                                  transforms.Normalize((0.5, ), (0.5, )),
+                                  transforms.Normalize((0.5,), (0.5,)),
                                 ]))
     nc = 1
 elif opt.model == 'test':
@@ -119,7 +119,7 @@ elif opt.model == 'test':
                            transforms.CenterCrop(opt.imageSize),
                            transforms.RandomHorizontalFlip(),
                            transforms.ToTensor(),
-                           transforms.Normalize((0.5, ), (0.5, )),
+                           transforms.Normalize((0.5,), (0.5,)),
                          ]))
     nc = 1
   elif opt.dataset == 'fmnist':
@@ -131,7 +131,7 @@ elif opt.model == 'test':
                                   transforms.CenterCrop(opt.imageSize),
                                   transforms.RandomHorizontalFlip(),
                                   transforms.ToTensor(),
-                                  transforms.Normalize((0.5, ), (0.5, )),
+                                  transforms.Normalize((0.5,), (0.5,)),
                                 ]))
     nc = 1
 
@@ -147,7 +147,7 @@ device = torch.device("cuda:0" if opt.cuda else "cpu")
 ngpu = int(opt.ngpu)
 
 # define CrossEntropyLoss()
-criterion = nn.CrossEntropyLoss().to(device)
+criterion = nn.CrossEntropyLoss().cuda()
 
 
 class AlexNet(nn.Module):
@@ -191,7 +191,7 @@ class AlexNet(nn.Module):
 
 class AverageMeter(object):
   """Computes and stores the average and current value"""
-
+  
   def __init__(self, name, fmt=':f'):
     self.count = 0
     self.sum = 0
@@ -199,13 +199,13 @@ class AverageMeter(object):
     self.val = 0
     self.name = name
     self.fmt = fmt
-
+  
   def update(self, val, n=1):
     self.val = val
     self.sum += val * n
     self.count += n
     self.avg = self.sum / self.count
-
+  
   def __str__(self):
     fmtstr = '{name} {val' + self.fmt + '} ({avg' + self.fmt + '})'
     return fmtstr.format(**self.__dict__)
@@ -216,12 +216,12 @@ class ProgressMeter(object):
     self.batch_fmtstr = self._get_batch_fmtstr(num_batches)
     self.meters = meters
     self.prefix = prefix
-
+  
   def print(self, batch):
     entries = [self.prefix + self.batch_fmtstr.format(batch)]
     entries += [str(meter) for meter in self.meters]
     print('\t'.join(entries))
-
+  
   @staticmethod
   def _get_batch_fmtstr(num_batches):
     num_digits = len(str(num_batches // 1))
@@ -234,11 +234,11 @@ def accuracy(output, target, topk=(1,)):
   with torch.no_grad():
     maxk = max(topk)
     batch_size = target.size(0)
-
+    
     _, pred = output.topk(maxk, 1, True, True)
     pred = pred.t()
     correct = pred.eq(target.view(1, -1).expand_as(pred))
-
+    
     res = []
     for k in topk:
       correct_k = correct[:k].view(-1).float().sum(0, keepdim=True)
@@ -248,19 +248,19 @@ def accuracy(output, target, topk=(1,)):
 
 def train():
   print(f"Train numbers:{len(dataset)}")
-
+  
   # load model
-  model = LeNet(ngpu).to(device)
-
+  model = AlexNet().cuda()
+  
   # define optimizer
   optimizer = torch.optim.Adam(model.parameters(),
                                lr=opt.lr,
                                betas=(opt.beta1, 0.9),
                                weight_decay=opt.weight_decay)
-
+  
   for epoch in range(opt.niter):
     end = time.time()
-
+    
     batch_time = AverageMeter('Time', ':6.3f')
     data_time = AverageMeter('Data', ':6.3f')
     losses = AverageMeter('Loss', ':6.3f')
@@ -274,37 +274,39 @@ def train():
       top1,
       top5,
       prefix=f"Epoch: [{epoch + 1}]")
-
+    
     model.train()
-
+    
     for i, (data, target) in enumerate(dataloader, 0):
       # measure data loading time
       data_time.update(time.time() - end)
-
+      
+      data, target = data.cuda(), target.cuda()
+      
       # compute output
       output = model(data)
-      loss = criterion(output, target).to(device)
-
+      loss = criterion(output, target)
+      
       # measure accuracy and record loss
       acc1, acc5 = accuracy(output, target, topk=(1, 5))
       losses.update(loss.item(), data.size(0))
       top1.update(acc1[0], data.size(0))
       top5.update(acc5[0], data.size(0))
-
+      
       # compute gradient and do Adam step
       optimizer.zero_grad()
       loss.backward()
       optimizer.step()
-
+      
       # measure elapsed time
       batch_time.update(time.time() - end)
       end = time.time()
-
+      
       if i % opt.print_freq == 0:
         progress.print(i)
-
+    
     # Save the model checkpoint
-    torch.save(model, f"{opt.outf}/LeNet_epoch_{epoch + 1}.pth")
+    torch.save(model, f"{opt.outf}/AlexNet_epoch_{epoch + 1}.pth")
   print(f"Model save to '{opt.outf}'.")
 
 
@@ -314,7 +316,7 @@ def test():
   else:
     model = torch.load(f'{opt.outf}/AlexNet_epoch_{opt.niter}.pth', map_location="cpu")
   model.eval()
-
+  
   batch_time = AverageMeter('Time', ':6.3f')
   losses = AverageMeter('Loss', ':6.3f')
   top1 = AverageMeter('Acc@1', ':6.2f')
@@ -326,33 +328,34 @@ def test():
     top1,
     top5,
     prefix='Test: ')
-
+  
   with torch.no_grad():
     end = time.time()
     for i, (data, target) in enumerate(dataloader):
-      data, target = data.to(device), target.to(device)
+      data, target = data.cuda(), target.cuda()
       # compute output
       output = model(data)
-      loss = criterion(output, target).to(device)
-
+      loss = criterion(output, target)
+      
       # measure accuracy and record loss
       acc1, acc5 = accuracy(output, target, topk=(1, 5))
       losses.update(loss.item(), data.size(0))
       top1.update(acc1[0], data.size(0))
       top5.update(acc5[0], data.size(0))
-
+      
       # measure elapsed time
       batch_time.update(time.time() - end)
       end = time.time()
-
+      
       if i % opt.print_freq == 0:
         progress.print(i)
-
+    
     print(' * Acc@1 {top1.avg:.3f} Acc@5 {top5.avg:.3f}'
           .format(top1=top1, top5=top5))
 
 
-if opt.model == 'train':
-  train()
-elif opt.model == 'test':
-  test()
+if __name__ == '__main__':
+  if opt.model == 'train':
+    train()
+  elif opt.model == 'test':
+    test()
