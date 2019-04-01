@@ -10,8 +10,9 @@ import torchvision.transforms as transforms
 import torchvision.datasets as dset
 
 parser = argparse.ArgumentParser(description='PyTorch AlexNet Training')
-parser.add_argument('--dataset', required=True, help='cifar10/100 | fmnist/mnist | folder')
+parser.add_argument('--dataset', required=True, help='cifar-10/100 | fmnist/mnist | folder')
 parser.add_argument('--dataroot', required=True, help='path to dataset')
+parser.add_argument('--classes', type=int, required=True, help='classes of pictures')
 parser.add_argument('--workers', type=int, help='number of data loading workers', default=2)
 parser.add_argument('--batchSize', type=int, default=32, help='inputs batch size')
 parser.add_argument('--imageSize', type=int, default=32, help='the height / width of the inputs image to network')
@@ -28,6 +29,8 @@ parser.add_argument('--model', required=True, help='training models or testing m
 
 opt = parser.parse_args()
 print(opt)
+
+best_acc = 0.
 
 try:
   os.makedirs(opt.outf)
@@ -57,12 +60,12 @@ if opt.model == 'train':
     dataset = dset.ImageFolder(root=opt.dataroot,
                                transform=transform)
     nc = 3
-  elif opt.dataset == 'cifar10':
+  elif opt.dataset == 'cifar-10':
     dataset = dset.CIFAR10(root=opt.dataroot,
                            download=True,
                            transform=transform)
     nc = 3
-  elif opt.dataset == 'cifar100':
+  elif opt.dataset == 'cifar-100':
     dataset = dset.CIFAR100(root=opt.dataroot,
                             download=True,
                             transform=transform)
@@ -168,7 +171,7 @@ class LeNet(nn.Module):
       nn.Dropout(),
       nn.Linear(120, 84),
       nn.ReLU(inplace=True),
-      nn.Linear(84, 10)
+      nn.Linear(84, opt.classes)
     )
 
   def forward(self, inputs):
