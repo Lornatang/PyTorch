@@ -143,6 +143,9 @@ dataloader = torch.utils.data.DataLoader(
 device = torch.device("cuda:0" if opt.cuda else "cpu")
 ngpu = int(opt.ngpu)
 
+# define CrossEntropyLoss()
+criterion = nn.CrossEntropyLoss().to(device)
+
 
 class LeNet(nn.Module):
 
@@ -165,7 +168,7 @@ class LeNet(nn.Module):
       nn.Dropout(),
       nn.Linear(120, 84),
       nn.ReLU(inplace=True),
-      nn.Linear(84, 101)
+      nn.Linear(84, 10)
     )
 
   def forward(self, inputs):
@@ -239,10 +242,9 @@ def train():
   # load model
   model = LeNet(ngpu).to(device)
 
-  # define loss function (criterion) and optimizer
-  criterion = nn.CrossEntropyLoss().to(device)
-
-  optimizer = torch.optim.Adam(model.parameters(), opt.lr,
+  # define optimizer
+  optimizer = torch.optim.Adam(model.parameters(),
+                               lr=opt.lr,
                                betas=(opt.beta1, 0.9),
                                weight_decay=opt.weight_decay)
 
@@ -251,7 +253,7 @@ def train():
 
     batch_time = AverageMeter('Time', ':6.3f')
     data_time = AverageMeter('Data', ':6.3f')
-    losses = AverageMeter('Loss', ':.6f')
+    losses = AverageMeter('Loss', ':6.3f')
     top1 = AverageMeter('Acc@1', ':6.2f')
     top5 = AverageMeter('Acc@5', ':6.2f')
     progress = ProgressMeter(
@@ -261,7 +263,7 @@ def train():
       losses,
       top1,
       top5,
-      prefix=f"Epoch: [{epoch}]")
+      prefix=f"Epoch: [{epoch + 1}]")
 
     model.train()
 
@@ -279,7 +281,7 @@ def train():
       top1.update(acc1[0], data.size(0))
       top5.update(acc5[0], data.size(0))
 
-      # compute gradient and do SGD step
+      # compute gradient and do Adam step
       optimizer.zero_grad()
       loss.backward()
       optimizer.step()
@@ -291,20 +293,20 @@ def train():
       if i % opt.print_freq == 0:
         progress.print(i)
 
-      # Save the model checkpoint
-      torch.save(model, f"{opt.outf}/LeNet_epoch_{epoch + 1}.pth")
+    # Save the model checkpoint
+    torch.save(model, f"{opt.outf}/LeNet_epoch_{epoch + 1}.pth")
   print(f"Model save to '{opt.outf}'.")
 
 
 def test():
-  model = torch.load(f'{opt.outf}/LeNet_epoch_{opt.niter}.pth')
+  if torch.cuda.is_available():
+    model = torch.load(f'{opt.outf}/LeNet_epoch_{opt.niter}.pth')
+  else:
+    model = torch.load(f'{opt.outf}/LeNet_epoch_{opt.niter}.pth', map_location="cpu")
   model.eval()
 
-  # define loss function (criterion) and optimizer
-  criterion = nn.CrossEntropyLoss().to(device)
-
   batch_time = AverageMeter('Time', ':6.3f')
-  losses = AverageMeter('Loss', ':.6f')
+  losses = AverageMeter('Loss', ':6.3f')
   top1 = AverageMeter('Acc@1', ':6.2f')
   top5 = AverageMeter('Acc@5', ':6.2f')
   progress = ProgressMeter(
@@ -323,6 +325,7 @@ def test():
       output = model(data)
       loss = criterion(output, target).to(device)
 
+      # measure accuracy and record loss
       acc1, acc5 = accuracy(output, target, topk=(1, 5))
       losses.update(loss.item(), data.size(0))
       top1.update(acc1[0], data.size(0))
