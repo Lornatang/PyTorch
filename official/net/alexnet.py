@@ -30,8 +30,6 @@ parser.add_argument('--model', required=True, help='training models or testing m
 opt = parser.parse_args()
 print(opt)
 
-best_acc = 0.
-
 try:
   os.makedirs(opt.outf)
 except OSError:
