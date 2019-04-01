@@ -147,14 +147,13 @@ device = torch.device("cuda:0" if opt.cuda else "cpu")
 ngpu = int(opt.ngpu)
 
 # define CrossEntropyLoss()
-criterion = nn.CrossEntropyLoss().to(device)
+criterion = nn.CrossEntropyLoss().cuda()
 
 
 class LeNet(nn.Module):
 
-  def __init__(self, ngpus):
+  def __init__(self):
     super(LeNet, self).__init__()
-    self.ngpu = ngpus
     self.features = nn.Sequential(
       nn.Conv2d(nc, 6, kernel_size=5, stride=1, padding=1),
       nn.ReLU(inplace=True),
@@ -243,7 +242,7 @@ def train():
   print(f"Train numbers:{len(dataset)}")
 
   # load model
-  model = LeNet(ngpu).to(device)
+  model = LeNet().cuda()
 
   # define optimizer
   optimizer = torch.optim.Adam(model.parameters(),
@@ -273,10 +272,12 @@ def train():
     for i, (data, target) in enumerate(dataloader, 0):
       # measure data loading time
       data_time.update(time.time() - end)
+      
+      data, target = data.cuda(), target.cuda()
 
       # compute output
       output = model(data)
-      loss = criterion(output, target).to(device)
+      loss = criterion(output, target)
 
       # measure accuracy and record loss
       acc1, acc5 = accuracy(output, target, topk=(1, 5))
@@ -323,10 +324,10 @@ def test():
   with torch.no_grad():
     end = time.time()
     for i, (data, target) in enumerate(dataloader):
-      data, target = data.to(device), target.to(device)
+      data, target = data.cuda(), target.cuda()
       # compute output
       output = model(data)
-      loss = criterion(output, target).to(device)
+      loss = criterion(output, target)
 
       # measure accuracy and record loss
       acc1, acc5 = accuracy(output, target, topk=(1, 5))
@@ -345,7 +346,8 @@ def test():
           .format(top1=top1, top5=top5))
 
 
-if opt.model == 'train':
-  train()
-elif opt.model == 'test':
-  test()
+if __name__ == '__main__':
+  if opt.model == 'train':
+    train()
+  elif opt.model == 'test':
+    test()
