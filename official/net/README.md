@@ -144,7 +144,7 @@ Different varieties of the same fruit (apple for instance) are stored as belongi
 - The paper introduces the dataset and an implementation of a Neural Network trained to recognized the fruits in the dataset.
 
 ### 2.5.5 Download
-Collection of pictures: [fruits.zip](https://www.kaggle.com/moltean/fruits/downloads/fruits.zip/44)
+Collection of pictures: [fruits.zip](https://www.kaggle.com/moltean/fruits)
 
 # Result
 
