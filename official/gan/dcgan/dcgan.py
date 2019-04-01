@@ -2,7 +2,6 @@ import argparse
 import os
 import random
 
-import torch
 import torch.nn as nn
 import torch.backends.cudnn as cudnn
 import torch.optim as optim
@@ -10,7 +9,6 @@ import torch.utils.data
 import torchvision.datasets as dset
 import torchvision.transforms as transforms
 import torchvision.utils as vutils
-
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--dataset', required=True, help='cifar10 | lsun | mnist |imagenet | folder | lfw | fake')
@@ -50,51 +48,56 @@ cudnn.benchmark = True
 if torch.cuda.is_available() and not opt.cuda:
   print("WARNING: You have a CUDA device, so you should probably run with --cuda")
 
+transform = transforms.Compose([
+  transforms.Resize(opt.imageSize),
+  transforms.CenterCrop(opt.imageSize),
+  transforms.ToTensor(),
+  transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+])
+
 if opt.dataset in ['imagenet', 'folder', 'lfw']:
   # folder dataset
   dataset = dset.ImageFolder(root=opt.dataroot,
-                             transform=transforms.Compose([
-                               transforms.Resize(opt.imageSize),
-                               transforms.CenterCrop(opt.imageSize),
-                               transforms.ToTensor(),
-                               transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
-                             ]))
+                             transform=transform)
   nc = 3
-elif opt.dataset == 'lsun':
-  dataset = dset.LSUN(root=opt.dataroot, classes=['bedroom_train'],
-                      transform=transforms.Compose([
-                        transforms.Resize(opt.imageSize),
-                        transforms.CenterCrop(opt.imageSize),
-                        transforms.ToTensor(),
-                        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
-                      ]))
+elif opt.dataset == 'cifar-10':
+  dataset = dset.CIFAR10(root=opt.dataroot,
+                         download=True,
+                         transform=transform)
   nc = 3
-elif opt.dataset == 'cifar10':
-  dataset = dset.CIFAR10(root=opt.dataroot, download=True,
-                         transform=transforms.Compose([
-                           transforms.Resize(opt.imageSize),
-                           transforms.ToTensor(),
-                           transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
-                         ]))
+elif opt.dataset == 'cifar-100':
+  dataset = dset.CIFAR100(root=opt.dataroot,
+                          download=True,
+                          transform=transform)
   nc = 3
-
 elif opt.dataset == 'mnist':
-  dataset = dset.MNIST(root=opt.dataroot, download=True,
+  dataset = dset.MNIST(root=opt.dataroot,
+                       download=True,
                        transform=transforms.Compose([
                          transforms.Resize(opt.imageSize),
+                         transforms.CenterCrop(opt.imageSize),
                          transforms.ToTensor(),
                          transforms.Normalize((0.5,), (0.5,)),
                        ]))
   nc = 1
-
-elif opt.dataset == 'fake':
-  dataset = dset.FakeData(image_size=(3, opt.imageSize, opt.imageSize),
-                          transform=transforms.ToTensor())
-  nc = 3
+elif opt.dataset == 'fmnist':
+  dataset = dset.FashionMNIST(root=opt.dataroot,
+                              download=True,
+                              transform=transforms.Compose([
+                                transforms.Resize(opt.imageSize),
+                                transforms.CenterCrop(opt.imageSize),
+                                transforms.ToTensor(),
+                                transforms.Normalize((0.5,), (0.5,)),
+                              ]))
+  nc = 1
 
 assert dataset
-dataloader = torch.utils.data.DataLoader(dataset, batch_size=opt.batchSize,
-                                         shuffle=True, num_workers=int(opt.workers))
+dataloader = torch.utils.data.DataLoader(
+  dataset,
+  batch_size=opt.batchSize,
+  shuffle=True,
+  num_workers=int(
+    opt.workers))
 
 if opt.cuda:
   cuda = True if torch.cuda.is_available() else False
@@ -137,10 +140,11 @@ class Generator(nn.Module):
       nn.Tanh()
       # state size. (nc) x 32 x 32
     )
-  
+
   def forward(self, inputs):
     if inputs.is_cuda and self.ngpu > 1:
-      outputs = nn.parallel.data_parallel(self.main, inputs, range(self.ngpu))
+      outputs = nn.parallel.data_parallel(
+        self.main, inputs, range(self.ngpu))
     else:
       outputs = self.main(inputs)
     return outputs
@@ -165,13 +169,14 @@ class Discriminator(nn.Module):
       nn.Conv2d(ndf * 4, 1, 4, 1, 0, bias=False),
       nn.Sigmoid()
     )
-  
+
   def forward(self, inputs):
     if inputs.is_cuda and self.ngpu > 1:
-      outputs = nn.parallel.data_parallel(self.main, inputs, range(self.ngpu))
+      outputs = nn.parallel.data_parallel(
+        self.main, inputs, range(self.ngpu))
     else:
       outputs = self.main(inputs)
-    
+
     return outputs.view(-1, 1).squeeze(1)
 
 
@@ -192,8 +197,18 @@ real_label = 1
 fake_label = 0
 
 # setup optimizer
-optimizerD = optim.Adam(Discriminator.parameters(), lr=opt.lr, betas=(opt.beta1, 0.999))
-optimizerG = optim.Adam(Generator.parameters(), lr=opt.lr, betas=(opt.beta1, 0.999))
+optimizerD = optim.Adam(
+  Discriminator.parameters(),
+  lr=opt.lr,
+  betas=(
+    opt.beta1,
+    0.999))
+optimizerG = optim.Adam(
+  Generator.parameters(),
+  lr=opt.lr,
+  betas=(
+    opt.beta1,
+    0.999))
 
 for epoch in range(opt.niter):
   for i, data in enumerate(dataloader, 0):
@@ -205,12 +220,12 @@ for epoch in range(opt.niter):
     real_cpu = data[0]
     batch_size = real_cpu.size(0)
     label = torch.full((batch_size,), real_label)
-    
+
     output = Discriminator(real_cpu)
     errD_real = criterion(output, label)
     errD_real.backward()
     D_x = output.mean().item()
-    
+
     # train with fake
     noise = torch.randn(batch_size, nz, 1, 1)
     fake = Generator(noise)
@@ -221,7 +236,7 @@ for epoch in range(opt.niter):
     D_G_z1 = output.mean().item()
     errD = errD_real + errD_fake
     optimizerD.step()
-    
+
     ############################
     # (2) Update G network: maximize log(D(G(z)))
     ###########################
@@ -232,7 +247,7 @@ for epoch in range(opt.niter):
     errG.backward()
     D_G_z2 = output.mean().item()
     optimizerG.step()
-    
+
     print(f"[{epoch}/{opt.niter}][{i}/{len(dataloader)}] "
           f"Loss_D: {errD.item():.4f} "
           f"Loss_G: {errG.item():.4f} "
@@ -244,10 +259,11 @@ for epoch in range(opt.niter):
                         f"{opt.outf}/real_samples.png",
                         normalize=True)
       fake = Generator(fixed_noise)
-      vutils.save_image(fake.detach(),
-                        f"{opt.outf}/fake_samples_epoch_{epoch+1:03d}.png",
-                        normalize=True)
-  
+      vutils.save_image(
+        fake.detach(),
+        f"{opt.outf}/fake_samples_epoch_{epoch+1:03d}.png",
+        normalize=True)
+
   # do checkpointing
   torch.save(Generator, f"{opt.outf}/netG_epoch_{epoch+1}.pth")
   torch.save(Discriminator, f"{opt.outf}/netD_epoch_{epoch+1}.pth")
