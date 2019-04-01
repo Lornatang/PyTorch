@@ -153,42 +153,18 @@ Collection of pictures: [fruits.zip](https://www.kaggle.com/moltean/fruits/downl
 
 # Result
 
-|    Model       |   DataSet   |  Accuracy  |Epoch |
-|:---------------|:------------|:----------:|:----:|
-|LeNet-5         |MNIST        |98%         |25
-|LeNet-5         |Fashion-MNIST|86%         |25
-|LeNet-5         |CIFAR-10     |56%         |25
-|LeNet-5         |CIFAR-100    |19%         |25
-|LeNet-5         |NOT-MNIST    |89%         |25
-|LeNet-5[+]      |Caltech-101  |35%         |25
-|LeNet-5[+]      |Caltech-256  |14%         |25
-|LeNet-5[+]      |Fruits       |91%         |25
-|----------------|-------------|------------|--
-|AlexNet[+]      |MNIST        |99%         |14
-|AlexNet[+]      |Fashion-MNIST|90%         |14
-|AlexNet[+]      |CIFAR-10     |74%         |17
-|AlexNet[+]      |CIFAR-100    |39%         |17
-|AlexNet[+]      |NOT_MNIST    |_           |_
-|AlexNet         |Caltech-101  |71%         |_
-|AlexNet         |Caltech-256  |_           |_
-|AlexNet         |Fruits       |_           |_
-|----------------|-------------|------------|--
-|VGG-11          |MNIST        |_           |_
-|VGG-11          |Fashion-MNIST|_           |_
-|VGG-11          |CIFAR-10     |_           |_
-|VGG-11          |CIFAR-100    |_           |_
-|VGG-11          |NOT-MNIST    |_           |_
-|VGG-11          |Caltech-101  |93%         |25
-|VGG-11          |Caltech-256  |_           |_
-|----------------|-------------|------------|--
-|VGG-11_bn       |Caltech-101  |96%         |25
-|----------------|-------------|------------|--
-|SqueezeNet      |Caltech-101  |25%         |25
-|----------------|-------------|------------|--
-|DenseNet-121    |Caltech-101  |97%         |25
-|----------------|-------------|------------|--
-|ResNet-18       |Caltech-101  |99%         |25
-|----------------|-------------|------------|--
+|    Model       |   DataSet   | Top-1 | Top-5 | Epoch |
+|:---------------|:------------|:-----:|:-----:|:------|
+|LeNet-5         |MNIST        |98.450 |99.910 |25     |
+|LeNet-5         |Fashion-MNIST|_      |_      |_      |
+|LeNet-5         |CIFAR-10     |_      |_      |_      |
+|LeNet-5         |CIFAR-100    |_      |_      |_      |
+|LeNet-5         |NOT-MNIST    |_      |_      |_      |
+|LeNet-5[+]      |Caltech-101  |_      |_      |_      |
+|LeNet-5[+]      |Caltech-256  |_      |_      |_      |
+|LeNet-5[+]      |Fruits       |_      |_      |_      |
+|----------------|-------------|-------|-------|-------|
+
 
 *Tips:
  
