@@ -1,7 +1,6 @@
 import argparse
 import os
 import numpy as np
-import math
 import itertools
 import datetime
 import time
@@ -10,7 +9,6 @@ import torchvision.transforms as transforms
 from torchvision.utils import save_image, make_grid
 
 from torch.utils.data import DataLoader
-from torchvision import datasets
 from torch.autograd import Variable
 
 from models import *
@@ -18,7 +16,6 @@ from datasets import *
 from utils import *
 
 import torch.nn as nn
-import torch.nn.functional as F
 import torch
 
 parser = argparse.ArgumentParser()
