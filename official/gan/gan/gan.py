@@ -146,7 +146,7 @@ class Discriminator(nn.Module):
       nn.LeakyReLU(0.2, inplace=True),
       nn.Linear(512, 256),
       nn.LeakyReLU(0.2, inplace=True),
-      nn.Linear(256, 1),
+      nn.Linear(256, 3),
       nn.Sigmoid(),
     )
 
@@ -184,60 +184,65 @@ Tensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
 #  Training
 # ----------
 
-for epoch in range(opt.niter):
-  for i, (data, _) in enumerate(dataloader):
-    # Adversarial ground truths
-    valid = Variable(Tensor(data.size(0), 1).fill_(1.0), requires_grad=False)
-    fake = Variable(Tensor(data.size(0), 1).fill_(0.0), requires_grad=False)
+def main():
+  for epoch in range(opt.niter):
+    for i, (data, _) in enumerate(dataloader):
+      # Adversarial ground truths
+      valid = Variable(Tensor(data.size(0), 1).fill_(1.0), requires_grad=False)
+      fake = Variable(Tensor(data.size(0), 1).fill_(0.0), requires_grad=False)
 
-    # Configure input
-    real_imgs = Variable(data.type(Tensor))
+      # Configure input
+      real_imgs = Variable(data.type(Tensor))
 
-    # -----------------
-    #  Train Generator
-    # -----------------
+      # -----------------
+      #  Train Generator
+      # -----------------
 
-    optimizer_G.zero_grad()
+      optimizer_G.zero_grad()
 
-    # Sample noise as generator input
-    z = Variable(Tensor(np.random.normal(0, 1, (data.shape[0], opt.nz))))
+      # Sample noise as generator input
+      z = Variable(Tensor(np.random.normal(0, 1, (data.shape[0], opt.nz))))
 
-    # Generate a batch of images
-    gen_imgs = netG(z)
+      # Generate a batch of images
+      gen_imgs = netG(z)
 
-    # Loss measures generator's ability to fool the discriminator
-    g_loss = adversarial_loss(netD(gen_imgs), valid)
+      # Loss measures generator's ability to fool the discriminator
+      g_loss = adversarial_loss(netD(gen_imgs), valid)
 
-    g_loss.backward()
-    optimizer_G.step()
+      g_loss.backward()
+      optimizer_G.step()
 
-    # ---------------------
-    #  Train Discriminator
-    # ---------------------
+      # ---------------------
+      #  Train Discriminator
+      # ---------------------
 
-    optimizer_D.zero_grad()
+      optimizer_D.zero_grad()
 
-    # Measure discriminator's ability to classify real from generated samples
-    real_loss = adversarial_loss(netD(real_imgs), valid)
-    fake_loss = adversarial_loss(netD(gen_imgs.detach()), fake)
-    d_loss = (real_loss + fake_loss) / 2
+      # Measure discriminator's ability to classify real from generated samples
+      real_loss = adversarial_loss(netD(real_imgs), valid)
+      fake_loss = adversarial_loss(netD(gen_imgs.detach()), fake)
+      d_loss = (real_loss + fake_loss) / 2
 
-    d_loss.backward()
-    optimizer_D.step()
+      d_loss.backward()
+      optimizer_D.step()
 
-    print(
-      "[Epoch %d/%d] [Batch %d/%d] [D loss: %f] [G loss: %f]"
-      % (epoch, opt.niter, i, len(dataloader), d_loss.item(), g_loss.item())
-    )
+      print(
+        "[Epoch %d/%d] [Batch %d/%d] [D loss: %f] [G loss: %f]"
+        % (epoch, opt.niter, i, len(dataloader), d_loss.item(), g_loss.item())
+      )
 
-    if i % 100 == 0:
-      vutils.save_image(real_imgs,
-                        '%s/real_samples.png' % opt.outf,
-                        normalize=True)
-      fake = netG(z)
-      vutils.save_image(fake.detach(),
-                        '%s/fake_samples_epoch_%03d.png' % (opt.outf, epoch),
-                        normalize=True)
-  # do checkpointing
-  torch.save(netG, '%s/netG_epoch_%d.pth' % (opt.outf, epoch))
-  torch.save(netD, '%s/netD_epoch_%d.pth' % (opt.outf, epoch))
+      if i % 100 == 0:
+        vutils.save_image(real_imgs,
+                          '%s/real_samples.png' % opt.outf,
+                          normalize=True)
+        fake = netG(z)
+        vutils.save_image(fake.detach(),
+                          '%s/fake_samples_epoch_%03d.png' % (opt.outf, epoch),
+                          normalize=True)
+    # do checkpointing
+    torch.save(netG, '%s/netG_epoch_%d.pth' % (opt.outf, epoch))
+    torch.save(netD, '%s/netD_epoch_%d.pth' % (opt.outf, epoch))
+
+
+if __name__ == '__main__':
+    main()
