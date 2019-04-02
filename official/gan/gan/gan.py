@@ -24,7 +24,7 @@ parser.add_argument('--imageSize', type=int, default=64, help='the height / widt
 parser.add_argument('--nz', type=int, default=100, help='size of the latent z vector')
 parser.add_argument('--ngf', type=int, default=64)
 parser.add_argument('--ndf', type=int, default=64)
-parser.add_argument('--niter', type=int, default=25, help='number of epochs to train for')
+parser.add_argument('--niter', type=int, default=175, help='number of epochs to train for')
 parser.add_argument('--lr', type=float, default=0.0002, help='learning rate, default=0.0002')
 parser.add_argument('--beta1', type=float, default=0.5, help='beta1 for adam. default=0.5')
 parser.add_argument('--cuda', action='store_true', help='enables cuda')
@@ -165,9 +165,9 @@ netG = Generator()
 netD = Discriminator()
 
 if opt.netD != '':
-  torch.load(opt.netD)
+  netD = torch.load(opt.netD)
 if opt.netG != '':
-  torch.load(opt.netG)
+  netG = torch.load(opt.netG)
 
 if cuda:
   netG.cuda()
