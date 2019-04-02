@@ -117,6 +117,5 @@ dmypy.json
 .idea/
 .vscode/
 *.DS_Store
-*.pth
 *.png
 *.jpg
