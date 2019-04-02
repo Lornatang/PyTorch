@@ -1,4 +1,4 @@
-<p align="center"><img src="assets/logo.png" width="480"\></p>
+<p align="center"><img src="assets/logo.png" width="1000"\></p>
 
 ## PyTorch-GAN
 Collection of PyTorch. 
