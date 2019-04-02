@@ -681,3 +681,6 @@ $ python3 wgan_div.py
 <p align="center">
     <img src="assets/wgan_div.png" width="240"\>
 </p>
+
+
+# Thanks: [eriklindernoren](https://github.com/eriklindernoren)
