@@ -161,8 +161,8 @@ class Discriminator(nn.Module):
 adversarial_loss = torch.nn.BCELoss()
 
 # Initialize generator and discriminator
-generator = Generator()
-discriminator = Discriminator()
+netG = Generator()
+netD = Discriminator()
 
 if opt.netD != '':
   torch.load(opt.netD)
@@ -170,13 +170,13 @@ if opt.netG != '':
   torch.load(opt.netG)
 
 if cuda:
-  generator.cuda()
-  discriminator.cuda()
+  netG.cuda()
+  netD.cuda()
   adversarial_loss.cuda()
 
 # Optimizers
-optimizer_G = torch.optim.Adam(generator.parameters(), lr=opt.lr, betas=(opt.beta1, 0.999))
-optimizer_D = torch.optim.Adam(discriminator.parameters(), lr=opt.lr, betas=(opt.beta1, 0.999))
+optimizer_G = torch.optim.Adam(netG.parameters(), lr=opt.lr, betas=(opt.beta1, 0.999))
+optimizer_D = torch.optim.Adam(netD.parameters(), lr=opt.lr, betas=(opt.beta1, 0.999))
 
 Tensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
 
@@ -203,10 +203,10 @@ for epoch in range(opt.niter):
     z = Variable(Tensor(np.random.normal(0, 1, (data.shape[0], opt.nz))))
 
     # Generate a batch of images
-    gen_imgs = generator(z)
+    gen_imgs = netG(z)
 
     # Loss measures generator's ability to fool the discriminator
-    g_loss = adversarial_loss(discriminator(gen_imgs), valid)
+    g_loss = adversarial_loss(netD(gen_imgs), valid)
 
     g_loss.backward()
     optimizer_G.step()
@@ -218,8 +218,8 @@ for epoch in range(opt.niter):
     optimizer_D.zero_grad()
 
     # Measure discriminator's ability to classify real from generated samples
-    real_loss = adversarial_loss(discriminator(real_imgs), valid)
-    fake_loss = adversarial_loss(discriminator(gen_imgs.detach()), fake)
+    real_loss = adversarial_loss(netD(real_imgs), valid)
+    fake_loss = adversarial_loss(netD(gen_imgs.detach()), fake)
     d_loss = (real_loss + fake_loss) / 2
 
     d_loss.backward()
@@ -234,10 +234,10 @@ for epoch in range(opt.niter):
       vutils.save_image(real_imgs,
                         '%s/real_samples.png' % opt.outf,
                         normalize=True)
-      fake = generator(z)
+      fake = netG(z)
       vutils.save_image(fake.detach(),
                         '%s/fake_samples_epoch_%03d.png' % (opt.outf, epoch),
                         normalize=True)
   # do checkpointing
-  torch.save(generator, '%s/netG_epoch_%d.pth' % (opt.outf, epoch))
-  torch.save(discriminator, '%s/netD_epoch_%d.pth' % (opt.outf, epoch))
+  torch.save(netG, '%s/netG_epoch_%d.pth' % (opt.outf, epoch))
+  torch.save(netD, '%s/netD_epoch_%d.pth' % (opt.outf, epoch))
