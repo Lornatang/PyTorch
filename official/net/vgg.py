@@ -5,19 +5,19 @@ import time
 import math
 
 import torch.nn as nn
-import torch.nn.functional as F
 import torch.optim as optim
 import torch.utils.data
 import torchvision.transforms as transforms
 import torchvision.datasets as dset
+
 
 parser = argparse.ArgumentParser(description='PyTorch AlexNet Training')
 parser.add_argument('--dataset', required=True, help='cifar-10/100 | fmnist/mnist | folder')
 parser.add_argument('--dataroot', required=True, help='path to dataset')
 parser.add_argument('--classes', type=int, required=True, help='classes of pictures')
 parser.add_argument('--workers', type=int, help='number of data loading workers', default=4)
-parser.add_argument('--batchSize', type=int, default=32, help='inputs batch size')
-parser.add_argument('--imageSize', type=int, default=32, help='the height / width of the inputs image to network')
+parser.add_argument('--batchSize', type=int, default=128, help='inputs batch size')
+parser.add_argument('--imageSize', type=int, default=224, help='the height / width of the inputs image to network')
 parser.add_argument('--niter', type=int, default=25, help='number of epochs to train for')
 parser.add_argument('--lr', type=float, default=0.0001, help='learning rate, default=0.0001')
 parser.add_argument('--beta1', type=float, default=0.5, help='beta1 for adam. default=0.5')
@@ -156,7 +156,7 @@ class VGG(nn.Module):
     super(VGG, self).__init__()
     self.features = features
     self.classifier = nn.Sequential(
-      nn.Linear(512 * 1 * 1, 4096),
+      nn.Linear(512 * 7 * 7, 4096),
       nn.ReLU(True),
       nn.Dropout(),
       nn.Linear(4096, 4096),
@@ -169,9 +169,9 @@ class VGG(nn.Module):
   
   def forward(self, x):
     x = self.features(x)
-    x = x.view(-1, 512 * 1 * 1)
+    x = x.view(-1, 512 * 7 * 7)
     x = self.classifier(x)
-    return F.log_softmax(x, dim=1)
+    return x
   
   def _initialize_weights(self):
     for m in self.modules():
