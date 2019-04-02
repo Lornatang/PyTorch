@@ -173,7 +173,7 @@ Collection of pictures: [fruits.zip](https://www.kaggle.com/moltean/fruits)
 |VGG11|CIFAR-10|74.110|97.800|17
 |-----|-------|-----|-----|-----|
 |VGG11_bn|CIFAR-10|82.187|99.241|25
-|VGG11_bn|Caltech_256|_|_|_
+|VGG11_bn|Caltech_256|81.073|94.393|50
 |-----|-------|-----|-----|-----|
 |VGG19|CIFAR-10|72.310|96.370|25
 |VGG19|Caltech_256|_|_|_
