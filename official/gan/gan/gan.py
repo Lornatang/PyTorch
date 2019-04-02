@@ -164,6 +164,11 @@ adversarial_loss = torch.nn.BCELoss()
 generator = Generator()
 discriminator = Discriminator()
 
+if opt.netD != '':
+  torch.load(opt.netD)
+if opt.netG != '':
+  torch.load(opt.netG)
+
 if cuda:
   generator.cuda()
   discriminator.cuda()
