@@ -1,6 +1,7 @@
 import argparse
 import os
 import random
+
 import torch.nn as nn
 import torch.backends.cudnn as cudnn
 import torch.optim as optim
@@ -251,12 +252,12 @@ def main():
                           normalize=True)
         fake = netG(fixed_noise)
         vutils.save_image(fake.detach(),
-                          '%s/fake_samples_epoch_%03d.png' % (opt.outf, epoch),
+                          '%s/fake_samples_epoch_%03d.png' % (opt.outf, epoch+1),
                           normalize=True)
 
     # do checkpointing
-    torch.save(netG, '%s/netG_epoch_%d.pth' % (opt.outf, epoch))
-    torch.save(netD, '%s/netD_epoch_%d.pth' % (opt.outf, epoch))
+    torch.save(netG, '%s/netG_epoch_%d.pth' % (opt.outf, epoch+1))
+    torch.save(netD, '%s/netD_epoch_%d.pth' % (opt.outf, epoch+1))
 
 
 if __name__ == '__main__':
