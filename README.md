@@ -94,7 +94,7 @@ docker build -t pytorch -f docker/pytorch/Dockerfile .
 ```
 
 You can also pull a pre-built docker image from Docker Hub and run with nvidia-docker,
-but this is not currently maintained and will pull PyTorch 0.2.
+but this is not currently maintained and will pull PyTorch 0.4.
 ```
 nvidia-docker run --rm -ti --ipc=host pytorch/pytorch:latest
 ```
