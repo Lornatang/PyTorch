@@ -1,61 +1,35 @@
-import re
-import urllib.request
-
-import requests
-
-
-def get_onepage_urls(onepageurl):
-    """获取单个翻页的所有图片的urls+当前翻页的下一翻页的url"""
-    if not onepageurl:
-        print('已到最后一页, 结束')
-        return [], ''
-    try:
-        html = requests.get(onepageurl).text
-    except Exception as e:
-        print(e)
-        pic_urls = []
-        fanye_url = ''
-        return pic_urls, fanye_url
-    pic_urls = re.findall('"objURL":"(.*?)",', html, re.S)
-    fanye_urls = re.findall(
-        re.compile(r'<a href="(.*)" class="n">下一页</a>'),
-        html,
-        flags=0)
-    fanye_url = 'http://image.baidu.com' + fanye_urls[0] if fanye_urls else ''
-    return pic_urls, fanye_url
+import re  # 导入正则表达式模块
+import requests  # python HTTP客户端 编写爬虫和测试服务器经常用到的模块
+import random  # 随机生成一个数，范围[0,1]
+import os
 
 
-def down_pic(pic_urls):
-    """给出图片链接列表, 下载所有图片"""
-    for i, pic_url in enumerate(pic_urls):
+if not os.path.isdir('data'):
+    os.makedirs('data')
+
+
+# 定义函数方法
+def spider_pic(html, keyword):
+    print('正在查找 ' + keyword + ' 对应的图片,下载中，请稍后......')
+    for addr in re.findall('"objURL":"(.*?)"', html, re.S):  # 查找URL
+        print('正在爬取URL地址：' + str(addr)[0:30] + '...')  # 爬取的地址长度超过30时，用'...'代替后面的内容
+
         try:
-            pic = requests.get(pic_url, timeout=15)
-            string = './data/' + str(i + 1) + '.jpg'
-            with open(string, 'wb') as f:
-                f.write(pic.content)
-                print('成功下载第%s张图片: %s' % (str(i + 1), str(pic_url)))
-        except Exception as e:
-            print('下载第%s张图片时失败: %s' % (str(i + 1), str(pic_url)))
-            print(e)
+            pics = requests.get(addr, timeout=10)  # 请求URL时间（最大10秒）
+        except requests.exceptions.ConnectionError:
+            print('您当前请求的URL地址出现错误')
             continue
 
+        fq = open('./data/' + (str(random.randrange(0, 10000, 4)) + '.jpg'), 'wb')  # 下载图片，并保存和命名
+        fq.write(pics.content)
+        fq.close()
 
+
+# python的主方法
 if __name__ == '__main__':
-    keyword = '张杰高清壁纸'  # 关键词, 改为你想输入的词即可, 相当于在百度图片里搜索一样
-    url_init_first = r'http://image.baidu.com/search/flip?tn=baiduimage&ipn=r&ct=201326592&cl=2&lm=-1&st=-1&fm=result' \
-                     r'&fr=&sf=1&fmq=1497491098685_R&pv=&ic=0&nc=1&z=&se=1&showtab=0&fb=0&width=&height=&face=0&isty' \
-                     r'pe=2&ie=utf-8&ctd=1497491098685%5E00_1519X735&word='
-    url_init = url_init_first + urllib.request.quote(keyword, safe='/')
-    all_pic_urls = []
-    onepage_urls, fanye_url = get_onepage_urls(url_init)
-    all_pic_urls.extend(onepage_urls)
+    word = input('请输入你要搜索的图片关键字：')
+    result = requests.get(
+        'http://image.baidu.com/search/index?tn=baiduimage&ps=1&ct=201326592&lm=-1&cl=2&nc=1&ie=utf-8&word=' + word)
 
-    fanye_count = 0  # 累计翻页数
-    while True:
-        onepage_urls, fanye_url = get_onepage_urls(fanye_url)
-        fanye_count += 1
-        print('第%s页' % fanye_count)
-        if fanye_url == '' and onepage_urls == []:
-            break
-        all_pic_urls.extend(onepage_urls)
-    down_pic(list(set(all_pic_urls)))
+# 调用函数
+spider_pic(result.text, word)
