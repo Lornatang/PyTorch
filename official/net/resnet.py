@@ -35,7 +35,7 @@ parser.add_argument(
 parser.add_argument(
     '--imageSize',
     type=int,
-    default=32,
+    default=224,
     help='the height / width of the inputs image to network')
 parser.add_argument(
     '--niter',
@@ -272,7 +272,7 @@ class Bottleneck(nn.Module):
 
     return out
 
-
+import torchvision.models.resnet
 class ResNet(nn.Module):
 
   def __init__(self, block, layers):
@@ -287,7 +287,7 @@ class ResNet(nn.Module):
     self.layer2 = self._make_layer(block, 128, layers[1], stride=2)
     self.layer3 = self._make_layer(block, 256, layers[2], stride=2)
     self.layer4 = self._make_layer(block, 512, layers[3], stride=2)
-    self.avgpool = nn.AvgPool2d(1, stride=1)  # raw kernel_size=7, stride=1. For use img size 224 * 224.
+    self.avgpool = nn.AvgPool2d(1, stride=1)
     self.fc = nn.Linear(512 * block.expansion, opt.classes)
 
     for m in self.modules():
