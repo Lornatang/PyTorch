@@ -181,12 +181,13 @@ Collection of pictures: [fruits.zip](https://www.kaggle.com/moltean/fruits)
 |VGG19_bn|CIFAR-10|_|_|_
 |VGG19_bn|Caltech_256|_|_|_
 |-----|-------|-----|-----|-----|
-|DenseNet121|CIFAR-10|_|_|_
-|DenseNet121|Caltech_256|_|_|_
+|DenseNet121|Caltech-101|99.677|100.000|6
+|DenseNet121|Caltech_256|91.832|98.442|25|
 |-----|-------|-----|-----|-----|
 |DenseNet201|CIFAR-10|_|_|_
 |DenseNet201|Caltech_256|_|_|_
 |-----|-------|-----|-----|-----|
+|ResNet50|Caltech_256|97.664|99.768|25
 
 
 
