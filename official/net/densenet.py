@@ -4,6 +4,7 @@ import random
 import time
 
 import torch.nn as nn
+import torch.nn.functional as F
 import torch.optim as optim
 import torch.utils.data
 import torchvision.transforms as transforms
@@ -345,19 +346,11 @@ class DenseNet(nn.Module):
       bn_size (int) - multiplicative factor for number of bottle neck layers
         (i.e. bn_size * k features in the bottleneck layer)
       drop_rate (float) - dropout rate after each dense layer
+      num_classes (int) - number of classification classes
   """
 
-  def __init__(
-          self,
-          growth_rate=32,
-          block_config=(
-                  6,
-                  12,
-                  24,
-                  16),
-          num_init_features=64,
-          bn_size=4,
-          drop_rate=0):
+  def __init__(self, growth_rate=32, block_config=(6, 12, 24, 16),
+               num_init_features=64, bn_size=4, drop_rate=0, num_classes=1000):
 
     super(DenseNet, self).__init__()
 
@@ -372,18 +365,12 @@ class DenseNet(nn.Module):
     # Each denseblock
     num_features = num_init_features
     for i, num_layers in enumerate(block_config):
-      block = _DenseBlock(
-        num_layers=num_layers,
-        num_input_features=num_features,
-        bn_size=bn_size,
-        growth_rate=growth_rate,
-        drop_rate=drop_rate)
+      block = _DenseBlock(num_layers=num_layers, num_input_features=num_features,
+                          bn_size=bn_size, growth_rate=growth_rate, drop_rate=drop_rate)
       self.features.add_module('denseblock%d' % (i + 1), block)
       num_features = num_features + num_layers * growth_rate
       if i != len(block_config) - 1:
-        trans = _Transition(
-          num_input_features=num_features,
-          num_output_features=num_features // 2)
+        trans = _Transition(num_input_features=num_features, num_output_features=num_features // 2)
         self.features.add_module('transition%d' % (i + 1), trans)
         num_features = num_features // 2
 
@@ -391,25 +378,24 @@ class DenseNet(nn.Module):
     self.features.add_module('norm5', nn.BatchNorm2d(num_features))
 
     # Linear layer
-    self.classifier = nn.Linear(num_features, opt.classes)
+    self.classifier = nn.Linear(num_features, num_classes)
 
     # Official init from torch repo.
     for m in self.modules():
       if isinstance(m, nn.Conv2d):
-        nn.init.kaiming_normal_(m.weight.data)
+        nn.init.kaiming_normal_(m.weight)
       elif isinstance(m, nn.BatchNorm2d):
-        m.weight.data.fill_(1)
-        m.bias.data.zero_()
+        nn.init.constant_(m.weight, 1)
+        nn.init.constant_(m.bias, 0)
       elif isinstance(m, nn.Linear):
-        m.bias.data.zero_()
+        nn.init.constant_(m.bias, 0)
 
-  def forward(self, inputs):
-    x = self.features(inputs)
-    nn.ReLU(inplace=True)
-    nn.AvgPool2d(kernel_size=7, stride=1)
-    x = x.view(x.size(0), -1)
-    x = self.classifier(x)
-    return x
+  def forward(self, x):
+    features = self.features(x)
+    out = F.relu(features, inplace=True)
+    out = F.adaptive_avg_pool2d(out, (1, 1)).view(features.size(0), -1)
+    out = self.classifier(out)
+    return out
 
 
 class AverageMeter(object):
