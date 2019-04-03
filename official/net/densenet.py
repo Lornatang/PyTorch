@@ -30,17 +30,17 @@ parser.add_argument(
 parser.add_argument(
   '--batchSize',
   type=int,
-  default=32,
+  default=64,
   help='inputs batch size')
 parser.add_argument(
   '--imageSize',
   type=int,
-  default=32,
+  default=224,
   help='the height / width of the inputs image to network')
 parser.add_argument(
   '--niter',
   type=int,
-  default=25,
+  default=50,
   help='number of epochs to train for')
 parser.add_argument('--lr', type=float, default=0.0001,
                     help='learning rate, default=0.0001')
