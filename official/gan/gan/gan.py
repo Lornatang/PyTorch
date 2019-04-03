@@ -184,6 +184,7 @@ Tensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
 #  Training
 # ----------
 
+
 def main():
   for epoch in range(opt.niter):
     for i, (data, _) in enumerate(dataloader):
