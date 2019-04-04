@@ -26,7 +26,7 @@ parser.add_argument('--cuda', action='store_true', help='enables cuda')
 parser.add_argument('--ngpu', type=int, default=1, help='number of GPUs to use')
 parser.add_argument('--outf', default='.', help='folder to output images and model checkpoints')
 parser.add_argument('--manualSeed', type=int, help='manual seed')
-parser.add_argument('--model', required=True, help='training models or testing models')
+parser.add_argument('--model', default='test', help='training models or testing models. (default: test)')
 
 opt = parser.parse_args()
 print(opt)

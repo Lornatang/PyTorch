@@ -26,7 +26,7 @@ parser.add_argument('--ngpu', type=int, default=1, help='number of GPUs to use')
 parser.add_argument('--outf', default='.', help='folder to output images and model checkpoints')
 parser.add_argument('--net', default='', help='model checkpoints')
 parser.add_argument('--manualSeed', type=int, help='manual seed')
-parser.add_argument('--model', default='train', help='training models or testing models. (default: train)')
+parser.add_argument('--model', default='test', help='training models or testing models. (default: test)')
 
 opt = parser.parse_args()
 print(opt)
