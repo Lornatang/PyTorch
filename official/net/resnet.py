@@ -12,72 +12,24 @@ import torchvision.models as models
 
 
 parser = argparse.ArgumentParser(description='PyTorch AlexNet Training')
-parser.add_argument(
-  '--dataset',
-  required=True,
-  help='cifar-10/100 | fmnist/mnist | folder')
+parser.add_argument('--dataset', required=True, help='cifar-10/100 | fmnist/mnist | folder')
 parser.add_argument('--dataroot', required=True, help='path to dataset')
-parser.add_argument(
-  '--classes',
-  type=int,
-  required=True,
-  help='classes of pictures')
-parser.add_argument(
-  '--workers',
-  type=int,
-  help='number of data loading workers',
-  default=4)
-parser.add_argument(
-  '--batchSize',
-  type=int,
-  default=32,
-  help='inputs batch size')
-parser.add_argument(
-  '--imageSize',
-  type=int,
-  default=224,
-  help='the height / width of the inputs image to network')
-parser.add_argument(
-  '--niter',
-  type=int,
-  default=25,
-  help='number of epochs to train for')
-parser.add_argument('--lr', type=float, default=0.0001,
-                    help='learning rate, default=0.0001')
-parser.add_argument('--beta1', type=float, default=0.5,
-                    help='beta1 for adam. default=0.5')
-parser.add_argument(
-  '--weight-decay',
-  default=1e-4,
-  type=float,
-  metavar='W',
-  help='weight decay (default: 1e-4)')
-parser.add_argument(
-  '-p',
-  '--print-freq',
-  default=10,
-  type=int,
-  metavar='N',
-  help='print frequency (default: 10)')
+parser.add_argument('--classes', type=int, required=True, help='classes of pictures')
+parser.add_argument('--workers', type=int, help='number of data loading workers', default=4)
+parser.add_argument('--batchSize', type=int, default=32, help='inputs batch size')
+parser.add_argument('--imageSize', type=int, default=32, help='the height / width of the inputs image to network')
+parser.add_argument('--niter', type=int, default=25, help='number of epochs to train for')
+parser.add_argument('--lr', type=float, default=0.0001, help='learning rate, default=0.0001')
+parser.add_argument('--beta1', type=float, default=0.5, help='beta1 for adam. default=0.5')
+parser.add_argument('--weight-decay', default=1e-4, type=float, metavar='W', help='weight decay (default: 1e-4)')
+parser.add_argument('-p', '--print-freq', default=10, type=int, metavar='N', help='print frequency (default: 10)')
 parser.add_argument('--cuda', action='store_true', help='enables cuda')
-parser.add_argument(
-  '--ngpu',
-  type=int,
-  default=1,
-  help='number of GPUs to use')
-parser.add_argument(
-  '--outf',
-  default='.',
-  help='folder to output images and model checkpoints')
-parser.add_argument(
-  '--net',
-  default='',
-  help='for model checkpoints')
+parser.add_argument('--ngpu', type=int, default=1, help='number of GPUs to use')
+parser.add_argument('--outf', default='.', help='folder to output images and model checkpoints')
+parser.add_argument('--net', default='', help='model checkpoints')
 parser.add_argument('--manualSeed', type=int, help='manual seed')
-parser.add_argument(
-  '--model',
-  required=True,
-  help='training models or testing models')
+parser.add_argument('--model', default='train', help='training models or testing models. (default: train)')
+
 
 opt = parser.parse_args()
 print(opt)

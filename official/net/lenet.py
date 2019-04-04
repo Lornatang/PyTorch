@@ -24,8 +24,9 @@ parser.add_argument('-p', '--print-freq', default=10, type=int, metavar='N', hel
 parser.add_argument('--cuda', action='store_true', help='enables cuda')
 parser.add_argument('--ngpu', type=int, default=1, help='number of GPUs to use')
 parser.add_argument('--outf', default='.', help='folder to output images and model checkpoints')
+parser.add_argument('--net', default='', help='model checkpoints')
 parser.add_argument('--manualSeed', type=int, help='manual seed')
-parser.add_argument('--model', required=True, help='training models or testing models')
+parser.add_argument('--model', default='train', help='training models or testing models. (default: train)')
 
 opt = parser.parse_args()
 print(opt)
@@ -240,7 +241,10 @@ def train():
   print(f"Train numbers:{len(dataset)}")
 
   # load model
-  model = LeNet().cuda()
+  if opt.net != '':
+    model = torch.load(f'{opt.outf}/{opt.net}')
+  else:
+    model = LeNet().cuda()
 
   # define optimizer
   optimizer = torch.optim.Adam(model.parameters(),
@@ -270,7 +274,7 @@ def train():
     for i, (data, target) in enumerate(dataloader, 0):
       # measure data loading time
       data_time.update(time.time() - end)
-      
+
       data, target = data.cuda(), target.cuda()
 
       # compute output
@@ -296,15 +300,16 @@ def train():
         progress.print(i)
 
     # Save the model checkpoint
-    torch.save(model, f"{opt.outf}/LeNet_epoch_{epoch + 1}.pth")
+    torch.save(model, f"{opt.outf}/DenseNet_epoch_{epoch + 1}.pth")
   print(f"Model save to '{opt.outf}'.")
 
 
 def test():
-  if torch.cuda.is_available():
-    model = torch.load(f'{opt.outf}/LeNet_epoch_{opt.niter}.pth')
+  if opt.net != '':
+    model = torch.load(f'{opt.outf}/{opt.net}')
   else:
-    model = torch.load(f'{opt.outf}/LeNet_epoch_{opt.niter}.pth', map_location="cpu")
+    model = torch.load(f'{opt.outf}/DenseNet_epoch_{opt.niter}.pth')
+
   model.eval()
 
   batch_time = AverageMeter('Time', ':6.3f')
