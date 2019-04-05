@@ -77,11 +77,11 @@ elif opt.dataset == 'cifar10':
   nc = 3
 elif opt.dataset == 'cifar-100':
   dataset = dset.CIFAR100(root=opt.dataroot, download=True,
-                         transform=transforms.Compose([
-                           transforms.Resize(opt.imageSize),
-                           transforms.ToTensor(),
-                           transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
-                         ]))
+                          transform=transforms.Compose([
+                            transforms.Resize(opt.imageSize),
+                            transforms.ToTensor(),
+                            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+                          ]))
   nc = 3
 elif opt.dataset == 'mnist':
   dataset = dset.MNIST(root=opt.dataroot, download=True,
@@ -256,7 +256,7 @@ def main():
       optimizerG.step()
 
       print('[%d/%d][%d/%d] Loss_D: %.4f Loss_G: %.4f D(x): %.4f D(G(z)): %.4f / %.4f'
-            % (epoch+1, opt.niter, i, len(dataloader),
+            % (epoch + 1, opt.niter, i, len(dataloader),
                errD.item(), errG.item(), D_x, D_G_z1, D_G_z2))
       if i % 100 == 0:
         vutils.save_image(real_cpu,
@@ -264,12 +264,12 @@ def main():
                           normalize=True)
         fake = netG(fixed_noise)
         vutils.save_image(fake.detach(),
-                          '%s/fake_samples_epoch_%03d.png' % (opt.outf, epoch+1),
+                          '%s/fake_samples_epoch_%03d.png' % (opt.outf, epoch + 1),
                           normalize=True)
 
     # do checkpointing
-    torch.save(netG, '%s/netG_epoch_%d.pth' % (opt.outf, epoch+1))
-    torch.save(netD, '%s/netD_epoch_%d.pth' % (opt.outf, epoch+1))
+    torch.save(netG, '%s/netG_epoch_%d.pth' % (opt.outf, epoch + 1))
+    torch.save(netD, '%s/netD_epoch_%d.pth' % (opt.outf, epoch + 1))
 
 
 if __name__ == '__main__':
