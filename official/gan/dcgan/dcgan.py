@@ -75,7 +75,14 @@ elif opt.dataset == 'cifar10':
                            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
                          ]))
   nc = 3
-
+elif opt.dataset == 'cifar-100':
+  dataset = dset.CIFAR100(root=opt.dataroot, download=True,
+                         transform=transforms.Compose([
+                           transforms.Resize(opt.imageSize),
+                           transforms.ToTensor(),
+                           transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+                         ]))
+  nc = 3
 elif opt.dataset == 'mnist':
   dataset = dset.MNIST(root=opt.dataroot, download=True,
                        transform=transforms.Compose([
