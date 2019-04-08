@@ -1,19 +1,14 @@
 import argparse
 import os
-import numpy as np
 import random
 
-import torchvision.transforms as transforms
-import torch.backends.cudnn as cudnn
-from torch.utils.data import DataLoader
-from torch.autograd import Variable
-import torchvision.utils as vutils
-import torchvision.datasets as dset
-
 import torch.nn as nn
-import torch
-
-os.makedirs("data", exist_ok=True)
+import torch.backends.cudnn as cudnn
+import torch.optim as optim
+import torch.utils.data
+import torchvision.datasets as dset
+import torchvision.transforms as transforms
+import torchvision.utils as vutils
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--dataset', required=True, help='cifar10 | lsun | mnist |imagenet | folder | lfw | fake')
@@ -22,9 +17,7 @@ parser.add_argument('--workers', type=int, help='number of data loading workers'
 parser.add_argument('--batchSize', type=int, default=64, help='inputs batch size')
 parser.add_argument('--imageSize', type=int, default=64, help='the height / width of the inputs image to network')
 parser.add_argument('--nz', type=int, default=100, help='size of the latent z vector')
-parser.add_argument('--ngf', type=int, default=64)
-parser.add_argument('--ndf', type=int, default=64)
-parser.add_argument('--niter', type=int, default=175, help='number of epochs to train for')
+parser.add_argument('--niter', type=int, default=100, help='number of epochs to train for')
 parser.add_argument('--lr', type=float, default=0.0002, help='learning rate, default=0.0002')
 parser.add_argument('--beta1', type=float, default=0.5, help='beta1 for adam. default=0.5')
 parser.add_argument('--cuda', action='store_true', help='enables cuda')
@@ -107,27 +100,29 @@ dataloader = torch.utils.data.DataLoader(dataset, batch_size=opt.batchSize,
 device = torch.device("cuda:0" if opt.cuda else "cpu")
 ngpu = int(opt.ngpu)
 nz = int(opt.nz)
-ngf = int(opt.ngf)
-ndf = int(opt.ndf)
 
 
 class Generator(nn.Module):
   def __init__(self):
     super(Generator, self).__init__()
 
-    def block(in_feat, out_feat, normalize=True):
-      layers = [nn.Linear(in_feat, out_feat)]
-      if normalize:
-        layers.append(nn.BatchNorm1d(out_feat, 0.8))
-      layers.append(nn.LeakyReLU(0.2, inplace=True))
-      return layers
-
     self.model = nn.Sequential(
-      *block(opt.nz, 128, normalize=False),
-      *block(128, 256),
-      *block(256, 512),
-      *block(512, 1024),
-      nn.Linear(1024, int(np.prod(img_shape))),
+      nn.Linear(nz, 128),
+      nn.LeakyReLU(0.2, inplace=True),
+
+      nn.Linear(128, 256),
+      nn.BatchNorm1d(256, 0.8),
+      nn.LeakyReLU(0.2, inplace=True),
+
+      nn.Linear(256, 512),
+      nn.BatchNorm1d(512, 0.8),
+      nn.LeakyReLU(0.2, inplace=True),
+
+      nn.Linear(512, 1024),
+      nn.BatchNorm1d(1024, 0.8),
+      nn.LeakyReLU(0.2, inplace=True),
+
+      nn.Linear(1024, opt.imageSize * opt.imageSize),
       nn.Tanh()
     )
 
@@ -142,7 +137,7 @@ class Discriminator(nn.Module):
     super(Discriminator, self).__init__()
 
     self.model = nn.Sequential(
-      nn.Linear(int(np.prod(img_shape)), 512),
+      nn.Linear(opt.imageSize * opt.imageSize, 512),
       nn.LeakyReLU(0.2, inplace=True),
       nn.Linear(512, 256),
       nn.LeakyReLU(0.2, inplace=True),
@@ -158,7 +153,11 @@ class Discriminator(nn.Module):
 
 
 # Loss function
-adversarial_loss = torch.nn.BCELoss()
+criterion = torch.nn.BCELoss()
+
+fixed_noise = torch.randn(opt.batchSize, nz, 1, 1, device=device)
+real_label = 1
+fake_label = 0
 
 # Initialize generator and discriminator
 netG = Generator()
@@ -172,78 +171,70 @@ if opt.netG != '':
 if cuda:
   netG.cuda()
   netD.cuda()
-  adversarial_loss.cuda()
+  criterion.cuda()
 
 # Optimizers
-optimizer_G = torch.optim.Adam(netG.parameters(), lr=opt.lr, betas=(opt.beta1, 0.999))
-optimizer_D = torch.optim.Adam(netD.parameters(), lr=opt.lr, betas=(opt.beta1, 0.999))
+optimizerG = torch.optim.Adam(netG.parameters(), lr=opt.lr, betas=(opt.beta1, 0.999))
+optimizerD = torch.optim.Adam(netD.parameters(), lr=opt.lr, betas=(opt.beta1, 0.999))
 
 Tensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
-
-# ----------
-#  Training
-# ----------
 
 
 def main():
   for epoch in range(opt.niter):
-    for i, (data, _) in enumerate(dataloader):
-      # Adversarial ground truths
-      valid = Variable(Tensor(data.size(0), 1).fill_(1.0), requires_grad=False)
-      fake = Variable(Tensor(data.size(0), 1).fill_(0.0), requires_grad=False)
+    for i, data in enumerate(dataloader, 0):
+      ############################
+      # (1) Update D network: maximize log(D(x)) + log(1 - D(G(z)))
+      ###########################
+      # train with real
+      netD.zero_grad()
+      img = data[0].to(device)
+      batch_size = img.size(0)
+      label = torch.full((batch_size,), real_label, device=device)
 
-      # Configure input
-      real_imgs = Variable(data.type(Tensor))
+      output = netD(img)
+      errD_real = criterion(output, label)
+      errD_real.backward()
+      D_x = output.mean().item()
 
-      # -----------------
-      #  Train Generator
-      # -----------------
+      # train with fake
+      noise = torch.randn(batch_size, nz, 1, 1, device=device)
+      fake = netG(noise)
+      label.fill_(fake_label)
+      output = netD(fake.detach())
+      errD_fake = criterion(output, label)
+      errD_fake.backward()
+      D_G_z1 = output.mean().item()
+      errD = errD_real + errD_fake
+      optimizerD.step()
 
-      optimizer_G.zero_grad()
+      ############################
+      # (2) Update G network: maximize log(D(G(z)))
+      ###########################
+      netG.zero_grad()
+      label.fill_(real_label)  # fake labels are real for generator cost
+      output = netD(fake)
+      errG = criterion(output, label)
+      errG.backward()
+      D_G_z2 = output.mean().item()
+      optimizerG.step()
 
-      # Sample noise as generator input
-      z = Variable(Tensor(np.random.normal(0, 1, (data.shape[0], opt.nz))))
-
-      # Generate a batch of images
-      gen_imgs = netG(z)
-
-      # Loss measures generator's ability to fool the discriminator
-      g_loss = adversarial_loss(netD(gen_imgs), valid)
-
-      g_loss.backward()
-      optimizer_G.step()
-
-      # ---------------------
-      #  Train Discriminator
-      # ---------------------
-
-      optimizer_D.zero_grad()
-
-      # Measure discriminator's ability to classify real from generated samples
-      real_loss = adversarial_loss(netD(real_imgs), valid)
-      fake_loss = adversarial_loss(netD(gen_imgs.detach()), fake)
-      d_loss = (real_loss + fake_loss) / 2
-
-      d_loss.backward()
-      optimizer_D.step()
-
-      print(
-        "[Epoch %d/%d] [Batch %d/%d] [D loss: %f] [G loss: %f]"
-        % (epoch, opt.niter, i, len(dataloader), d_loss.item(), g_loss.item())
-      )
-
+      print('[%d/%d][%d/%d] Loss_D: %.4f Loss_G: %.4f D(x): %.4f D(G(z)): %.4f / %.4f'
+            % (epoch + 1, opt.niter, i, len(dataloader),
+               errD.item(), errG.item(), D_x, D_G_z1, D_G_z2))
       if i % 100 == 0:
-        vutils.save_image(real_imgs,
-                          '%s/real_samples.png' % opt.outf,
+        vutils.save_image(img,
+                          f'{opt.outf}/real_samples.png',
                           normalize=True)
-        fake = netG(z)
+        fake = netG(fixed_noise)
         vutils.save_image(fake.detach(),
-                          '%s/fake_samples_epoch_%03d.png' % (opt.outf, epoch),
+                          f'{opt.outf}/fake_samples_epoch_{epoch+1}.png',
                           normalize=True)
+
     # do checkpointing
-    torch.save(netG, '%s/netG_epoch_%d.pth' % (opt.outf, epoch))
-    torch.save(netD, '%s/netD_epoch_%d.pth' % (opt.outf, epoch))
+    torch.save(netG, '%s/netG_epoch_%d.pth' % (opt.outf, epoch + 1))
+    torch.save(netD, '%s/netD_epoch_%d.pth' % (opt.outf, epoch + 1))
 
 
 if __name__ == '__main__':
-    main()
+  main()
