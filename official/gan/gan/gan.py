@@ -1,27 +1,25 @@
 import argparse
 import os
 import random
+import numpy as np
 
-import torch
+from torch.autograd import Variable
 import torch.nn as nn
 import torch.backends.cudnn as cudnn
 import torch.optim as optim
 import torch.utils.data
-from torch.autograd import Variable
 
 import torchvision.datasets as dset
 import torchvision.transforms as transforms
 import torchvision.utils as vutils
 
-import numpy as np
-
 parser = argparse.ArgumentParser()
 parser.add_argument('--dataset', required=True, help='cifar10 | lsun | mnist |imagenet | folder | lfw | fake')
 parser.add_argument('--dataroot', required=True, help='path to dataset')
-parser.add_argument('--workers', type=int, help='number of data loading workers', default=2)
+parser.add_argument('--workers', type=int, help='number of data loading workers', default=4)
 parser.add_argument('--batchSize', type=int, default=64, help='inputs batch size')
 parser.add_argument('--imageSize', type=int, default=64, help='the height / width of the inputs image to network')
-parser.add_argument('--nz', type=int, default=100, help='size of the latent z vector')
+parser.add_argument('--nz', type=int, default=50, help='size of the latent z vector')
 parser.add_argument('--niter', type=int, default=100, help='number of epochs to train for')
 parser.add_argument('--lr', type=float, default=0.0002, help='learning rate, default=0.0002')
 parser.add_argument('--beta1', type=float, default=0.5, help='beta1 for adam. default=0.5')
