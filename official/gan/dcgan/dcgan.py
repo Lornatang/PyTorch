@@ -67,7 +67,7 @@ elif opt.dataset == 'lsun':
                         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
                       ]))
   nc = 3
-elif opt.dataset == 'cifar10':
+elif opt.dataset == 'cifar-10':
   dataset = dset.CIFAR10(root=opt.dataroot, download=True,
                          transform=transforms.Compose([
                            transforms.Resize(opt.imageSize),
@@ -205,7 +205,7 @@ if opt.netD and opt.netG != '':
 print(netD)
 print(netG)
 
-criterion = nn.BCELoss()
+criterion = nn.BCEWithLogitsLoss()
 
 fixed_noise = torch.randn(opt.batchSize, nz, 1, 1, device=device)
 real_label = 1
@@ -255,9 +255,12 @@ def main():
       D_G_z2 = output.mean().item()
       optimizerG.step()
 
-      print('[%d/%d][%d/%d] Loss_D: %.4f Loss_G: %.4f D(x): %.4f D(G(z)): %.4f / %.4f'
-            % (epoch + 1, opt.niter, i, len(dataloader),
-               errD.item(), errG.item(), D_x, D_G_z1, D_G_z2))
+      print(f'[{epoch + 1}/{opt.niter}][{i}/{len(dataloader)}] '
+            f'Loss_D: {errD:.4f} '
+            f'Loss_G: {errG:.4f} '
+            f'D(x): {D_x:.4f} '
+            f'D(G(z)): {D_G_z1:.4f} / {D_G_z2:.4f}')
+
       if i % 100 == 0:
         vutils.save_image(img,
                           '%s/real_samples.png' % opt.outf,
