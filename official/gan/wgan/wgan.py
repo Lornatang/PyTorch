@@ -242,7 +242,7 @@ def main():
       optimizerG.step()
 
       # Clip weights of discriminator
-      for p in discriminator.parameters():
+      for p in netD.parameters():
         p.data.clamp_(-opt.clip_value, opt.clip_value)
 
       # Train the generator every n_critic iterations
@@ -251,15 +251,15 @@ def main():
         #  Train Generator
         # -----------------
 
-        optimizer_G.zero_grad()
+        optimizerG.zero_grad()
 
         # Generate a batch of images
-        gen_imgs = generator(z)
+        gen_imgs = netG(z)
         # Adversarial loss
-        loss_G = -torch.mean(discriminator(gen_imgs))
+        loss_G = -torch.mean(netD(gen_imgs))
 
         loss_G.backward()
-        optimizer_G.step()
+        optimizerG.step()
 
       print('[%d/%d][%d/%d] Loss_D: %.4f Loss_G: %.4f D(x): %.4f D(G(z)): %.4f / %.4f'
             % (epoch + 1, opt.niter, i, len(dataloader),
