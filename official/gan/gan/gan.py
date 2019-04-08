@@ -103,10 +103,11 @@ nz = int(opt.nz)
 
 
 class Generator(nn.Module):
-  def __init__(self):
+  def __init__(self, ngpus):
     super(Generator, self).__init__()
+    self.ngpu = ngpus
 
-    self.model = nn.Sequential(
+    self.main = nn.Sequential(
       nn.Linear(nz, 128),
       nn.LeakyReLU(0.2, inplace=True),
 
@@ -127,29 +128,33 @@ class Generator(nn.Module):
     )
 
   def forward(self, inputs):
-    img = self.model(inputs)
-    img = img.view(img.size(0), *img_shape)
-    return img
+    if inputs.is_cuda and self.ngpu > 1:
+      outputs = nn.parallel.data_parallel(self.main, inputs, range(self.ngpu))
+    else:
+      outputs = self.main(inputs)
+    return outputs
 
 
 class Discriminator(nn.Module):
-  def __init__(self):
+  def __init__(self, ngpus):
     super(Discriminator, self).__init__()
+    self.ngpu = ngpus
 
-    self.model = nn.Sequential(
+    self.main = nn.Sequential(
       nn.Linear(opt.imageSize * opt.imageSize, 512),
       nn.LeakyReLU(0.2, inplace=True),
       nn.Linear(512, 256),
       nn.LeakyReLU(0.2, inplace=True),
-      nn.Linear(256, 3),
+      nn.Linear(256, nc),
       nn.Sigmoid(),
     )
 
-  def forward(self, img):
-    img_flat = img.view(img.size(0), -1)
-    validity = self.model(img_flat)
-
-    return validity
+  def forward(self, inputs):
+    if inputs.is_cuda and self.ngpu > 1:
+      outputs = nn.parallel.data_parallel(self.main, inputs, range(self.ngpu))
+    else:
+      outputs = self.main(inputs)
+    return outputs.view(-1, 1).squeeze(1)
 
 
 # Loss function
