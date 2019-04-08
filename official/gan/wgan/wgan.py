@@ -17,6 +17,8 @@ parser.add_argument('--workers', type=int, help='number of data loading workers'
 parser.add_argument('--batchSize', type=int, default=64, help='inputs batch size')
 parser.add_argument('--imageSize', type=int, default=64, help='the height / width of the inputs image to network')
 parser.add_argument('--nz', type=int, default=100, help='size of the latent z vector')
+parser.add_argument('--ngf', type=int, default=64)
+parser.add_argument('--ndf', type=int, default=64)
 parser.add_argument('--niter', type=int, default=100, help='number of epochs to train for')
 parser.add_argument('--lr', type=float, default=0.0002, help='learning rate, default=0.0002')
 parser.add_argument('--cuda', action='store_true', help='enables cuda')
@@ -66,7 +68,7 @@ elif opt.dataset == 'lsun':
                         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
                       ]))
   nc = 3
-elif opt.dataset == 'cifar10':
+elif opt.dataset == 'cifar-10':
   dataset = dset.CIFAR10(root=opt.dataroot, download=True,
                          transform=transforms.Compose([
                            transforms.Resize(opt.imageSize),
@@ -118,28 +120,30 @@ def weights_init(m):
 
 
 class Generator(nn.Module):
-  def __init__(self, ngpus):
+  def __init__(self, gpus):
     super(Generator, self).__init__()
-    self.ngpu = ngpus
-
+    self.ngpu = gpus
     self.main = nn.Sequential(
-      nn.Linear(nz, 128),
-      nn.LeakyReLU(0.2, inplace=True),
-
-      nn.Linear(128, 256),
-      nn.BatchNorm1d(256, 0.8),
-      nn.LeakyReLU(0.2, inplace=True),
-
-      nn.Linear(256, 512),
-      nn.BatchNorm1d(512, 0.8),
-      nn.LeakyReLU(0.2, inplace=True),
-
-      nn.Linear(512, 1024),
-      nn.BatchNorm1d(1024, 0.8),
-      nn.LeakyReLU(0.2, inplace=True),
-
-      nn.Linear(1024, nc),
+      # inputs is Z, going into a convolution
+      nn.ConvTranspose2d(nz, ngf * 8, 4, 1, 0, bias=False),
+      nn.BatchNorm2d(ngf * 8),
+      nn.ReLU(True),
+      # state size. (ngf*8) x 4 x 4
+      nn.ConvTranspose2d(ngf * 8, ngf * 4, 4, 2, 1, bias=False),
+      nn.BatchNorm2d(ngf * 4),
+      nn.ReLU(True),
+      # state size. (ngf*4) x 8 x 8
+      nn.ConvTranspose2d(ngf * 4, ngf * 2, 4, 2, 1, bias=False),
+      nn.BatchNorm2d(ngf * 2),
+      nn.ReLU(True),
+      # state size. (ngf*2) x 16 x 16
+      nn.ConvTranspose2d(ngf * 2, ngf, 4, 2, 1, bias=False),
+      nn.BatchNorm2d(ngf),
+      nn.ReLU(True),
+      # state size. (ngf) x 32 x 32
+      nn.ConvTranspose2d(ngf, nc, 4, 2, 1, bias=False),
       nn.Tanh()
+      # state size. (nc) x 64 x 64
     )
 
   def forward(self, inputs):
@@ -151,17 +155,28 @@ class Generator(nn.Module):
 
 
 class Discriminator(nn.Module):
-  def __init__(self, ngpus):
+  def __init__(self, gpus):
     super(Discriminator, self).__init__()
-    self.ngpu = ngpus
-
+    self.ngpu = gpus
     self.main = nn.Sequential(
-      nn.Linear(nc * opt.imageSize * opt.imageSize, 512),
+      # inputs is (nc) x 64 x 64
+      nn.Conv2d(nc, ndf, 4, 2, 1, bias=False),
       nn.LeakyReLU(0.2, inplace=True),
-      nn.Linear(512, 256),
+      # state size. (ndf) x 32 x 32
+      nn.Conv2d(ndf, ndf * 2, 4, 2, 1, bias=False),
+      nn.BatchNorm2d(ndf * 2),
       nn.LeakyReLU(0.2, inplace=True),
-      nn.Linear(256, nc),
-      nn.Sigmoid(),
+      # state size. (ndf*2) x 16 x 16
+      nn.Conv2d(ndf * 2, ndf * 4, 4, 2, 1, bias=False),
+      nn.BatchNorm2d(ndf * 4),
+      nn.LeakyReLU(0.2, inplace=True),
+      # state size. (ndf*4) x 8 x 8
+      nn.Conv2d(ndf * 4, ndf * 8, 4, 2, 1, bias=False),
+      nn.BatchNorm2d(ndf * 8),
+      nn.LeakyReLU(0.2, inplace=True),
+      # state size. (ndf*8) x 4 x 4
+      nn.Conv2d(ndf * 8, 1, 4, 1, 0, bias=False),
+      nn.Sigmoid()
     )
 
   def forward(self, inputs):
@@ -169,6 +184,7 @@ class Discriminator(nn.Module):
       outputs = nn.parallel.data_parallel(self.main, inputs, range(self.ngpu))
     else:
       outputs = self.main(inputs)
+
     return outputs.view(-1, 1).squeeze(1)
 
 
@@ -190,9 +206,8 @@ if opt.netD and opt.netG != '':
 print(netD)
 print(netG)
 
-criterion = nn.BCELoss()
+criterion = nn.BCEWithLogitsLoss()
 
-noise = torch.randn(opt.batchSize, nz, 1, 1, device=device)
 real_label = 1
 fake_label = 0
 
@@ -205,21 +220,26 @@ def main():
   for epoch in range(opt.niter):
     for i, data in enumerate(dataloader, 0):
 
-      # configure input
-      imgs = data[0].to(device)
-
-      # ---------------------
-      #  Train Discriminator
-      # ---------------------
-
+      # train with real
       netD.zero_grad()
+      imgs = data[0].to(device)
+      batch_size = imgs.size(0)
+      label = torch.full((batch_size,), real_label, device=device)
 
-      # Generate a batch of images
-      fake_imgs = netG(noise).detach()
-      # Adversarial loss
-      errD = -torch.mean(netD(imgs)) + torch.mean(netD(fake_imgs))
+      output = netD(imgs)
+      errD_real = criterion(output, label)
+      errD_real.backward()
+      D_x = output.mean().item()
 
-      errD.backward()
+      # train with fake
+      noise = torch.randn(batch_size, nz, 1, 1, device=device)
+      fake = netG(noise)
+      label.fill_(fake_label)
+      output = netD(fake.detach())
+      errD_fake = criterion(output, label)
+      errD_fake.backward()
+      D_G_z1 = output.mean().item()
+      errD = errD_real + errD_fake
       optimizerD.step()
 
       # Clip weights of discriminator
@@ -231,18 +251,19 @@ def main():
         # -----------------
         #  Train Generator
         # -----------------
-
-        optimizerG.zero_grad()
-
-        # Generate a batch of images
-        gen_imgs = netG(noise)
-        # Adversarial loss
-        errG = -torch.mean(netD(gen_imgs))
-
+        netG.zero_grad()
+        label.fill_(real_label)  # fake labels are real for generator cost
+        output = netD(fake)
+        errG = criterion(output, label)
         errG.backward()
+        D_G_z2 = output.mean().item()
         optimizerG.step()
 
-      print(f'[{epoch + 1}/{opt.niter}][{i}/{len(dataloader)}] Loss_D: {errD:.4f} Loss_G: {errG:.4f}')
+      print(f'[{epoch + 1}/{opt.niter}][{i}/{len(dataloader)}] '
+            f'Loss_D: {errD:.4f} '
+            f'Loss_G: {errG:.4f} '
+            f'D(x): {D_x:.4f} '
+            f'D(G(z)): {D_G_z1:.4f} / {D_G_z2:.4f}')
 
       if i % 100 == 0:
         vutils.save_image(imgs,
