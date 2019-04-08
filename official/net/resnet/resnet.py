@@ -144,7 +144,7 @@ dataloader = torch.utils.data.DataLoader(
   num_workers=int(
     opt.workers))
 
-cuda = True if torch.cuda.is_available() else False
+device = torch.device("cuda:0" if opt.cuda else "cpu")
 ngpu = int(opt.ngpu)
 
 # define CrossEntropyLoss()
@@ -215,8 +215,8 @@ def train():
   if opt.net != '':
     model = torch.load(f'{opt.outf}/{opt.net}')
   else:
-    model = models.resnet50(pretrained=True).cuda()
-    model.classifier = nn.Linear(512 * 4, opt.classes).cuda()
+    model = models.resnet50(pretrained=True).to(device)
+    model.classifier = nn.Linear(512 * 4, opt.classes).to(device)
 
   # define optimizer
   optimizer = torch.optim.Adam(model.parameters(),
