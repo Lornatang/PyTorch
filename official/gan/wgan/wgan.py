@@ -169,7 +169,6 @@ if opt.cuda:
   netD.to(device)
   netG.to(device)
 
-
 if opt.netD and opt.netG != '':
   if torch.cuda.is_available():
     netD = torch.load(opt.netD)
@@ -177,7 +176,6 @@ if opt.netD and opt.netG != '':
   else:
     netD = torch.load(opt.netD, map_location='cpu')
     netG = torch.load(opt.netG, map_location='cpu')
-
 
 # setup optimizer
 optimizerD = optim.RMSprop(netD.parameters(), lr=opt.lr)
@@ -248,8 +246,8 @@ def main():
                           normalize=True)
 
     # do checkpointing
-    torch.save(netG, '%s/netG_epoch_%d.pth' % (opt.outf, epoch + 1))
-    torch.save(netD, '%s/netD_epoch_%d.pth' % (opt.outf, epoch + 1))
+    torch.save(netG, f'{opt.outf}/netG_epoch_{epoch + 1}.pth')
+    torch.save(netD, f'{opt.outf}/netD_epoch_{epoch + 1}.pth')
 
 
 if __name__ == '__main__':
