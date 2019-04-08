@@ -7,7 +7,7 @@ import torch.nn as nn
 import torch.backends.cudnn as cudnn
 import torch.optim as optim
 import torch.utils.data
-import torch.autograd.Variable as Variable
+from torch.autograd import Variable
 
 import torchvision.datasets as dset
 import torchvision.transforms as transforms
@@ -162,13 +162,10 @@ class Discriminator(nn.Module):
     return outputs
 
 
-criterion = nn.BCEWithLogitsLoss()
-
 netD = Discriminator(ngpu)
 netG = Generator(ngpu)
 
 if opt.cuda:
-  criterion.to(device)
   netD.to(device)
   netG.to(device)
 
@@ -196,47 +193,51 @@ def main():
       # (1) Update D network: maximize log(D(x)) + log(1 - D(G(z)))
       ###########################
 
-      # Adversarial ground truths
-      real_label = Variable(Tensor(data.size(0), 1).fill_(1.0), requires_grad=False)
-      fake_label = Variable(Tensor(data.size(0), 1).fill_(0.0), requires_grad=False)
-
+      # configure input
       data = data.to(device)
 
       # -----------------
-      #  Train Generator
+      #  Train Discriminator
       # -----------------
 
-      netG.zero_grad()
+      netD.zero_grad()
 
       # Sample noise as generator input
       noise = Variable(Tensor(np.random.normal(0, 1, (data.shape[0], nz))))
 
       # Generate a batch of images
-      output = netG(noise)
+      fake_imgs = netG(noise).detach()
 
       # Loss measures generator's ability to fool the discriminator
-      errG = criterion(netD(output), real_label)
-
-      errG.backward()
-      optimizerG.step()
-
-      # ---------------------
-      #  Train Discriminator
-      # ---------------------
-
-      netD.zero_grad()
-
-      # Measure discriminator's ability to classify real from generated samples
-      real_loss = criterion(netD(data), real_label)
-      fake_loss = criterion(netD(output.detach()), fake_label)
-      errD = (real_loss + fake_loss) / 2
+      errD = -torch.mean(netD(data)) + torch.mean(netD(fake_imgs))
 
       errD.backward()
       optimizerD.step()
 
-      print(f'[{epoch + 1}/{opt.niter}][{i}/{len(dataloader)}] '
-            f'Loss_D: {errD.item():.4f} '
-            f'Loss_G: {errG.item():.4f}.')
+      # Clip weights of discriminator
+      for p in netD.parameters():
+        p.data.clamp_(-opt.clip_value, opt.clip_value)
+
+        # Train the generator every n_critic iterations
+        if i % opt.n_critic == 0:
+
+          # ---------------------
+          #  Train Generator
+          # ---------------------
+
+          optimizerG.zero_grad()
+
+          # Generate a batch of images
+          fake_imgs = netG(noise)
+          # Adversarial loss
+          errG = -torch.mean(netD(fake_imgs))
+
+          errG.backward()
+          optimizerG.step()
+
+          print(f'[{epoch + 1}/{opt.niter}][{i}/{len(dataloader)}] '
+                f'Loss_D: {errD.item():.4f} '
+                f'Loss_G: {errG.item():.4f}.')
 
       if i % 100 == 0:
         vutils.save_image(data,
