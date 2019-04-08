@@ -17,8 +17,7 @@ parser.add_argument('--workers', type=int, help='number of data loading workers'
 parser.add_argument('--batchSize', type=int, default=64, help='inputs batch size')
 parser.add_argument('--imageSize', type=int, default=64, help='the height / width of the inputs image to network')
 parser.add_argument('--nz', type=int, default=100, help='size of the latent z vector')
-parser.add_argument('--ngf', type=int, default=64)
-parser.add_argument('--ndf', type=int, default=64)
+parser.add_argument('--hiddenSize', type=int, default=1024)
 parser.add_argument('--niter', type=int, default=100, help='number of epochs to train for')
 parser.add_argument('--lr', type=float, default=0.0002, help='learning rate, default=0.0002')
 parser.add_argument('--beta1', type=float, default=0.5, help='beta1 for adam. default=0.5')
@@ -104,18 +103,7 @@ dataloader = torch.utils.data.DataLoader(dataset, batch_size=opt.batchSize,
 device = torch.device("cuda:0" if opt.cuda else "cpu")
 ngpu = int(opt.ngpu)
 nz = int(opt.nz)
-ngf = int(opt.ngf)
-ndf = int(opt.ndf)
-
-
-# custom weights initialization called on netG and netD
-def weights_init(m):
-  classname = m.__class__.__name__
-  if classname.find('Conv') != -1:
-    m.weight.data.normal_(0.0, 0.02)
-  elif classname.find('BatchNorm') != -1:
-    m.weight.data.normal_(1.0, 0.02)
-    m.bias.data.fill_(0)
+hidden_size = int(opt.hiddenSize)
 
 
 class Generator(nn.Module):
@@ -123,26 +111,12 @@ class Generator(nn.Module):
     super(Generator, self).__init__()
     self.ngpu = gpus
     self.main = nn.Sequential(
-      # inputs is Z, going into a convolution
-      nn.ConvTranspose2d(nz, ngf * 8, 4, 1, 0, bias=False),
-      nn.BatchNorm2d(ngf * 8),
-      nn.ReLU(True),
-      # state size. (ngf*8) x 4 x 4
-      nn.ConvTranspose2d(ngf * 8, ngf * 4, 4, 2, 1, bias=False),
-      nn.BatchNorm2d(ngf * 4),
-      nn.ReLU(True),
-      # state size. (ngf*4) x 8 x 8
-      nn.ConvTranspose2d(ngf * 4, ngf * 2, 4, 2, 1, bias=False),
-      nn.BatchNorm2d(ngf * 2),
-      nn.ReLU(True),
-      # state size. (ngf*2) x 16 x 16
-      nn.ConvTranspose2d(ngf * 2, ngf, 4, 2, 1, bias=False),
-      nn.BatchNorm2d(ngf),
-      nn.ReLU(True),
-      # state size. (ngf) x 32 x 32
-      nn.ConvTranspose2d(ngf, nc, 4, 2, 1, bias=False),
+      nn.Linear(nz, hidden_size),
+      nn.ReLU(inplace=True),
+      nn.Linear(hidden_size, hidden_size),
+      nn.ReLU(inplace=True),
+      nn.Linear(hidden_size, nc * opt.imageSize * opt.imageSize),
       nn.Tanh()
-      # state size. (nc) x 64 x 64
     )
 
   def forward(self, inputs):
@@ -158,40 +132,26 @@ class Discriminator(nn.Module):
     super(Discriminator, self).__init__()
     self.ngpu = gpus
     self.main = nn.Sequential(
-      # inputs is (nc) x 64 x 64
-      nn.Conv2d(nc, ndf, 4, 2, 1, bias=False),
-      nn.LeakyReLU(0.2, inplace=True),
-      # state size. (ndf) x 32 x 32
-      nn.Conv2d(ndf, ndf * 2, 4, 2, 1, bias=False),
-      nn.BatchNorm2d(ndf * 2),
-      nn.LeakyReLU(0.2, inplace=True),
-      # state size. (ndf*2) x 16 x 16
-      nn.Conv2d(ndf * 2, ndf * 4, 4, 2, 1, bias=False),
-      nn.BatchNorm2d(ndf * 4),
-      nn.LeakyReLU(0.2, inplace=True),
-      # state size. (ndf*4) x 8 x 8
-      nn.Conv2d(ndf * 4, ndf * 8, 4, 2, 1, bias=False),
-      nn.BatchNorm2d(ndf * 8),
-      nn.LeakyReLU(0.2, inplace=True),
-      # state size. (ndf*8) x 4 x 4
-      nn.Conv2d(ndf * 8, 1, 4, 1, 0, bias=False),
-      nn.Sigmoid()
+      nn.Linear(nc * opt.imageSize * opt.imageSize, hidden_size),
+      nn.LeakyReLU(0.01, inplace=True),
+      nn.Linear(hidden_size, hidden_size),
+      nn.LeakyReLU(0.01, inplace=True),
+      nn.Linear(hidden_size, 1),
     )
 
   def forward(self, inputs):
+    inputs = inputs.view(inputs.size(0), -1)
     if inputs.is_cuda and self.ngpu > 1:
       outputs = nn.parallel.data_parallel(self.main, inputs, range(self.ngpu))
     else:
       outputs = self.main(inputs)
 
-    return outputs.view(-1, 1).squeeze(1)
+    return outputs
 
 
 netD = Discriminator(ngpu).to(device)
-netD.apply(weights_init)
 
 netG = Generator(ngpu).to(device)
-netG.apply(weights_init)
 
 
 if opt.netD and opt.netG != '':
