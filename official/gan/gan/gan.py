@@ -111,11 +111,7 @@ class Generator(nn.Module):
     super(Generator, self).__init__()
     self.ngpu = gpus
     self.main = nn.Sequential(
-      nn.Linear(nz, 128),
-      nn.LeakyReLU(0.2, inplace=True),
-
-      nn.Linear(128, 256),
-      nn.BatchNorm1d(256),
+      nn.Linear(nz, 256),
       nn.LeakyReLU(0.2, inplace=True),
 
       nn.Linear(256, 512),
@@ -126,7 +122,11 @@ class Generator(nn.Module):
       nn.BatchNorm1d(1024),
       nn.LeakyReLU(0.2, inplace=True),
 
-      nn.Linear(1024, nc * opt.imageSize * opt.imageSize),
+      nn.Linear(1024, 2048),
+      nn.BatchNorm1d(2048),
+      nn.LeakyReLU(0.2, inplace=True),
+
+      nn.Linear(2048, nc * opt.imageSize * opt.imageSize),
       nn.Tanh()
     )
 
@@ -143,9 +143,9 @@ class Discriminator(nn.Module):
     super(Discriminator, self).__init__()
     self.ngpu = gpus
     self.main = nn.Sequential(
-      nn.Linear(nc * opt.imageSize * opt.imageSize, 512),
+      nn.Linear(nc * opt.imageSize * opt.imageSize, 1024),
       nn.LeakyReLU(0.2, inplace=True),
-      nn.Linear(512, 256),
+      nn.Linear(1024, 256),
       nn.LeakyReLU(0.2, inplace=True),
       nn.Linear(256, 1),
     )
