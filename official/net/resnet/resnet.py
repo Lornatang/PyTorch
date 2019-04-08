@@ -144,7 +144,7 @@ dataloader = torch.utils.data.DataLoader(
   num_workers=int(
     opt.workers))
 
-device = torch.device("cuda:0" if opt.cuda else "cpu")
+cuda = True if torch.cuda.is_available() else False
 ngpu = int(opt.ngpu)
 
 # define CrossEntropyLoss()
