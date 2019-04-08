@@ -2,13 +2,18 @@ import argparse
 import os
 import random
 
+import torch
 import torch.nn as nn
 import torch.backends.cudnn as cudnn
 import torch.optim as optim
 import torch.utils.data
+from torch.autograd import Variable
+
 import torchvision.datasets as dset
 import torchvision.transforms as transforms
 import torchvision.utils as vutils
+
+import numpy as np
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--dataset', required=True, help='cifar10 | lsun | mnist |imagenet | folder | lfw | fake')
@@ -98,7 +103,7 @@ assert dataset
 dataloader = torch.utils.data.DataLoader(dataset, batch_size=opt.batchSize,
                                          shuffle=True, num_workers=int(opt.workers))
 
-cuda = True if torch.cuda.is_available() else False
+device = torch.device("cuda:0" if opt.cuda else "cpu")
 ngpu = int(opt.ngpu)
 nz = int(opt.nz)
 
@@ -124,7 +129,6 @@ class Generator(nn.Module):
       nn.LeakyReLU(0.2, inplace=True),
 
       nn.Linear(1024, nc * opt.imageSize * opt.imageSize),
-
       nn.Tanh()
     )
 
@@ -164,8 +168,9 @@ netD = Discriminator(ngpu)
 netG = Generator(ngpu)
 
 if opt.cuda:
-  netD.cuda()
-  netG.cuda()
+  criterion.to(device)
+  netD.to(device)
+  netG.to(device)
 
 if opt.netD and opt.netG != '':
   if torch.cuda.is_available():
@@ -179,19 +184,21 @@ if opt.netD and opt.netG != '':
 optimizerD = optim.Adam(netD.parameters(), lr=opt.lr, betas=(opt.beta1, 0.999))
 optimizerG = optim.Adam(netG.parameters(), lr=opt.lr, betas=(opt.beta1, 0.999))
 
+Tensor = torch.cuda.FloatTensor if opt.cuda else torch.FloatTensor
+
 
 def main():
   for epoch in range(opt.niter):
-    for i, (data, _) in enumerate(dataloader, 0):
+    for i, (data, _) in enumerate(dataloader):
       ############################
       # (1) Update D network: maximize log(D(x)) + log(1 - D(G(z)))
       ###########################
 
       # Adversarial ground truths
-      real_label = torch.full((data.size(0),), 1)
-      fake_label = torch.full((data.size(0),), 0)
+      real_label = Variable(Tensor(data.size(0), 1).fill_(1.0), requires_grad=False)
+      fake_label = Variable(Tensor(data.size(0), 1).fill_(0.0), requires_grad=False)
 
-      data = data.cuda()
+      data = data.to(device)
 
       # -----------------
       #  Train Generator
@@ -200,7 +207,7 @@ def main():
       netG.zero_grad()
 
       # Sample noise as generator input
-      noise = torch.randn(data.size(0), nz, 1, 1)
+      noise = Variable(Tensor(np.random.normal(0, 1, (data.shape[0], nz))))
 
       # Generate a batch of images
       output = netG(noise)
