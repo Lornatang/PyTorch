@@ -224,11 +224,11 @@ def main():
       ###########################
       # train with real
       netD.zero_grad()
-      real_cpu = data[0].to(device)
-      batch_size = real_cpu.size(0)
+      img = data[0].to(device)
+      batch_size = img.size(0)
       label = torch.full((batch_size,), real_label, device=device)
 
-      output = netD(real_cpu)
+      output = netD(img)
       errD_real = criterion(output, label)
       errD_real.backward()
       D_x = output.mean().item()
@@ -259,7 +259,7 @@ def main():
             % (epoch + 1, opt.niter, i, len(dataloader),
                errD.item(), errG.item(), D_x, D_G_z1, D_G_z2))
       if i % 100 == 0:
-        vutils.save_image(real_cpu,
+        vutils.save_image(img,
                           '%s/real_samples.png' % opt.outf,
                           normalize=True)
         fake = netG(fixed_noise)
