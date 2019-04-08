@@ -67,7 +67,7 @@ elif opt.dataset == 'lsun':
                         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
                       ]))
   nc = 3
-elif opt.dataset == 'cifar-10':
+elif opt.dataset == 'cifar10':
   dataset = dset.CIFAR10(root=opt.dataroot, download=True,
                          transform=transforms.Compose([
                            transforms.Resize(opt.imageSize),
@@ -75,7 +75,7 @@ elif opt.dataset == 'cifar-10':
                            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
                          ]))
   nc = 3
-elif opt.dataset == 'cifar-100':
+elif opt.dataset == 'cifar100':
   dataset = dset.CIFAR100(root=opt.dataroot, download=True,
                           transform=transforms.Compose([
                             transforms.Resize(opt.imageSize),

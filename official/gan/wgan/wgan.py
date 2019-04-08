@@ -69,7 +69,7 @@ elif opt.dataset == 'lsun':
                         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
                       ]))
   nc = 3
-elif opt.dataset == 'cifar-10':
+elif opt.dataset == 'cifar10':
   dataset = dset.CIFAR10(root=opt.dataroot, download=True,
                          transform=transforms.Compose([
                            transforms.Resize(opt.imageSize),
@@ -77,7 +77,7 @@ elif opt.dataset == 'cifar-10':
                            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
                          ]))
   nc = 3
-elif opt.dataset == 'cifar-100':
+elif opt.dataset == 'cifar100':
   dataset = dset.CIFAR100(root=opt.dataroot, download=True,
                           transform=transforms.Compose([
                             transforms.Resize(opt.imageSize),
@@ -117,15 +117,15 @@ class Generator(nn.Module):
       nn.LeakyReLU(0.2, inplace=True),
 
       nn.Linear(128, 256),
-      nn.BatchNorm2d(256),
+      nn.BatchNorm1d(256),
       nn.LeakyReLU(0.2, inplace=True),
 
       nn.Linear(256, 512),
-      nn.BatchNorm2d(512),
+      nn.BatchNorm1d(512),
       nn.LeakyReLU(0.2, inplace=True),
 
       nn.Linear(512, 1024),
-      nn.BatchNorm2d(1024),
+      nn.BatchNorm1d(1024),
       nn.LeakyReLU(0.2, inplace=True),
 
       nn.Linear(1024, nc * opt.imageSize * opt.imageSize),
