@@ -202,8 +202,6 @@ if opt.netD and opt.netG != '':
     netD = torch.load(opt.netD, map_location='cpu')
     netG = torch.load(opt.netG, map_location='cpu')
 
-print(netD)
-print(netG)
 
 criterion = nn.BCEWithLogitsLoss()
 
