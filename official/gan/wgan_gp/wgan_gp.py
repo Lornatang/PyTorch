@@ -213,9 +213,7 @@ def compute_gradient_penalty(net, real_samples, fake_samples):
 def main():
   for epoch in range(opt.niter):
     for i, (real_imgs, _) in enumerate(dataloader):
-      ############################
-      # (1) Update D network: maximize log(D(x)) + log(1 - D(G(z)))
-      ###########################
+
       # configure input
       real_imgs = real_imgs.to(device)
 
@@ -226,7 +224,7 @@ def main():
       netD.zero_grad()
 
       # Sample noise as generator input
-      noise = Variable(Tensor(np.random.normal(0, 1, (real_imgs.size(0), nz))))
+      noise = torch.randn(real_imgs.size(0), nz)
 
       # Generate a batch of images
       fake_imgs = netG(noise)
