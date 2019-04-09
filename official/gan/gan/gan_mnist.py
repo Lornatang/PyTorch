@@ -1,9 +1,7 @@
 import argparse
 import os
 import random
-import numpy as np
 
-from torch.autograd import Variable
 import torch.nn as nn
 import torch.backends.cudnn as cudnn
 import torch.optim as optim
@@ -107,6 +105,7 @@ class Discriminator(nn.Module):
       nn.Linear(512, 256),
       nn.LeakyReLU(0.2, inplace=True),
       nn.Linear(256, 1),
+      nn.Sigmoid()
     )
 
   def forward(self, inputs):
@@ -146,16 +145,16 @@ Tensor = torch.cuda.FloatTensor if opt.cuda else torch.FloatTensor
 
 def main():
   for epoch in range(opt.niter):
-    for i, (data, _) in enumerate(dataloader):
+    for i, (real_imgs, _) in enumerate(dataloader):
       ############################
       # (1) Update D network: maximize log(D(x)) + log(1 - D(G(z)))
       ###########################
 
       # Adversarial ground truths
-      real_label = torch.full((data.size(0), 1), 1, device=device)
-      fake_label = torch.full((data.size(0), 1), 0, device=device)
+      real_label = torch.full((real_imgs.size(0), 1), 1, device=device)
+      fake_label = torch.full((real_imgs.size(0), 1), 0, device=device)
 
-      data = data.to(device)
+      real_imgs = real_imgs.to(device)
 
       # -----------------
       #  Train Generator
@@ -164,14 +163,13 @@ def main():
       netG.zero_grad()
 
       # Sample noise as generator input
-      noise = torch.randn(data.size(0), nz)
+      noise = torch.randn(real_imgs.size(0), nz)
 
       # Generate a batch of images
-      output = netG(noise)
-      print(netD(output))
+      fake_imgs = netG(noise)
 
       # Loss measures generator's ability to fool the discriminator
-      errG = criterion(netD(output), real_label)
+      errG = criterion(netD(fake_imgs), real_label)
 
       errG.backward()
       optimizerG.step()
@@ -183,8 +181,8 @@ def main():
       netD.zero_grad()
 
       # Measure discriminator's ability to classify real from generated samples
-      real_loss = criterion(netD(data), real_label)
-      fake_loss = criterion(netD(output.detach()), fake_label)
+      real_loss = criterion(netD(real_imgs), real_label)
+      fake_loss = criterion(netD(fake_imgs.detach()), fake_label)
       errD = (real_loss + fake_loss) / 2
 
       errD.backward()
@@ -195,7 +193,7 @@ def main():
             f'Loss_G: {errG.item():.4f}.')
 
       if i % 100 == 0:
-        vutils.save_image(data,
+        vutils.save_image(real_imgs,
                           f'{opt.outf}/real_samples.png',
                           normalize=True)
         vutils.save_image(netG(noise).detach(),
@@ -203,8 +201,8 @@ def main():
                           normalize=True)
 
     # do checkpointing
-    torch.save(netG, '%s/netG_epoch_%d.pth' % (opt.outf, epoch + 1))
-    torch.save(netD, '%s/netD_epoch_%d.pth' % (opt.outf, epoch + 1))
+    torch.save(netG, f'{opt.outf}/netG_epoch_{epoch + 1}.pth')
+    torch.save(netD, f'{opt.outf}/netD_epoch_{epoch + 1}.pth')
 
 
 if __name__ == '__main__':
