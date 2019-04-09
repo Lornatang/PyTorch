@@ -94,15 +94,15 @@ class Generator(nn.Module):
       nn.LeakyReLU(0.2, inplace=True),
 
       nn.Linear(128, 256),
-      nn.BatchNorm1d(256),
+      nn.BatchNorm1d(256, 0.8),
       nn.LeakyReLU(0.2, inplace=True),
 
       nn.Linear(256, 512),
-      nn.BatchNorm1d(512),
+      nn.BatchNorm1d(512, 0.8),
       nn.LeakyReLU(0.2, inplace=True),
 
       nn.Linear(512, 1024),
-      nn.BatchNorm1d(1024),
+      nn.BatchNorm1d(1024, 0.8),
       nn.LeakyReLU(0.2, inplace=True),
 
       nn.Linear(1024, nc * opt.imageSize * opt.imageSize),
