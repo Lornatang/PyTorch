@@ -14,11 +14,11 @@ import torchvision.transforms as transforms
 import torchvision.utils as vutils
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--dataset', required=True, help='cifar10 | lsun | mnist |imagenet | folder | lfw | fake')
+parser.add_argument('--dataset', required=True, help='cifar10 | cifar100')
 parser.add_argument('--dataroot', required=True, help='path to dataset')
 parser.add_argument('--workers', type=int, help='number of data loading workers', default=4)
 parser.add_argument('--batchSize', type=int, default=64, help='inputs batch size')
-parser.add_argument('--imageSize', type=int, default=64, help='the height / width of the inputs image to network')
+parser.add_argument('--imageSize', type=int, default=32, help='the height / width of the inputs image to network')
 parser.add_argument('--nz', type=int, default=100, help='size of the latent z vector')
 parser.add_argument('--niter', type=int, default=200, help='number of epochs to train for')
 parser.add_argument('--lr', type=float, default=0.0002, help='learning rate, default=0.0002')
@@ -49,26 +49,8 @@ cudnn.benchmark = True
 if torch.cuda.is_available() and not opt.cuda:
   print("WARNING: You have a CUDA device, so you should probably run with --cuda")
 
-if opt.dataset in ['imagenet', 'folder', 'lfw']:
-  # folder dataset
-  dataset = dset.ImageFolder(root=opt.dataroot,
-                             transform=transforms.Compose([
-                               transforms.Resize(opt.imageSize),
-                               transforms.CenterCrop(opt.imageSize),
-                               transforms.ToTensor(),
-                               transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
-                             ]))
-  nc = 3
-elif opt.dataset == 'lsun':
-  dataset = dset.LSUN(root=opt.dataroot, classes=['bedroom_train'],
-                      transform=transforms.Compose([
-                        transforms.Resize(opt.imageSize),
-                        transforms.CenterCrop(opt.imageSize),
-                        transforms.ToTensor(),
-                        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
-                      ]))
-  nc = 3
-elif opt.dataset == 'cifar10':
+
+if opt.dataset == 'cifar10':
   dataset = dset.CIFAR10(root=opt.dataroot, download=True,
                          transform=transforms.Compose([
                            transforms.Resize(opt.imageSize),
@@ -83,19 +65,6 @@ elif opt.dataset == 'cifar100':
                             transforms.ToTensor(),
                             transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
                           ]))
-  nc = 3
-elif opt.dataset == 'mnist':
-  dataset = dset.MNIST(root=opt.dataroot, download=True,
-                       transform=transforms.Compose([
-                         transforms.Resize(opt.imageSize),
-                         transforms.ToTensor(),
-                         transforms.Normalize((0.5,), (0.5,)),
-                       ]))
-  nc = 1
-elif opt.dataset == 'fake':
-  dataset = dset.FakeData(image_size=(3, opt.imageSize, opt.imageSize),
-                          transform=transforms.ToTensor())
-  nc = 3
 
 assert dataset
 dataloader = torch.utils.data.DataLoader(dataset, batch_size=opt.batchSize,
@@ -160,7 +129,7 @@ class Discriminator(nn.Module):
     return outputs
 
 
-criterion = nn.BCEWithLogitsLoss()
+criterion = nn.BCELoss()
 
 netD = Discriminator(ngpu)
 netG = Generator(ngpu)
@@ -243,8 +212,8 @@ def main():
                           normalize=True)
 
     # do checkpointing
-    torch.save(netG, '%s/netG_epoch_%d.pth' % (opt.outf, epoch + 1))
-    torch.save(netD, '%s/netD_epoch_%d.pth' % (opt.outf, epoch + 1))
+    torch.save(netG, f'{opt.outf}/netG_epoch_{epoch + 1}.pth')
+    torch.save(netD, f'{opt.outf}/netD_epoch_{epoch + 1}.pth')
 
 
 if __name__ == '__main__':
