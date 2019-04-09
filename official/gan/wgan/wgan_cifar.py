@@ -18,9 +18,9 @@ parser.add_argument('--dataset', required=True, help='cifar10 | lsun | mnist |im
 parser.add_argument('--dataroot', required=True, help='path to dataset')
 parser.add_argument('--workers', type=int, help='number of data loading workers', default=4)
 parser.add_argument('--batchSize', type=int, default=64, help='inputs batch size')
-parser.add_argument('--imageSize', type=int, default=64, help='the height / width of the inputs image to network')
+parser.add_argument('--imageSize', type=int, default=32, help='the height / width of the inputs image to network')
 parser.add_argument('--nz', type=int, default=100, help='size of the latent z vector')
-parser.add_argument('--niter', type=int, default=200, help='number of epochs to train for')
+parser.add_argument('--niter', type=int, default=50, help='number of epochs to train for')
 parser.add_argument("--n_critic", type=int, default=5, help="number of training steps for discriminator per iter")
 parser.add_argument("--clip_value", type=float, default=0.01, help="lower and upper clip value for disc. weights")
 parser.add_argument('--lr', type=float, default=0.0002, help='learning rate, default=0.0002')
@@ -50,33 +50,13 @@ cudnn.benchmark = True
 if torch.cuda.is_available() and not opt.cuda:
   print("WARNING: You have a CUDA device, so you should probably run with --cuda")
 
-if opt.dataset in ['imagenet', 'folder', 'lfw']:
-  # folder dataset
-  dataset = dset.ImageFolder(root=opt.dataroot,
-                             transform=transforms.Compose([
-                               transforms.Resize(opt.imageSize),
-                               transforms.CenterCrop(opt.imageSize),
-                               transforms.ToTensor(),
-                               transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
-                             ]))
-  nc = 3
-elif opt.dataset == 'lsun':
-  dataset = dset.LSUN(root=opt.dataroot, classes=['bedroom_train'],
-                      transform=transforms.Compose([
-                        transforms.Resize(opt.imageSize),
-                        transforms.CenterCrop(opt.imageSize),
-                        transforms.ToTensor(),
-                        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
-                      ]))
-  nc = 3
-elif opt.dataset == 'cifar10':
+if opt.dataset == 'cifar10':
   dataset = dset.CIFAR10(root=opt.dataroot, download=True,
                          transform=transforms.Compose([
                            transforms.Resize(opt.imageSize),
                            transforms.ToTensor(),
                            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
                          ]))
-  nc = 3
 elif opt.dataset == 'cifar100':
   dataset = dset.CIFAR100(root=opt.dataroot, download=True,
                           transform=transforms.Compose([
@@ -84,20 +64,6 @@ elif opt.dataset == 'cifar100':
                             transforms.ToTensor(),
                             transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
                           ]))
-  nc = 3
-elif opt.dataset == 'mnist':
-  dataset = dset.MNIST(root=opt.dataroot, download=True,
-                       transform=transforms.Compose([
-                         transforms.Resize(opt.imageSize),
-                         transforms.ToTensor(),
-                         transforms.Normalize((0.5,), (0.5,)),
-                       ]))
-  nc = 1
-
-elif opt.dataset == 'fake':
-  dataset = dset.FakeData(image_size=(3, opt.imageSize, opt.imageSize),
-                          transform=transforms.ToTensor())
-  nc = 3
 
 assert dataset
 dataloader = torch.utils.data.DataLoader(dataset, batch_size=opt.batchSize,
@@ -106,6 +72,7 @@ dataloader = torch.utils.data.DataLoader(dataset, batch_size=opt.batchSize,
 device = torch.device("cuda:0" if opt.cuda else "cpu")
 ngpu = int(opt.ngpu)
 nz = int(opt.nz)
+nc = 3
 
 
 class Generator(nn.Module):
