@@ -2,13 +2,14 @@ import argparse
 import os
 import random
 
-import torch.nn as nn
-import torch.backends.cudnn as cudnn
-import torch.optim as optim
-import torch.utils.data
-import torchvision.datasets as dset
-import torchvision.transforms as transforms
-import torchvision.utils as vutils
+import torch
+from torch import nn
+from torch import optim
+from torch.backends import cudnn as cudnn
+
+from torchvision import datasets as dset
+from torchvision import transforms as transforms
+from torchvision import utils as vutils
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--dataset', required=True, help='cifar10 | lsun | mnist |imagenet | folder | lfw | fake')
@@ -201,7 +202,7 @@ if opt.netD and opt.netG != '':
     netD = torch.load(opt.netD, map_location='cpu')
     netG = torch.load(opt.netG, map_location='cpu')
 
-criterion = nn.BCEWithLogitsLoss()
+criterion = nn.BCELoss()
 
 fixed_noise = torch.randn(opt.batchSize, nz, 1, 1, device=device)
 real_label = 1
@@ -214,13 +215,13 @@ optimizerG = optim.Adam(netG.parameters(), lr=opt.lr, betas=(opt.beta1, 0.999))
 
 def main():
   for epoch in range(opt.niter):
-    for i, data in enumerate(dataloader, 0):
+    for i, (data, _) in enumerate(dataloader):
       ############################
       # (1) Update D network: maximize log(D(x)) + log(1 - D(G(z)))
       ###########################
       # train with real
       netD.zero_grad()
-      img = data[0].to(device)
+      img = data.to(device)
       batch_size = img.size(0)
       label = torch.full((batch_size,), real_label, device=device)
       output = netD(img)
@@ -260,7 +261,8 @@ def main():
         vutils.save_image(data,
                           f'{opt.outf}/real_samples.png',
                           normalize=True)
-        vutils.save_image(netG(noise).detach(),
+        fake = netG(fixed_noise)
+        vutils.save_image(fake.detach(),
                           f'{opt.outf}/fake_samples_epoch_{epoch + 1}.png',
                           normalize=True)
 
