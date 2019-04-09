@@ -14,7 +14,6 @@ import torchvision.transforms as transforms
 import torchvision.utils as vutils
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--dataset', required=True, help='mnist dataset')
 parser.add_argument('--dataroot', required=True, help='path to dataset')
 parser.add_argument('--workers', type=int, help='number of data loading workers', default=4)
 parser.add_argument('--batchSize', type=int, default=64, help='inputs batch size')
@@ -53,7 +52,7 @@ dataset = dset.MNIST(root=opt.dataroot, download=True,
                      transform=transforms.Compose([
                        transforms.Resize(opt.imageSize),
                        transforms.ToTensor(),
-                       transforms.Normalize((0.5,), (0.5,)),
+                       transforms.Normalize([0.5], [0.5]),
                      ]))
 
 dataloader = torch.utils.data.DataLoader(dataset, batch_size=opt.batchSize,
@@ -94,7 +93,8 @@ class Generator(nn.Module):
       outputs = nn.parallel.data_parallel(self.main, inputs, range(self.ngpu))
     else:
       outputs = self.main(inputs)
-    return outputs.view(outputs.size(0), *(nc, opt.imageSize, opt.imageSize))
+
+    return outputs.view(outputs.size(0), nc, opt.imageSize, opt.imageSize)
 
 
 class Discriminator(nn.Module):
@@ -152,8 +152,8 @@ def main():
       ###########################
 
       # Adversarial ground truths
-      real_label = Variable(Tensor(data.size(0), 1).fill_(1.0), requires_grad=False)
-      fake_label = Variable(Tensor(data.size(0), 1).fill_(0.0), requires_grad=False)
+      real_label = torch.full((data.size(0), 1), 1, device=device)
+      fake_label = torch.full((data.size(0), 1), 0, device=device)
 
       data = data.to(device)
 
@@ -164,10 +164,11 @@ def main():
       netG.zero_grad()
 
       # Sample noise as generator input
-      noise = Variable(Tensor(np.random.normal(0, 1, (data.shape[0], nz))))
+      noise = torch.randn(data.size(0), nz)
 
       # Generate a batch of images
       output = netG(noise)
+      print(netD(output))
 
       # Loss measures generator's ability to fool the discriminator
       errG = criterion(netD(output), real_label)
