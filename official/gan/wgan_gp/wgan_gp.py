@@ -1,9 +1,7 @@
 import argparse
 import os
 import random
-import numpy as np
 
-from torch.autograd import Variable
 from torch import autograd
 import torch.nn as nn
 import torch.backends.cudnn as cudnn
@@ -19,7 +17,7 @@ parser.add_argument('--dataset', required=True, help='cifar10 or cifar100 datase
 parser.add_argument('--dataroot', required=True, help='path to dataset')
 parser.add_argument('--workers', type=int, help='number of data loading workers', default=4)
 parser.add_argument('--batchSize', type=int, default=64, help='inputs batch size')
-parser.add_argument('--imageSize', type=int, default=32, help='the height / width of the inputs image to network')
+parser.add_argument('--imageSize', type=int, default=64, help='the height / width of the inputs image to network')
 parser.add_argument('--nz', type=int, default=128, help='size of the latent z vector')
 parser.add_argument('--niter', type=int, default=50, help='number of epochs to train for')
 parser.add_argument("--n_critic", type=int, default=5, help="number of training steps for discriminator per iter")
@@ -93,7 +91,6 @@ elif opt.dataset == 'mnist':
                          transforms.Normalize((0.5,), (0.5,)),
                        ]))
   nc = 1
-
 elif opt.dataset == 'fake':
   dataset = dset.FakeData(image_size=(3, opt.imageSize, opt.imageSize),
                           transform=transforms.ToTensor())
@@ -150,11 +147,19 @@ class Discriminator(nn.Module):
     self.ngpu = ngpus
 
     self.main = nn.Sequential(
-      nn.Linear(nc * opt.imageSize * opt.imageSize, 512),
+      nn.Linear(nc * opt.imageSize * opt.imageSize, 1024),
       nn.LeakyReLU(0.2, inplace=True),
+
+      nn.Linear(1024, 512),
+      nn.LeakyReLU(0.2, inplace=True),
+
       nn.Linear(512, 256),
       nn.LeakyReLU(0.2, inplace=True),
-      nn.Linear(256, 1),
+
+      nn.Linear(256, 128),
+      nn.LeakyReLU(0.2, inplace=True),
+
+      nn.Linear(128, 1)
     )
 
   def forward(self, inputs):
@@ -191,11 +196,11 @@ Tensor = torch.cuda.FloatTensor if opt.cuda else torch.FloatTensor
 def compute_gradient_penalty(net, real_samples, fake_samples):
   """Calculates the gradient penalty loss for WGAN GP"""
   # Random weight term for interpolation between real and fake samples
-  alpha = Tensor(np.random.random((real_samples.size(0), 1, 1, 1)))
+  alpha = torch.randn(real_samples.size(0), 1, 1, 1)
   # Get random interpolation between real and fake samples
   interpolates = (alpha * real_samples + ((1 - alpha) * fake_samples)).requires_grad_(True)
   d_interpolates = net(interpolates)
-  fake = Variable(Tensor(real_samples.shape[0], 1).fill_(1.0), requires_grad=False)
+  fake = torch.full((real_samples.size(0), 1), 1, device=device)
   # Get gradient w.r.t. interpolates
   gradients = autograd.grad(
     outputs=d_interpolates,
