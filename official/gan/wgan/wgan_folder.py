@@ -23,7 +23,7 @@ parser.add_argument('--ndf', type=int, default=64)
 parser.add_argument('--niter', type=int, default=50, help='number of epochs to train for')
 parser.add_argument("--n_critic", type=int, default=5, help="number of training steps for discriminator per iter")
 parser.add_argument("--clip_value", type=float, default=0.01, help="lower and upper clip value for disc. weights")
-parser.add_argument('--lr', type=float, default=0.0002, help='learning rate, default=0.0002')
+parser.add_argument('--lr', type=float, default=0.00005, help='learning rate, default=0.0002')
 parser.add_argument('--cuda', action='store_true', help='enables cuda')
 parser.add_argument('--ngpu', type=int, default=1, help='number of GPUs to use')
 parser.add_argument('--netG', default='', help="path to netG (to continue training)")
@@ -178,14 +178,6 @@ if opt.cuda:
   netD.to(device)
   netG.to(device)
 
-if opt.netD and opt.netG != '':
-  if torch.cuda.is_available():
-    netD = torch.load(opt.netD)
-    netG = torch.load(opt.netG)
-  else:
-    netD = torch.load(opt.netD, map_location='cpu')
-    netG = torch.load(opt.netG, map_location='cpu')
-
 # setup optimizer
 optimizerD = optim.RMSprop(netD.parameters(), lr=opt.lr)
 optimizerG = optim.RMSprop(netG.parameters(), lr=opt.lr)
@@ -232,26 +224,26 @@ def train():
       for p in netD.parameters():
         p.data.clamp_(-opt.clip_value, opt.clip_value)
 
-        # Train the generator every n_critic iterations
-        if i % opt.n_critic == 0:
+      # Train the generator every n_critic iterations
+      if i % opt.n_critic == 0:
 
-          # ---------------------
-          #  Train Generator
-          # ---------------------
+        # ---------------------
+        #  Train Generator
+        # ---------------------
 
-          optimizerG.zero_grad()
+        optimizerG.zero_grad()
 
-          # Generate a batch of images
-          fake_imgs = netG(noise)
-          # Adversarial loss
-          errG = -torch.mean(netD(fake_imgs))
+        # Generate a batch of images
+        fake_imgs = netG(noise)
+        # Adversarial loss
+        errG = -torch.mean(netD(fake_imgs))
 
-          errG.backward()
-          optimizerG.step()
+        errG.backward()
+        optimizerG.step()
 
-          print(f'[{epoch + 1}/{opt.niter}][{i}/{len(dataloader)}] '
-                f'Loss_D: {errD.item():.4f} '
-                f'Loss_G: {errG.item():.4f}.')
+        print(f'[{epoch + 1}/{opt.niter}][{i}/{len(dataloader)}] '
+              f'Loss_D: {errD.item():.4f} '
+              f'Loss_G: {errG.item():.4f}.')
 
       if i % 100 == 0:
         vutils.save_image(real_imgs,
