@@ -202,7 +202,7 @@ def train():
       netD.zero_grad()
 
       # Sample noise as generator input
-      noise = torch.randn(real_imgs.size(0), nz, 1, 1)
+      noise = torch.randn(real_imgs.size(0), nz, 1, 1).to(device)
 
       # Generate a batch of images
       fake_imgs = netG(noise).detach()
@@ -227,7 +227,7 @@ def train():
           optimizerG.zero_grad()
 
           # Generate a batch of images
-          fake_imgs = netG(noise)
+          fake_imgs = netG(noise).to(device)
           # Adversarial loss
           errG = -torch.mean(netD(fake_imgs))
 
@@ -247,8 +247,8 @@ def train():
                           normalize=True)
 
     # do checkpointing
-    torch.save(netG, f'{opt.outf}/netG_epoch_{epoch + 1}.pth')
-    torch.save(netD, f'{opt.outf}/netD_epoch_{epoch + 1}.pth')
+    torch.save(netG, f'{opt.outf}/netG.pth')
+    torch.save(netD, f'{opt.outf}/netD.pth')
 
 
 if __name__ == '__main__':
