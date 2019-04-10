@@ -217,7 +217,7 @@ def train():
       netD.zero_grad()
 
       # Sample noise as generator input
-      noise = torch.randn(real_imgs.size(0), nz, 1, 1)
+      noise = torch.randn(real_imgs.size(0), nz, 1, 1).to(device)
 
       # Generate a batch of images
       fake_imgs = netG(noise).detach()
