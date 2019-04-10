@@ -29,6 +29,7 @@ parser.add_argument('--netG', default='', help="path to netG (to continue traini
 parser.add_argument('--netD', default='', help="path to netD (to continue training)")
 parser.add_argument('--outf', default='.', help='folder to output images and model checkpoints')
 parser.add_argument('--manualSeed', type=int, help='manual seed')
+parser.add_argument('--model', type=str, default='train', help='GAN train models.default: \'train\'. other: gen')
 
 opt = parser.parse_args()
 print(opt)
@@ -186,7 +187,16 @@ optimizerD = optim.Adam(netD.parameters(), lr=opt.lr, betas=(opt.beta1, 0.999))
 optimizerG = optim.Adam(netG.parameters(), lr=opt.lr, betas=(opt.beta1, 0.999))
 
 
-def main():
+def gen_sample():
+  data = torch.utils.data.DataLoader(dataset, num_workers=int(opt.workers))
+  for i, (imgs, _) in enumerate(data):
+    noise = torch.randn(imgs.size(0), nz, 1, 1)
+    vutils.save_image(netG(noise).detach(),
+                      f'{opt.outf}/{i}.png',
+                      normalize=True)
+
+
+def train():
   for epoch in range(opt.niter):
     for i, (data, _) in enumerate(dataloader):
       ############################
@@ -245,4 +255,7 @@ def main():
 
 
 if __name__ == '__main__':
-  main()
+  if opt.model == 'train':
+    train()
+  elif opt.model == 'gen':
+    gen_sample()
