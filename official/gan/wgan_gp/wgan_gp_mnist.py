@@ -13,20 +13,20 @@ import torchvision.transforms as transforms
 import torchvision.utils as vutils
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--dataroot', required=True, help='path to dataset')
 parser.add_argument('--workers', type=int, help='number of data loading workers', default=4)
 parser.add_argument('--batchSize', type=int, default=64, help='inputs batch size')
 parser.add_argument('--imageSize', type=int, default=28, help='the height / width of the inputs image to network')
 parser.add_argument('--nz', type=int, default=128, help='size of the latent z vector')
 parser.add_argument('--niter', type=int, default=50, help='number of epochs to train for')
 parser.add_argument("--n_critic", type=int, default=5, help="number of training steps for discriminator per iter")
-parser.add_argument('--lr', type=float, default=0.0002, help='learning rate, default=0.0002')
+parser.add_argument('--lr', type=float, default=0.0001, help='learning rate, default=0.0002')
 parser.add_argument('--cuda', action='store_true', help='enables cuda')
 parser.add_argument('--ngpu', type=int, default=1, help='number of GPUs to use')
 parser.add_argument('--netG', default='', help="path to netG (to continue training)")
 parser.add_argument('--netD', default='', help="path to netD (to continue training)")
 parser.add_argument('--outf', default='.', help='folder to output images and model checkpoints')
 parser.add_argument('--manualSeed', type=int, help='manual seed')
+parser.add_argument('--model', type=str, default='train', help='GAN train models.default: \'train\'. other: gen')
 
 opt = parser.parse_args()
 print(opt)
@@ -146,8 +146,8 @@ if opt.netD and opt.netG != '':
     netG = torch.load(opt.netG, map_location='cpu')
 
 # setup optimizer
-optimizerD = optim.Adam(netD.parameters(), lr=opt.lr, betas=(0.5, 0.999))
-optimizerG = optim.Adam(netG.parameters(), lr=opt.lr, betas=(0.5, 0.999))
+optimizerD = optim.Adam(netD.parameters(), lr=opt.lr, betas=(0.5, 0.9))
+optimizerG = optim.Adam(netG.parameters(), lr=opt.lr, betas=(0.5, 0.9))
 
 
 def compute_gradient_penalty(net, real_samples, fake_samples):
@@ -172,7 +172,16 @@ def compute_gradient_penalty(net, real_samples, fake_samples):
   return gradient_penaltys
 
 
-def main():
+def gen_sample():
+  data = torch.utils.data.DataLoader(dataset, num_workers=int(opt.workers))
+  for i, (imgs, _) in enumerate(data):
+    noise = torch.randn(imgs.size(0), nz, 1, 1)
+    vutils.save_image(netG(noise).detach(),
+                      f'{opt.outf}/{i}.png',
+                      normalize=True)
+
+
+def train():
   for epoch in range(opt.niter):
     for i, (real_imgs, _) in enumerate(dataloader):
 
@@ -239,4 +248,7 @@ def main():
 
 
 if __name__ == '__main__':
-  main()
+  if opt.model == 'train':
+    train()
+  elif opt.model == 'gen':
+    gen_sample()
