@@ -149,8 +149,6 @@ if opt.netD and opt.netG != '':
 optimizerD = optim.Adam(netD.parameters(), lr=opt.lr, betas=(0.5, 0.999))
 optimizerG = optim.Adam(netG.parameters(), lr=opt.lr, betas=(0.5, 0.999))
 
-Tensor = torch.cuda.FloatTensor if opt.cuda else torch.FloatTensor
-
 
 def compute_gradient_penalty(net, real_samples, fake_samples):
     """Calculates the gradient penalty loss for WGAN GP"""
