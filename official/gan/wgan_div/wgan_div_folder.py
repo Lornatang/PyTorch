@@ -21,7 +21,7 @@ parser.add_argument('--imageSize', type=int, default=64, help='the height / widt
 parser.add_argument('--nz', type=int, default=128, help='size of the latent z vector')
 parser.add_argument('--ngf', type=int, default=64)
 parser.add_argument('--ndf', type=int, default=64)
-parser.add_argument('--niter', type=int, default=50, help='number of epochs to train for')
+parser.add_argument('--niter', type=int, default=25, help='number of epochs to train for')
 parser.add_argument("--n_critic", type=int, default=5, help="number of training steps for discriminator per iter")
 parser.add_argument('--lr', type=float, default=0.0002, help='learning rate, default=0.0002')
 parser.add_argument('--cuda', action='store_true', help='enables cuda')
@@ -82,11 +82,9 @@ nz = int(opt.nz)
 ndf = int(opt.ndf)
 ngf = int(opt.ngf)
 nc = 3
+
 k = 2
 p = 6
-
-# Loss weight for gradient penalty
-lambda_gp = 10
 
 
 # custom weights initialization called on netG and netD
@@ -105,21 +103,25 @@ class Generator(nn.Module):
     self.ngpu = gpus
     self.main = nn.Sequential(
       # inputs is Z, going into a convolution
-      nn.ConvTranspose2d(nz, ngf * 4, 4, 1, 0, bias=False),
-      nn.BatchNorm2d(ngf * 4),
+      nn.ConvTranspose2d(nz, ngf * 8, 4, 1, 0, bias=False),
+      nn.BatchNorm2d(ngf * 8),
       nn.ReLU(True),
       # state size. (ngf*8) x 4 x 4
+      nn.ConvTranspose2d(ngf * 8, ngf * 4, 4, 2, 1, bias=False),
+      nn.BatchNorm2d(ngf * 4),
+      nn.ReLU(True),
+      # state size. (ngf*4) x 8 x 8
       nn.ConvTranspose2d(ngf * 4, ngf * 2, 4, 2, 1, bias=False),
       nn.BatchNorm2d(ngf * 2),
       nn.ReLU(True),
-      # state size. (ngf*4) x 8 x 8
+      # state size. (ngf*2) x 16 x 16
       nn.ConvTranspose2d(ngf * 2, ngf, 4, 2, 1, bias=False),
       nn.BatchNorm2d(ngf),
       nn.ReLU(True),
-      # state size. (ngf*2) x 16 x 16
-      nn.ConvTranspose2d(ngf, nc, 4, 2, 1, bias=False),
-      nn.Tanh(),
       # state size. (ngf) x 32 x 32
+      nn.ConvTranspose2d(ngf, nc, 4, 2, 1, bias=False),
+      nn.Tanh()
+      # state size. (nc) x 64 x 64
     )
 
   def forward(self, inputs):
@@ -145,19 +147,24 @@ class Discriminator(nn.Module):
     super(Discriminator, self).__init__()
     self.ngpu = gpus
     self.main = nn.Sequential(
-      # inputs is (nc) x 32 x 32
+      # inputs is (nc) x 64 x 64
       nn.Conv2d(nc, ndf, 4, 2, 1, bias=False),
       nn.LeakyReLU(0.2, inplace=True),
-      # state size. (ndf) x 16 x 16
+      # state size. (ndf) x 32 x 32
       nn.Conv2d(ndf, ndf * 2, 4, 2, 1, bias=False),
       nn.BatchNorm2d(ndf * 2),
       nn.LeakyReLU(0.2, inplace=True),
-      # state size. (ndf*2) x 8 x 8
+      # state size. (ndf*2) x 16 x 16
       nn.Conv2d(ndf * 2, ndf * 4, 4, 2, 1, bias=False),
       nn.BatchNorm2d(ndf * 4),
       nn.LeakyReLU(0.2, inplace=True),
-      # state size. (ndf*4) x 4 x 4
-      nn.Conv2d(ndf * 4, 1, 4, 1, 0, bias=False),
+      # state size. (ndf*4) x 8 x 8
+      nn.Conv2d(ndf * 4, ndf * 8, 4, 2, 1, bias=False),
+      nn.BatchNorm2d(ndf * 8),
+      nn.LeakyReLU(0.2, inplace=True),
+      # state size. (ndf*8) x 4 x 4
+      nn.Conv2d(ndf * 8, 1, 4, 1, 0, bias=False),
+      nn.Sigmoid()
     )
 
   def forward(self, inputs):
