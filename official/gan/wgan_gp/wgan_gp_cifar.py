@@ -223,6 +223,9 @@ def train():
       # configure input
       real_imgs = real_imgs.to(device)
 
+      # Get real imgs batch size
+      batch_size = real_imgs.size(0)
+
       # -----------------
       #  Train Discriminator
       # -----------------
@@ -230,7 +233,7 @@ def train():
       netD.zero_grad()
 
       # Sample noise as generator input
-      noise = torch.randn(real_imgs.size(0), nz)
+      noise = torch.randn(batch_size, nz)
 
       # Generate a batch of images
       fake_imgs = netG(noise)
