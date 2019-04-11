@@ -238,9 +238,9 @@ def main():
         errG.backward()
         optimizerG.step()
 
-        print(f'[{epoch + 1}/{opt.niter}][{i}/{len(dataloader)}] '
-              f'Loss_D: {errD.item():.4f} '
-              f'Loss_G: {errG.item():.4f}.')
+      print(f'[{epoch + 1}/{opt.niter}][{i}/{len(dataloader)}] '
+            f'Loss_D: {errD.item():.4f} '
+            f'Loss_G: {errG.item():.4f}.')
 
       if i % 100 == 0:
         vutils.save_image(real_imgs,

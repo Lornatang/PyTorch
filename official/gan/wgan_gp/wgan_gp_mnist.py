@@ -32,12 +32,12 @@ opt = parser.parse_args()
 print(opt)
 
 try:
-    os.makedirs(opt.outf)
+  os.makedirs(opt.outf)
 except OSError:
-    pass
+  pass
 
 if opt.manualSeed is None:
-    opt.manualSeed = random.randint(1, 10000)
+  opt.manualSeed = random.randint(1, 10000)
 print("Random Seed: ", opt.manualSeed)
 random.seed(opt.manualSeed)
 torch.manual_seed(opt.manualSeed)
@@ -45,14 +45,14 @@ torch.manual_seed(opt.manualSeed)
 cudnn.benchmark = True
 
 if torch.cuda.is_available() and not opt.cuda:
-    print("WARNING: You have a CUDA device, so you should probably run with --cuda")
+  print("WARNING: You have a CUDA device, so you should probably run with --cuda")
 
 dataset = dset.MNIST(root=opt.dataroot, download=True,
                      transform=transforms.Compose([
-                         transforms.Resize(opt.imageSize),
-                         transforms.ToTensor(),
-                         transforms.Normalize((0.5,), (0.5,)),
-                         ]))
+                       transforms.Resize(opt.imageSize),
+                       transforms.ToTensor(),
+                       transforms.Normalize((0.5,), (0.5,)),
+                     ]))
 
 
 dataloader = torch.utils.data.DataLoader(dataset, batch_size=opt.batchSize,
@@ -68,82 +68,82 @@ lambda_gp = 10
 
 
 class Generator(nn.Module):
-    def __init__(self, ngpus):
-        super(Generator, self).__init__()
-        self.ngpu = ngpus
+  def __init__(self, ngpus):
+    super(Generator, self).__init__()
+    self.ngpu = ngpus
 
-        self.main = nn.Sequential(
-            nn.Linear(nz, 128),
-            nn.LeakyReLU(0.2, inplace=True),
+    self.main = nn.Sequential(
+      nn.Linear(nz, 128),
+      nn.LeakyReLU(0.2, inplace=True),
 
-            nn.Linear(128, 256),
-            nn.BatchNorm1d(256, 0.8),
-            nn.LeakyReLU(0.2, inplace=True),
+      nn.Linear(128, 256),
+      nn.BatchNorm1d(256, 0.8),
+      nn.LeakyReLU(0.2, inplace=True),
 
-            nn.Linear(256, 512),
-            nn.BatchNorm1d(512, 0.8),
-            nn.LeakyReLU(0.2, inplace=True),
+      nn.Linear(256, 512),
+      nn.BatchNorm1d(512, 0.8),
+      nn.LeakyReLU(0.2, inplace=True),
 
-            nn.Linear(512, 1024),
-            nn.BatchNorm1d(1024, 0.8),
-            nn.LeakyReLU(0.2, inplace=True),
+      nn.Linear(512, 1024),
+      nn.BatchNorm1d(1024, 0.8),
+      nn.LeakyReLU(0.2, inplace=True),
 
-            nn.Linear(1024, nc * opt.imageSize * opt.imageSize),
-            nn.Tanh()
-        )
+      nn.Linear(1024, nc * opt.imageSize * opt.imageSize),
+      nn.Tanh()
+    )
 
-    def forward(self, inputs):
-        if inputs.is_cuda and self.ngpu > 1:
-            outputs = nn.parallel.data_parallel(self.main, inputs, range(self.ngpu))
-        else:
-            outputs = self.main(inputs)
-        return outputs.view(outputs.size(0), nc, opt.imageSize, opt.imageSize)
+  def forward(self, inputs):
+    if inputs.is_cuda and self.ngpu > 1:
+      outputs = nn.parallel.data_parallel(self.main, inputs, range(self.ngpu))
+    else:
+      outputs = self.main(inputs)
+    return outputs.view(outputs.size(0), nc, opt.imageSize, opt.imageSize)
 
 
 class Discriminator(nn.Module):
-    def __init__(self, ngpus):
-        super(Discriminator, self).__init__()
-        self.ngpu = ngpus
+  def __init__(self, ngpus):
+    super(Discriminator, self).__init__()
+    self.ngpu = ngpus
 
-        self.main = nn.Sequential(
-            nn.Linear(nc * opt.imageSize * opt.imageSize, 1024),
-            nn.LeakyReLU(0.2, inplace=True),
+    self.main = nn.Sequential(
+      nn.Linear(nc * opt.imageSize * opt.imageSize, 1024),
+      nn.LeakyReLU(0.2, inplace=True),
 
-            nn.Linear(1024, 512),
-            nn.LeakyReLU(0.2, inplace=True),
+      nn.Linear(1024, 512),
+      nn.LeakyReLU(0.2, inplace=True),
 
-            nn.Linear(512, 256),
-            nn.LeakyReLU(0.2, inplace=True),
+      nn.Linear(512, 256),
+      nn.LeakyReLU(0.2, inplace=True),
 
-            nn.Linear(256, 128),
-            nn.LeakyReLU(0.2, inplace=True),
+      nn.Linear(256, 128),
+      nn.LeakyReLU(0.2, inplace=True),
 
-            nn.Linear(128, 1)
-        )
+      nn.Linear(128, 1)
+    )
 
-    def forward(self, inputs):
-        inputs = inputs.view(inputs.size(0), -1)
-        if inputs.is_cuda and self.ngpu > 1:
-            outputs = nn.parallel.data_parallel(self.main, inputs, range(self.ngpu))
-        else:
-            outputs = self.main(inputs)
-        return outputs
+  def forward(self, inputs):
+    inputs = inputs.view(inputs.size(0), -1)
+    if inputs.is_cuda and self.ngpu > 1:
+      outputs = nn.parallel.data_parallel(self.main, inputs, range(self.ngpu))
+    else:
+      outputs = self.main(inputs)
+    return outputs
 
 
 netD = Discriminator(ngpu)
 netG = Generator(ngpu)
 
 if opt.cuda:
-    netD.to(device)
-    netG.to(device)
+  netD.to(device)
+  netG.to(device)
 
 if opt.netD and opt.netG != '':
-    if torch.cuda.is_available():
-        netD = torch.load(opt.netD)
-        netG = torch.load(opt.netG)
-    else:
-        netD = torch.load(opt.netD, map_location='cpu')
-        netG = torch.load(opt.netG, map_location='cpu')
+  if torch.cuda.is_available():
+    netD = torch.load(opt.netD)
+    netG = torch.load(opt.netG)
+  else:
+    netD = torch.load(opt.netD, map_location='cpu')
+    netG = torch.load(opt.netG, map_location='cpu')
 
 # setup optimizer
 optimizerD = optim.Adam(netD.parameters(), lr=opt.lr, betas=(0.5, 0.999))
@@ -151,92 +151,92 @@ optimizerG = optim.Adam(netG.parameters(), lr=opt.lr, betas=(0.5, 0.999))
 
 
 def compute_gradient_penalty(net, real_samples, fake_samples):
-    """Calculates the gradient penalty loss for WGAN GP"""
-    # Random weight term for interpolation between real and fake samples
-    alpha = torch.randn(real_samples.size(0), 1, 1, 1)
-    # Get random interpolation between real and fake samples
-    interpolates = (alpha * real_samples + ((1 - alpha) * fake_samples)).requires_grad_(True)
-    d_interpolates = net(interpolates)
-    fake = torch.full((real_samples.size(0), 1), 1, device=device)
-    # Get gradient w.r.t. interpolates
-    gradients = autograd.grad(
-        outputs=d_interpolates,
-        inputs=interpolates,
-        grad_outputs=fake,
-        create_graph=True,
-        retain_graph=True,
-        only_inputs=True,
-    )[0]
-    gradients = gradients.view(gradients.size(0), -1)
-    gradient_penaltys = ((gradients.norm(2, dim=1) - 1) ** 2).mean()
-    return gradient_penaltys
+  """Calculates the gradient penalty loss for WGAN GP"""
+  # Random weight term for interpolation between real and fake samples
+  alpha = torch.randn(real_samples.size(0), 1, 1, 1)
+  # Get random interpolation between real and fake samples
+  interpolates = (alpha * real_samples + ((1 - alpha) * fake_samples)).requires_grad_(True)
+  d_interpolates = net(interpolates)
+  fake = torch.full((real_samples.size(0), 1), 1, device=device)
+  # Get gradient w.r.t. interpolates
+  gradients = autograd.grad(
+    outputs=d_interpolates,
+    inputs=interpolates,
+    grad_outputs=fake,
+    create_graph=True,
+    retain_graph=True,
+    only_inputs=True,
+  )[0]
+  gradients = gradients.view(gradients.size(0), -1)
+  gradient_penaltys = ((gradients.norm(2, dim=1) - 1) ** 2).mean()
+  return gradient_penaltys
 
 
 def main():
-    for epoch in range(opt.niter):
-        for i, (real_imgs, _) in enumerate(dataloader):
+  for epoch in range(opt.niter):
+    for i, (real_imgs, _) in enumerate(dataloader):
 
-            # configure input
-            real_imgs = real_imgs.to(device)
+      # configure input
+      real_imgs = real_imgs.to(device)
 
-            # -----------------
-            #  Train Discriminator
-            # -----------------
+      # -----------------
+      #  Train Discriminator
+      # -----------------
 
-            netD.zero_grad()
+      netD.zero_grad()
 
-            # Sample noise as generator input
-            noise = torch.randn(real_imgs.size(0), nz)
+      # Sample noise as generator input
+      noise = torch.randn(real_imgs.size(0), nz)
 
-            # Generate a batch of images
-            fake_imgs = netG(noise)
+      # Generate a batch of images
+      fake_imgs = netG(noise)
 
-            # Real images
-            real_validity = netD(real_imgs)
-            # Fake images
-            fake_validity = netD(fake_imgs)
-            # Gradient penalty
-            gradient_penalty = compute_gradient_penalty(netD, real_imgs.data, fake_imgs.data)
+      # Real images
+      real_validity = netD(real_imgs)
+      # Fake images
+      fake_validity = netD(fake_imgs)
+      # Gradient penalty
+      gradient_penalty = compute_gradient_penalty(netD, real_imgs.data, fake_imgs.data)
 
-            # Loss measures generator's ability to fool the discriminator
-            errD = -torch.mean(real_validity) + torch.mean(fake_validity) + lambda_gp * gradient_penalty
+      # Loss measures generator's ability to fool the discriminator
+      errD = -torch.mean(real_validity) + torch.mean(fake_validity) + lambda_gp * gradient_penalty
 
-            errD.backward()
-            optimizerD.step()
+      errD.backward()
+      optimizerD.step()
 
-            optimizerG.zero_grad()
+      optimizerG.zero_grad()
 
-            # Train the generator every n_critic iterations
-            if i % opt.n_critic == 0:
+      # Train the generator every n_critic iterations
+      if i % opt.n_critic == 0:
 
-                # ---------------------
-                #  Train Generator
-                # ---------------------
+        # ---------------------
+        #  Train Generator
+        # ---------------------
 
-                # Generate a batch of images
-                fake_imgs = netG(noise)
-                # Adversarial loss
-                errG = -torch.mean(netD(fake_imgs))
+        # Generate a batch of images
+        fake_imgs = netG(noise)
+        # Adversarial loss
+        errG = -torch.mean(netD(fake_imgs))
 
-                errG.backward()
-                optimizerG.step()
+        errG.backward()
+        optimizerG.step()
 
-                print(f'[{epoch + 1}/{opt.niter}][{i}/{len(dataloader)}] '
-                      f'Loss_D: {errD.item():.4f} '
-                      f'Loss_G: {errG.item():.4f}.')
+      print(f'[{epoch + 1}/{opt.niter}][{i}/{len(dataloader)}] '
+            f'Loss_D: {errD.item():.4f} '
+            f'Loss_G: {errG.item():.4f}.')
 
-            if i % 100 == 0:
-                vutils.save_image(real_imgs,
-                                  f'{opt.outf}/real_samples.png',
-                                  normalize=True)
-                vutils.save_image(netG(noise).detach(),
-                                  f'{opt.outf}/fake_samples_epoch_{epoch + 1}.png',
-                                  normalize=True)
+      if i % 100 == 0:
+        vutils.save_image(real_imgs,
+                          f'{opt.outf}/real_samples.png',
+                          normalize=True)
+        vutils.save_image(netG(noise).detach(),
+                          f'{opt.outf}/fake_samples_epoch_{epoch + 1}.png',
+                          normalize=True)
 
-        # do checkpointing
-        torch.save(netG, f'{opt.outf}/netG_epoch_{epoch + 1}.pth')
-        torch.save(netD, f'{opt.outf}/netD_epoch_{epoch + 1}.pth')
+    # do checkpointing
+    torch.save(netG, f'{opt.outf}/netG_epoch_{epoch + 1}.pth')
+    torch.save(netD, f'{opt.outf}/netD_epoch_{epoch + 1}.pth')
 
 
 if __name__ == '__main__':
-    main()
+  main()
