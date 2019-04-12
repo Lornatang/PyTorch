@@ -19,6 +19,8 @@ parser.add_argument('--workers', type=int, help='number of data loading workers'
 parser.add_argument('--batchSize', type=int, default=64, help='inputs batch size')
 parser.add_argument('--imageSize', type=int, default=32, help='the height / width of the inputs image to network')
 parser.add_argument('--nz', type=int, default=128, help='size of the latent z vector')
+parser.add_argument('--ngf', type=int, default=64)
+parser.add_argument('--ndf', type=int, default=64)
 parser.add_argument('--niter', type=int, default=25, help='number of epochs to train for')
 parser.add_argument("--n_critic", type=int, default=5, help="number of training steps for discriminator per iter")
 parser.add_argument('--lr', type=float, default=0.0002, help='learning rate, default=0.0002')
@@ -181,30 +183,8 @@ if opt.netD and opt.netG != '':
     netG = torch.load(opt.netG, map_location='cpu')
 
 # setup optimizer
-optimizerD = optim.Adam(netD.parameters(), lr=opt.lr, betas=(0.5, 0.9))
-optimizerG = optim.Adam(netG.parameters(), lr=opt.lr, betas=(0.5, 0.9))
-
-
-def compute_gradient_penalty(net, real_samples, fake_samples):
-  """Calculates the gradient penalty loss for WGAN GP"""
-  # Random weight term for interpolation between real and fake samples
-  alpha = torch.randn(real_samples.size(0), 1, 1, 1)
-  # Get random interpolation between real and fake samples
-  interpolates = (alpha * real_samples + ((1 - alpha) * fake_samples)).requires_grad_(True)
-  d_interpolates = net(interpolates)
-  fake = torch.full((real_samples.size(0), 1), 1, device=device)
-  # Get gradient w.r.t. interpolates
-  gradients = autograd.grad(
-    outputs=d_interpolates,
-    inputs=interpolates,
-    grad_outputs=fake,
-    create_graph=True,
-    retain_graph=True,
-    only_inputs=True,
-  )[0]
-  gradients = gradients.view(gradients.size(0), -1)
-  gradient_penaltys = ((gradients.norm(2, dim=1) - 1) ** 2).mean()
-  return gradient_penaltys
+optimizerD = optim.Adam(netD.parameters(), lr=opt.lr, betas=(0.5, 0.999))
+optimizerG = optim.Adam(netG.parameters(), lr=opt.lr, betas=(0.5, 0.999))
 
 
 def gen_sample():
@@ -217,11 +197,11 @@ def gen_sample():
 
 
 def train():
-  for epoch in range(opt.n_epochs):
+  for epoch in range(opt.niter):
     for i, (real_imgs, _) in enumerate(dataloader):
 
       # Configure input
-      real_imgs = real_imgs.to(device)
+      real_imgs = autograd.Variable(real_imgs.to(device), requires_grad=True)
 
       # Get real imgs batch size
       batch_size = real_imgs.size(0)
@@ -233,7 +213,7 @@ def train():
       optimizerD.zero_grad()
 
       # Sample noise as generator input
-      noise = torch.randn(batch_size, nz, 1, 1)
+      noise = torch.randn(batch_size, nz, 1, 1, device=device)
 
       # Generate a batch of images
       fake_imgs = netG(noise)
@@ -245,16 +225,22 @@ def train():
 
       # Compute W-div gradient penalty
       real_label = torch.full((batch_size, 1), 1, device=device)
-      fake_label = torch.full((batch_size, 1), 0, device=device)
+      fake_label = torch.full((batch_size, 1), 1, device=device)
 
-      real_grad = autograd.grad(
-        real_validity, real_imgs, real_label, create_graph=True, retain_graph=True, only_inputs=True
-      )[0]
+      real_grad = autograd.grad(real_validity,
+                                real_imgs,
+                                real_label,
+                                create_graph=True,
+                                retain_graph=True,
+                                only_inputs=True)[0]
       real_grad_norm = real_grad.view(real_grad.size(0), -1).pow(2).sum(1) ** (p / 2)
 
-      fake_grad = autograd.grad(
-        fake_validity, fake_imgs, fake_label, create_graph=True, retain_graph=True, only_inputs=True
-      )[0]
+      fake_grad = autograd.grad(fake_validity,
+                                fake_imgs,
+                                fake_label,
+                                create_graph=True,
+                                retain_graph=True,
+                                only_inputs=True)[0]
       fake_grad_norm = fake_grad.view(fake_grad.size(0), -1).pow(2).sum(1) ** (p / 2)
 
       div_gp = torch.mean(real_grad_norm + fake_grad_norm) * k / 2
