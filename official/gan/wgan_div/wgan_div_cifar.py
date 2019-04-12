@@ -224,8 +224,8 @@ def train():
       fake_validity = netD(fake_imgs)
 
       # Compute W-div gradient penalty
-      real_label = torch.full((batch_size, 1), 1, device=device)
-      fake_label = torch.full((batch_size, 1), 1, device=device)
+      real_label = torch.full((batch_size, ), 1, device=device)
+      fake_label = torch.full((batch_size, ), 1, device=device)
 
       real_grad = autograd.grad(real_validity,
                                 real_imgs,

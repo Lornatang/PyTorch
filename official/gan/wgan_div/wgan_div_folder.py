@@ -208,7 +208,7 @@ def train():
     for i, (real_imgs, _) in enumerate(dataloader):
 
       # Configure input
-      real_imgs = real_imgs.to(device)
+      real_imgs = autograd.Variable(real_imgs.to(device), requires_grad=True)
 
       # Get real_imgs batch size
       batch_size = real_imgs.size(0)
@@ -220,7 +220,7 @@ def train():
       optimizerD.zero_grad()
 
       # Sample noise as generator input
-      noise = torch.randn(batch_size, nz, 1, 1, device=device, requires_grad=True)
+      noise = torch.randn(batch_size, nz, 1, 1, device=device)
 
       # Generate a batch of images
       fake_imgs = netG(noise)
@@ -231,8 +231,8 @@ def train():
       fake_validity = netD(fake_imgs)
 
       # Compute W-div gradient penalty
-      real_label = torch.full((batch_size, 1), 1, device=device)
-      fake_label = torch.full((fake_imgs.size(0), 1), 1, device=device)
+      real_label = torch.full((batch_size, ), 1, device=device)
+      fake_label = torch.full((batch_size, ), 1, device=device)
 
       real_grad = autograd.grad(
         real_validity, real_imgs, real_label, create_graph=True, retain_graph=True, only_inputs=True)[0]
