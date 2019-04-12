@@ -19,6 +19,8 @@ parser.add_argument('--workers', type=int, help='number of data loading workers'
 parser.add_argument('--batchSize', type=int, default=64, help='inputs batch size')
 parser.add_argument('--imageSize', type=int, default=32, help='the height / width of the inputs image to network')
 parser.add_argument('--nz', type=int, default=128, help='size of the latent z vector')
+parser.add_argument('--ngf', type=int, default=64)
+parser.add_argument('--ndf', type=int, default=64)
 parser.add_argument('--niter', type=int, default=50, help='number of epochs to train for')
 parser.add_argument("--n_critic", type=int, default=5, help="number of training steps for discriminator per iter")
 parser.add_argument('--lr', type=float, default=0.0001, help='learning rate, default=0.0002')
@@ -192,7 +194,7 @@ def compute_gradient_penalty(net, real_samples, fake_samples):
   # Get random interpolation between real and fake samples
   interpolates = (alpha * real_samples + ((1 - alpha) * fake_samples)).requires_grad_(True)
   d_interpolates = net(interpolates)
-  fake = torch.full((real_samples.size(0), 1), 1, device=device)
+  fake = torch.full((real_samples.size(0), 1), 1.0, device=device)
   # Get gradient w.r.t. interpolates
   gradients = autograd.grad(
     outputs=d_interpolates,
@@ -233,7 +235,7 @@ def train():
       netD.zero_grad()
 
       # Sample noise as generator input
-      noise = torch.randn(batch_size, nz)
+      noise = torch.randn(batch_size, nz, 1, 1, device=device)
 
       # Generate a batch of images
       fake_imgs = netG(noise)
