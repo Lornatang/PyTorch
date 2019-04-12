@@ -150,6 +150,7 @@ class Discriminator(nn.Module):
       nn.LeakyReLU(0.2, inplace=True),
       # state size. (ndf*4) x 4 x 4
       nn.Conv2d(ndf * 4, 1, 4, 1, 0, bias=False),
+      nn.Sigmoid()
     )
 
   def forward(self, inputs):
@@ -174,13 +175,6 @@ if opt.cuda:
   netD.to(device)
   netG.to(device)
 
-if opt.netD and opt.netG != '':
-  if torch.cuda.is_available():
-    netD = torch.load(opt.netD)
-    netG = torch.load(opt.netG)
-  else:
-    netD = torch.load(opt.netD, map_location='cpu')
-    netG = torch.load(opt.netG, map_location='cpu')
 
 # setup optimizer
 optimizerD = optim.Adam(netD.parameters(), lr=opt.lr, betas=(0.5, 0.9))
@@ -194,7 +188,7 @@ def compute_gradient_penalty(net, real_samples, fake_samples):
   # Get random interpolation between real and fake samples
   interpolates = (alpha * real_samples + ((1 - alpha) * fake_samples)).requires_grad_(True)
   d_interpolates = net(interpolates)
-  fake = torch.full((real_samples.size(0), 1), 1.0, device=device)
+  fake = torch.full((real_samples.size(0), ), 1, device=device)
   # Get gradient w.r.t. interpolates
   gradients = autograd.grad(
     outputs=d_interpolates,
@@ -212,7 +206,7 @@ def compute_gradient_penalty(net, real_samples, fake_samples):
 def gen_sample():
   data = torch.utils.data.DataLoader(dataset, num_workers=int(opt.workers))
   for i, (imgs, _) in enumerate(data):
-    noise = torch.randn(imgs.size(0), nz, 1, 1)
+    noise = torch.randn(imgs.size(0), nz, 1, 1, device=device)
     vutils.save_image(netG(noise).detach(),
                       f'{opt.outf}/{i}.png',
                       normalize=True)

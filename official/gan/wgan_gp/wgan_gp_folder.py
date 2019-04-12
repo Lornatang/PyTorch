@@ -201,7 +201,7 @@ def compute_gradient_penalty(net, real_samples, fake_samples):
   # Get random interpolation between real and fake samples
   interpolates = (alpha * real_samples + ((1 - alpha) * fake_samples)).requires_grad_(True)
   d_interpolates = net(interpolates)
-  fake = torch.full((real_samples.size(0), 1), 1, device=device)
+  fake = torch.full((real_samples.size(0), ), 1, device=device)
   # Get gradient w.r.t. interpolates
   gradients = autograd.grad(
     outputs=d_interpolates,
