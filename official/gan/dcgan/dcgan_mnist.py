@@ -12,15 +12,14 @@ from torchvision import transforms as transforms
 from torchvision import utils as vutils
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--dataset', required=True, help='lsun | imagenet | folder | lfw | fake')
 parser.add_argument('--dataroot', required=True, help='path to dataset')
 parser.add_argument('--workers', type=int, help='number of data loading workers', default=2)
 parser.add_argument('--batchSize', type=int, default=64, help='inputs batch size')
-parser.add_argument('--imageSize', type=int, default=64, help='the height / width of the inputs image to network')
+parser.add_argument('--imageSize', type=int, default=28, help='the height / width of the inputs image to network')
 parser.add_argument('--nz', type=int, default=100, help='size of the latent z vector')
 parser.add_argument('--ngf', type=int, default=64)
 parser.add_argument('--ndf', type=int, default=64)
-parser.add_argument('--niter', type=int, default=50, help='number of epochs to train for')
+parser.add_argument('--niter', type=int, default=25, help='number of epochs to train for')
 parser.add_argument('--lr', type=float, default=0.0002, help='learning rate, default=0.0002')
 parser.add_argument('--beta1', type=float, default=0.5, help='beta1 for adam. default=0.5')
 parser.add_argument('--cuda', action='store_true', help='enables cuda')
@@ -29,7 +28,6 @@ parser.add_argument('--netG', default='', help="path to netG (to continue traini
 parser.add_argument('--netD', default='', help="path to netD (to continue training)")
 parser.add_argument('--outf', default='.', help='folder to output images and model checkpoints')
 parser.add_argument('--manualSeed', type=int, help='manual seed')
-parser.add_argument('--model', type=str, default='train', help='GAN train models.default: \'train\'. other: gen')
 
 opt = parser.parse_args()
 print(opt)
@@ -50,26 +48,13 @@ cudnn.benchmark = True
 if torch.cuda.is_available() and not opt.cuda:
   print("WARNING: You have a CUDA device, so you should probably run with --cuda")
 
-if opt.dataset in ['imagenet', 'folder', 'lfw']:
-  # folder dataset
-  dataset = dset.ImageFolder(root=opt.dataroot,
-                             transform=transforms.Compose([
-                               transforms.Resize(opt.imageSize),
-                               transforms.CenterCrop(opt.imageSize),
-                               transforms.ToTensor(),
-                               transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
-                             ]))
-elif opt.dataset == 'lsun':
-  dataset = dset.LSUN(root=opt.dataroot, classes=['bedroom_train'],
-                      transform=transforms.Compose([
+
+dataset = dset.MNIST(root=opt.dataroot, download=True,
+                     transform=transforms.Compose([
                         transforms.Resize(opt.imageSize),
-                        transforms.CenterCrop(opt.imageSize),
                         transforms.ToTensor(),
-                        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
-                      ]))
-elif opt.dataset == 'fake':
-  dataset = dset.FakeData(image_size=(3, opt.imageSize, opt.imageSize),
-                          transform=transforms.ToTensor())
+                        transforms.Normalize([0.5], [0.5]),
+                     ]))
 
 assert dataset
 dataloader = torch.utils.data.DataLoader(dataset, batch_size=opt.batchSize,
@@ -80,7 +65,7 @@ ngpu = int(opt.ngpu)
 nz = int(opt.nz)
 ngf = int(opt.ngf)
 ndf = int(opt.ndf)
-nc = 3
+nc = 1
 
 
 # custom weights initialization called on netG and netD
@@ -99,25 +84,21 @@ class Generator(nn.Module):
     self.ngpu = gpus
     self.main = nn.Sequential(
       # inputs is Z, going into a convolution
-      nn.ConvTranspose2d(nz, ngf * 8, 4, 1, 0, bias=False),
-      nn.BatchNorm2d(ngf * 8),
-      nn.ReLU(True),
-      # state size. (ngf*8) x 4 x 4
-      nn.ConvTranspose2d(ngf * 8, ngf * 4, 4, 2, 1, bias=False),
+      nn.ConvTranspose2d(nz, ngf * 4, 4, 1, 0, bias=False),
       nn.BatchNorm2d(ngf * 4),
       nn.ReLU(True),
-      # state size. (ngf*4) x 8 x 8
-      nn.ConvTranspose2d(ngf * 4, ngf * 2, 4, 2, 1, bias=False),
+      # state size. (ngf*8) x 4 x 4
+      nn.ConvTranspose2d(ngf * 4, ngf * 2, 3, 2, 1, bias=False),
       nn.BatchNorm2d(ngf * 2),
       nn.ReLU(True),
-      # state size. (ngf*2) x 16 x 16
+      # state size. (ngf*4) x 8 x 8
       nn.ConvTranspose2d(ngf * 2, ngf, 4, 2, 1, bias=False),
       nn.BatchNorm2d(ngf),
       nn.ReLU(True),
-      # state size. (ngf) x 32 x 32
+      # state size. (ngf*2) x 14 x 14
       nn.ConvTranspose2d(ngf, nc, 4, 2, 1, bias=False),
-      nn.Tanh()
-      # state size. (nc) x 64 x 64
+      nn.Tanh(),
+      # state size. (ngf) x 28 x 28
     )
 
   def forward(self, inputs):
@@ -143,23 +124,19 @@ class Discriminator(nn.Module):
     super(Discriminator, self).__init__()
     self.ngpu = gpus
     self.main = nn.Sequential(
-      # inputs is (nc) x 64 x 64
+      # inputs is (nc) x 28 x 28
       nn.Conv2d(nc, ndf, 4, 2, 1, bias=False),
       nn.LeakyReLU(0.2, inplace=True),
-      # state size. (ndf) x 32 x 32
+      # state size. (ndf) x 14 x 14
       nn.Conv2d(ndf, ndf * 2, 4, 2, 1, bias=False),
       nn.BatchNorm2d(ndf * 2),
       nn.LeakyReLU(0.2, inplace=True),
-      # state size. (ndf*2) x 16 x 16
-      nn.Conv2d(ndf * 2, ndf * 4, 4, 2, 1, bias=False),
+      # state size. (ndf*2) x 8 x 8
+      nn.Conv2d(ndf * 2, ndf * 4, 3, 2, 1, bias=False),
       nn.BatchNorm2d(ndf * 4),
       nn.LeakyReLU(0.2, inplace=True),
-      # state size. (ndf*4) x 8 x 8
-      nn.Conv2d(ndf * 4, ndf * 8, 4, 2, 1, bias=False),
-      nn.BatchNorm2d(ndf * 8),
-      nn.LeakyReLU(0.2, inplace=True),
-      # state size. (ndf*8) x 4 x 4
-      nn.Conv2d(ndf * 8, 1, 4, 1, 0, bias=False),
+      # state size. (ndf*4) x 4 x 4
+      nn.Conv2d(ndf * 4, 1, 4, 1, 0, bias=False),
       nn.Sigmoid()
     )
 
@@ -188,27 +165,18 @@ optimizerD = optim.Adam(netD.parameters(), lr=opt.lr, betas=(opt.beta1, 0.999))
 optimizerG = optim.Adam(netG.parameters(), lr=opt.lr, betas=(opt.beta1, 0.999))
 
 
-def gen_sample():
-  data = torch.utils.data.DataLoader(dataset, num_workers=int(opt.workers))
-  for i, (imgs, _) in enumerate(data):
-    noise = torch.randn(imgs.size(0), nz, 1, 1)
-    vutils.save_image(netG(noise).detach(),
-                      f'{opt.outf}/{i}.png',
-                      normalize=True)
-
-
-def train():
+def main():
   for epoch in range(opt.niter):
-    for i, (data, _) in enumerate(dataloader):
+    for i, (real_imgs, _) in enumerate(dataloader):
       ############################
       # (1) Update D network: maximize log(D(x)) + log(1 - D(G(z)))
       ###########################
       # train with real
       netD.zero_grad()
-      img = data.to(device)
-      batch_size = img.size(0)
-      label = torch.full((batch_size,), 1, device=device)
-      output = netD(img)
+      real_imgs = real_imgs.to(device)
+      batch_size = real_imgs.size(0)
+      label = torch.full((batch_size, ), 1, device=device)
+      output = netD(real_imgs)
       errD_real = criterion(output, label)
       errD_real.backward()
       D_x = output.mean().item()
@@ -242,7 +210,7 @@ def train():
             f'D(G(z)): {D_G_z1:.4f} / {D_G_z2:.4f}')
 
       if i % 100 == 0:
-        vutils.save_image(data,
+        vutils.save_image(real_imgs,
                           f'{opt.outf}/real_samples.png',
                           normalize=True)
         fake = netG(noise)
@@ -256,7 +224,4 @@ def train():
 
 
 if __name__ == '__main__':
-  if opt.model == 'train':
-    train()
-  elif opt.model == 'gen':
-    gen_sample()
+  main()

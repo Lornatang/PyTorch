@@ -117,6 +117,16 @@ class Generator(nn.Module):
     return outputs
 
 
+netG = Generator(ngpu).to(device)
+netG.apply(weights_init)
+
+if opt.netG != '':
+  if torch.cuda.is_available():
+    netG = torch.load(opt.netG)
+  else:
+    netG = torch.load(opt.netG, map_location='cpu')
+
+
 class Discriminator(nn.Module):
   def __init__(self, gpus):
     super(Discriminator, self).__init__()
@@ -150,22 +160,13 @@ class Discriminator(nn.Module):
 netD = Discriminator(ngpu).to(device)
 netD.apply(weights_init)
 
-netG = Generator(ngpu).to(device)
-netG.apply(weights_init)
-
-if opt.netD and opt.netG != '':
+if opt.netD != '':
   if torch.cuda.is_available():
     netD = torch.load(opt.netD)
-    netG = torch.load(opt.netG)
   else:
     netD = torch.load(opt.netD, map_location='cpu')
-    netG = torch.load(opt.netG, map_location='cpu')
 
 criterion = nn.BCELoss()
-
-fixed_noise = torch.randn(opt.batchSize, nz, 1, 1, device=device)
-real_label = 1
-fake_label = 0
 
 # setup optimizer
 optimizerD = optim.Adam(netD.parameters(), lr=opt.lr, betas=(opt.beta1, 0.999))
@@ -182,7 +183,7 @@ def main():
       netD.zero_grad()
       img = data.to(device)
       batch_size = img.size(0)
-      label = torch.full((batch_size,), real_label, device=device)
+      label = torch.full((batch_size,), 1, device=device)
       output = netD(img)
       errD_real = criterion(output, label)
       errD_real.backward()
@@ -191,7 +192,7 @@ def main():
       # train with fake
       noise = torch.randn(batch_size, nz, 1, 1, device=device)
       fake = netG(noise)
-      label.fill_(fake_label)
+      label.fill_(0)
       output = netD(fake.detach())
       errD_fake = criterion(output, label)
       errD_fake.backward()
@@ -203,7 +204,7 @@ def main():
       # (2) Update G network: maximize log(D(G(z)))
       ###########################
       netG.zero_grad()
-      label.fill_(real_label)  # fake labels are real for generator cost
+      label.fill_(1)  # fake labels are real for generator cost
       output = netD(fake)
       errG = criterion(output, label)
       errG.backward()
@@ -220,7 +221,7 @@ def main():
         vutils.save_image(data,
                           f'{opt.outf}/real_samples.png',
                           normalize=True)
-        fake = netG(fixed_noise)
+        fake = netG(noise)
         vutils.save_image(fake.detach(),
                           f'{opt.outf}/fake_samples_epoch_{epoch + 1}.png',
                           normalize=True)
