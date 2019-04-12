@@ -122,7 +122,7 @@ class Generator(nn.Module):
     return outputs
 
 
-netG = Generator(ngpu)
+netG = Generator(ngpu).to(device)
 netG.apply(weights_init)
 
 if opt.netG != '':
@@ -150,6 +150,7 @@ class Discriminator(nn.Module):
       nn.LeakyReLU(0.2, inplace=True),
       # state size. (ndf*4) x 4 x 4
       nn.Conv2d(ndf * 4, 1, 4, 1, 0, bias=False),
+      nn.Sigmoid()
     )
 
   def forward(self, inputs):
@@ -161,7 +162,7 @@ class Discriminator(nn.Module):
     return outputs.view(-1, 1).squeeze(1)
 
 
-netD = Discriminator(ngpu)
+netD = Discriminator(ngpu).to(device)
 netD.apply(weights_init)
 
 if opt.netD != '':
@@ -169,18 +170,6 @@ if opt.netD != '':
     netD = torch.load(opt.netD)
   else:
     netD = torch.load(opt.netD, map_location='cpu')
-
-if opt.cuda:
-  netD.to(device)
-  netG.to(device)
-
-if opt.netD and opt.netG != '':
-  if torch.cuda.is_available():
-    netD = torch.load(opt.netD)
-    netG = torch.load(opt.netG)
-  else:
-    netD = torch.load(opt.netD, map_location='cpu')
-    netG = torch.load(opt.netG, map_location='cpu')
 
 # setup optimizer
 optimizerD = optim.Adam(netD.parameters(), lr=opt.lr, betas=(0.5, 0.999))
