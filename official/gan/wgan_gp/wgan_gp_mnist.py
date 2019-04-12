@@ -17,6 +17,8 @@ parser.add_argument('--workers', type=int, help='number of data loading workers'
 parser.add_argument('--batchSize', type=int, default=64, help='inputs batch size')
 parser.add_argument('--imageSize', type=int, default=28, help='the height / width of the inputs image to network')
 parser.add_argument('--nz', type=int, default=128, help='size of the latent z vector')
+parser.add_argument('--ngf', type=int, default=64)
+parser.add_argument('--ndf', type=int, default=64)
 parser.add_argument('--niter', type=int, default=50, help='number of epochs to train for')
 parser.add_argument("--n_critic", type=int, default=5, help="number of training steps for discriminator per iter")
 parser.add_argument('--lr', type=float, default=0.0001, help='learning rate, default=0.0002')
@@ -61,68 +63,48 @@ dataloader = torch.utils.data.DataLoader(dataset, batch_size=opt.batchSize,
 device = torch.device("cuda:0" if opt.cuda else "cpu")
 ngpu = int(opt.ngpu)
 nz = int(opt.nz)
+ngf = int(opt.ngf)
+ndf = int(opt.ndf)
 nc = 1
 
 # Loss weight for gradient penalty
 lambda_gp = 10
 
 
+# custom weights initialization called on netG and netD
+def weights_init(m):
+  classname = m.__class__.__name__
+  if classname.find('Conv') != -1:
+    m.weight.data.normal_(0.0, 0.02)
+  elif classname.find('BatchNorm') != -1:
+    m.weight.data.normal_(1.0, 0.02)
+    m.bias.data.fill_(0)
+
+
 class Generator(nn.Module):
-  def __init__(self, ngpus):
+  def __init__(self, gpus):
     super(Generator, self).__init__()
-    self.ngpu = ngpus
-
+    self.ngpu = gpus
     self.main = nn.Sequential(
-      nn.Linear(nz, 128),
-      nn.LeakyReLU(0.2, inplace=True),
-
-      nn.Linear(128, 256),
-      nn.BatchNorm1d(256, 0.8),
-      nn.LeakyReLU(0.2, inplace=True),
-
-      nn.Linear(256, 512),
-      nn.BatchNorm1d(512, 0.8),
-      nn.LeakyReLU(0.2, inplace=True),
-
-      nn.Linear(512, 1024),
-      nn.BatchNorm1d(1024, 0.8),
-      nn.LeakyReLU(0.2, inplace=True),
-
-      nn.Linear(1024, nc * opt.imageSize * opt.imageSize),
-      nn.Tanh()
+      # inputs is Z, going into a convolution
+      nn.ConvTranspose2d(nz, ngf * 4, 4, 1, 0, bias=False),
+      nn.BatchNorm2d(ngf * 4),
+      nn.ReLU(True),
+      # state size. (ngf*8) x 4 x 4
+      nn.ConvTranspose2d(ngf * 4, ngf * 2, 3, 2, 1, bias=False),
+      nn.BatchNorm2d(ngf * 2),
+      nn.ReLU(True),
+      # state size. (ngf*4) x 8 x 8
+      nn.ConvTranspose2d(ngf * 2, ngf, 4, 2, 1, bias=False),
+      nn.BatchNorm2d(ngf),
+      nn.ReLU(True),
+      # state size. (ngf*2) x 14 x 14
+      nn.ConvTranspose2d(ngf, nc, 4, 2, 1, bias=False),
+      nn.Tanh(),
+      # state size. (ngf) x 28 x 28
     )
 
   def forward(self, inputs):
-    if inputs.is_cuda and self.ngpu > 1:
-      outputs = nn.parallel.data_parallel(self.main, inputs, range(self.ngpu))
-    else:
-      outputs = self.main(inputs)
-    return outputs.view(outputs.size(0), nc, opt.imageSize, opt.imageSize)
-
-
-class Discriminator(nn.Module):
-  def __init__(self, ngpus):
-    super(Discriminator, self).__init__()
-    self.ngpu = ngpus
-
-    self.main = nn.Sequential(
-      nn.Linear(nc * opt.imageSize * opt.imageSize, 1024),
-      nn.LeakyReLU(0.2, inplace=True),
-
-      nn.Linear(1024, 512),
-      nn.LeakyReLU(0.2, inplace=True),
-
-      nn.Linear(512, 256),
-      nn.LeakyReLU(0.2, inplace=True),
-
-      nn.Linear(256, 128),
-      nn.LeakyReLU(0.2, inplace=True),
-
-      nn.Linear(128, 1)
-    )
-
-  def forward(self, inputs):
-    inputs = inputs.view(inputs.size(0), -1)
     if inputs.is_cuda and self.ngpu > 1:
       outputs = nn.parallel.data_parallel(self.main, inputs, range(self.ngpu))
     else:
@@ -130,20 +112,54 @@ class Discriminator(nn.Module):
     return outputs
 
 
-netD = Discriminator(ngpu)
-netG = Generator(ngpu)
+netG = Generator(ngpu).to(device)
+netG.apply(weights_init)
 
-if opt.cuda:
-  netD.to(device)
-  netG.to(device)
-
-if opt.netD and opt.netG != '':
+if opt.netG != '':
   if torch.cuda.is_available():
-    netD = torch.load(opt.netD)
     netG = torch.load(opt.netG)
   else:
-    netD = torch.load(opt.netD, map_location='cpu')
     netG = torch.load(opt.netG, map_location='cpu')
+
+
+class Discriminator(nn.Module):
+  def __init__(self, gpus):
+    super(Discriminator, self).__init__()
+    self.ngpu = gpus
+    self.main = nn.Sequential(
+      # inputs is (nc) x 28 x 28
+      nn.Conv2d(nc, ndf, 4, 2, 1, bias=False),
+      nn.LeakyReLU(0.2, inplace=True),
+      # state size. (ndf) x 14 x 14
+      nn.Conv2d(ndf, ndf * 2, 4, 2, 1, bias=False),
+      nn.BatchNorm2d(ndf * 2),
+      nn.LeakyReLU(0.2, inplace=True),
+      # state size. (ndf*2) x 8 x 8
+      nn.Conv2d(ndf * 2, ndf * 4, 3, 2, 1, bias=False),
+      nn.BatchNorm2d(ndf * 4),
+      nn.LeakyReLU(0.2, inplace=True),
+      # state size. (ndf*4) x 4 x 4
+      nn.Conv2d(ndf * 4, 1, 4, 1, 0, bias=False),
+      nn.Sigmoid()
+    )
+
+  def forward(self, inputs):
+    if inputs.is_cuda and self.ngpu > 1:
+      outputs = nn.parallel.data_parallel(self.main, inputs, range(self.ngpu))
+    else:
+      outputs = self.main(inputs)
+
+    return outputs.view(-1, 1).squeeze(1)
+
+
+netD = Discriminator(ngpu).to(device)
+netD.apply(weights_init)
+
+if opt.netD != '':
+  if torch.cuda.is_available():
+    netD = torch.load(opt.netD)
+  else:
+    netD = torch.load(opt.netD, map_location='cpu')
 
 # setup optimizer
 optimizerD = optim.Adam(netD.parameters(), lr=opt.lr, betas=(0.5, 0.9))
