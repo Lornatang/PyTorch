@@ -264,7 +264,7 @@ In recent years, supervised learning with convolutional networks (CNNs) has seen
 #### Run Example
 ```
 $ cd dcgan/
-$ python3 dcgan.py
+$ python3 dcgan_cifar.py
 ```
 
 <p align="center">
@@ -371,7 +371,7 @@ We propose a new framework for estimating generative models via an adversarial p
 #### Run Example
 ```
 $ cd gan/
-$ python3 gan.py
+$ python3 gan_cifar.py
 ```
 
 <p align="center">
@@ -636,7 +636,7 @@ We introduce a new algorithm named WGAN, an alternative to traditional GAN train
 #### Run Example
 ```
 $ cd wgan/
-$ python3 wgan.py
+$ python3 wgan_folder.py
 ```
 
 ### Wasserstein GAN GP
@@ -653,7 +653,7 @@ Generative Adversarial Networks (GANs) are powerful generative models, but suffe
 #### Run Example
 ```
 $ cd wgan_gp/
-$ python3 wgan_gp.py
+$ python3 wgan_gp_folder.py
 ```
 
 <p align="center">
@@ -675,7 +675,7 @@ ily of Wasserstein GANs (WGANs) is considered to be state-of-the-art due to the 
 #### Run Example
 ```
 $ cd wgan_div/
-$ python3 wgan_div.py
+$ python3 wgan_div_folder.py
 ```
 
 <p align="center">
