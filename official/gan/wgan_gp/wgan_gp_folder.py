@@ -197,7 +197,7 @@ optimizerG = optim.Adam(netG.parameters(), lr=opt.lr, betas=(0.5, 0.9))
 def compute_gradient_penalty(net, real_samples, fake_samples):
   """Calculates the gradient penalty loss for WGAN GP"""
   # Random weight term for interpolation between real and fake samples
-  alpha = torch.randn(real_samples.size(0), 1, 1, 1)
+  alpha = torch.randn(real_samples.size(0), 1, 1, 1, device=device)
   # Get random interpolation between real and fake samples
   interpolates = (alpha * real_samples + ((1 - alpha) * fake_samples)).requires_grad_(True)
   d_interpolates = net(interpolates)
@@ -242,7 +242,7 @@ def train():
       netD.zero_grad()
 
       # Sample noise as generator input
-      noise = torch.randn(batch_size, nz)
+      noise = torch.randn(batch_size, nz, 1, 1, device=device)
 
       # Generate a batch of images
       fake_imgs = netG(noise)
