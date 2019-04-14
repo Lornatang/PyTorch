@@ -13,6 +13,7 @@ import torchvision.transforms as transforms
 import torchvision.utils as vutils
 
 parser = argparse.ArgumentParser()
+parser.add_argument('--dataroot', required=True, help='path to dataset')
 parser.add_argument('--workers', type=int, help='number of data loading workers', default=4)
 parser.add_argument('--batchSize', type=int, default=64, help='inputs batch size')
 parser.add_argument('--imageSize', type=int, default=28, help='the height / width of the inputs image to network')
@@ -214,7 +215,7 @@ def train():
       netD.zero_grad()
 
       # Sample noise as generator input
-      noise = torch.randn(batch_size, nz)
+      noise = torch.randn(batch_size, nz, 1, 1)
 
       # Generate a batch of images
       fake_imgs = netG(noise)
