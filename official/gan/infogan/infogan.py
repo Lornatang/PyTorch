@@ -23,7 +23,6 @@ parser.add_argument("--batch_size", type=int, default=64, help="size of the batc
 parser.add_argument("--lr", type=float, default=0.0002, help="adam: learning rate")
 parser.add_argument("--b1", type=float, default=0.5, help="adam: decay of first order momentum of gradient")
 parser.add_argument("--b2", type=float, default=0.999, help="adam: decay of first order momentum of gradient")
-parser.add_argument("--n_cpu", type=int, default=8, help="number of cpu threads to use during batch generation")
 parser.add_argument("--latent_dim", type=int, default=62, help="dimensionality of the latent space")
 parser.add_argument("--code_dim", type=int, default=2, help="latent code")
 parser.add_argument("--n_classes", type=int, default=10, help="number of classes for dataset")
@@ -34,16 +33,15 @@ opt = parser.parse_args()
 print(opt)
 
 cuda = True if torch.cuda.is_available() else False
-device = torch.device("cuda:0" if opt.cuda else "cpu")
 
 
 def weights_init_normal(m):
     classname = m.__class__.__name__
     if classname.find("Conv") != -1:
-        torch.nn.init.normal_(m.weight.data, 0.0, 0.02)
+        nn.init.normal_(m.weight.data, 0.0, 0.02)
     elif classname.find("BatchNorm") != -1:
-        torch.nn.init.normal_(m.weight.data, 1.0, 0.02)
-        torch.nn.init.constant_(m.bias.data, 0.0)
+        nn.init.normal_(m.weight.data, 1.0, 0.02)
+        nn.init.constant_(m.bias.data, 0.0)
 
 
 def to_categorical(y, num_columns):
@@ -76,8 +74,8 @@ class Generator(nn.Module):
             nn.Tanh(),
         )
 
-    def forward(self, noise, label, code):
-        gen_input = torch.cat((noise, label, code), -1)
+    def forward(self, noise, labels, code):
+        gen_input = torch.cat((noise, labels, code), -1)
         out = self.l1(gen_input)
         out = out.view(out.shape[0], 128, self.init_size, self.init_size)
         img = self.conv_blocks(out)
@@ -145,6 +143,7 @@ netG.apply(weights_init_normal)
 netD.apply(weights_init_normal)
 
 # Configure data loader
+os.makedirs("/tmp", exist_ok=True)
 dataloader = torch.utils.data.DataLoader(
     datasets.MNIST(
         "/tmp",
@@ -204,11 +203,11 @@ for epoch in range(opt.n_epochs):
         batch_size = real_imgs.shape[0]
 
         # Adversarial ground truths
-        valid = torch.full((batch_size, 1), 1, requires_grad=False, device=device)
-        fake = torch.full((batch_size, 1), 0, requires_grad=False, device=device)
+        valid = Variable(FloatTensor(batch_size, 1).fill_(1.0), requires_grad=False)
+        fake = Variable(FloatTensor(batch_size, 1).fill_(0.0), requires_grad=False)
 
         # Configure input
-        real_imgs = real_imgs.to(device)
+        real_imgs = Variable(real_imgs.type(FloatTensor))
         labels = to_categorical(labels.numpy(), num_columns=opt.n_classes)
 
         # -----------------
@@ -218,14 +217,15 @@ for epoch in range(opt.n_epochs):
         optimizerG.zero_grad()
 
         # Sample noise and labels as generator input
-        z = torch.randn(batch_size, opt.latent_dim)
-        label_input = to_categorical(torch.randint(0, opt.n_classes, (opt.latent_dim, )), num_columns=opt.n_classes)
+        z = Variable(FloatTensor(np.random.normal(0, 1, (batch_size, opt.latent_dim))))
+        label_input = to_categorical(np.random.randint(0, opt.n_classes, batch_size), num_columns=opt.n_classes)
         code_input = Variable(FloatTensor(np.random.uniform(-1, 1, (batch_size, opt.code_dim))))
+
         # Generate a batch of images
-        fake_imgs = netG(z, label_input, code_input)
+        gen_imgs = netG(z, label_input, code_input)
 
         # Loss measures generator's ability to fool the discriminator
-        validity, _, _ = netD(fake_imgs)
+        validity, _, _ = netD(gen_imgs)
         errG = adversarial_loss(validity, valid)
 
         errG.backward()
@@ -242,7 +242,7 @@ for epoch in range(opt.n_epochs):
         d_real_loss = adversarial_loss(real_pred, valid)
 
         # Loss for fake images
-        fake_pred, _, _ = netD(fake_imgs.detach())
+        fake_pred, _, _ = netD(gen_imgs.detach())
         d_fake_loss = adversarial_loss(fake_pred, fake)
 
         # Total discriminator loss
@@ -258,18 +258,18 @@ for epoch in range(opt.n_epochs):
         optimizerInfo.zero_grad()
 
         # Sample labels
-        sampled_labels = torch.randint(0, opt.n_classes, (batch_size, ))
+        sampled_labels = np.random.randint(0, opt.n_classes, batch_size)
 
         # Ground truth labels
         gt_labels = Variable(LongTensor(sampled_labels), requires_grad=False)
 
         # Sample noise, labels and code as generator input
-        z = torch.randn(batch_size, opt.latent_dim)
+        z = Variable(FloatTensor(np.random.normal(0, 1, (batch_size, opt.latent_dim))))
         label_input = to_categorical(sampled_labels, num_columns=opt.n_classes)
         code_input = Variable(FloatTensor(np.random.uniform(-1, 1, (batch_size, opt.code_dim))))
 
-        fake_imgs = netG(z, label_input, code_input)
-        _, pred_label, pred_code = netD(fake_imgs)
+        gen_imgs = netG(z, label_input, code_input)
+        _, pred_label, pred_code = netD(gen_imgs)
 
         errInfo = lambda_cat * categorical_loss(pred_label, gt_labels) + lambda_con * continuous_loss(
             pred_code, code_input
