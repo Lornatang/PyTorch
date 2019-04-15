@@ -129,7 +129,7 @@ class Generator(nn.Module):
 
 
 netG = Generator(ngpu).to(device)
-netG.apply(weights_init)
+netG.apply(weights_init_normal)
 
 if opt.netG != '':
   if torch.cuda.is_available():
@@ -173,7 +173,7 @@ class Discriminator(nn.Module):
 
 
 netD = Discriminator(ngpu).to(device)
-netD.apply(weights_init)
+netD.apply(weights_init_normal)
 
 if opt.netD != '':
   if torch.cuda.is_available():
