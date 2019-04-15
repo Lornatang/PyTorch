@@ -180,7 +180,7 @@ def sample_image(n_row, batches_done):
     # Static sample
     z = Variable(FloatTensor(np.random.normal(0, 1, (n_row ** 2, opt.latent_dim))))
     static_sample = netG(z, static_label, static_code)
-    save_image(static_sample.data, "images/static/%d.png" % batches_done, nrow=n_row, normalize=True)
+    save_image(static_sample.data, f"images/static/{batches_done}.png", nrow=n_row, normalize=True)
 
     # Get varied c1 and c2
     zeros = np.zeros((n_row ** 2, 1))
@@ -189,8 +189,8 @@ def sample_image(n_row, batches_done):
     c2 = Variable(FloatTensor(np.concatenate((zeros, c_varied), -1)))
     sample1 = netG(static_z, static_label, c1)
     sample2 = netG(static_z, static_label, c2)
-    save_image(sample1.data, "images/varying_c1/%d.png" % batches_done, nrow=n_row, normalize=True)
-    save_image(sample2.data, "images/varying_c2/%d.png" % batches_done, nrow=n_row, normalize=True)
+    save_image(sample1.data, f"images/varying_c1/{batches_done}.png", nrow=n_row, normalize=True)
+    save_image(sample2.data, f"images/varying_c2/{batches_done}.png", nrow=n_row, normalize=True)
 
 
 # ----------
