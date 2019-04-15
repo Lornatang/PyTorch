@@ -34,6 +34,7 @@ opt = parser.parse_args()
 print(opt)
 
 cuda = True if torch.cuda.is_available() else False
+device = torch.device("cuda:0" if opt.cuda else "cpu")
 
 
 def weights_init_normal(m):
@@ -75,8 +76,8 @@ class Generator(nn.Module):
             nn.Tanh(),
         )
 
-    def forward(self, noise, labels, code):
-        gen_input = torch.cat((noise, labels, code), -1)
+    def forward(self, noise, label, code):
+        gen_input = torch.cat((noise, label, code), -1)
         out = self.l1(gen_input)
         out = out.view(out.shape[0], 128, self.init_size, self.init_size)
         img = self.conv_blocks(out)
@@ -129,19 +130,19 @@ lambda_cat = 1
 lambda_con = 0.1
 
 # Initialize generator and discriminator
-generator = Generator()
-discriminator = Discriminator()
+netG = Generator()
+netD = Discriminator()
 
 if cuda:
-    generator.cuda()
-    discriminator.cuda()
+    netG.cuda()
+    netD.cuda()
     adversarial_loss.cuda()
     categorical_loss.cuda()
     continuous_loss.cuda()
 
 # Initialize weights
-generator.apply(weights_init_normal)
-discriminator.apply(weights_init_normal)
+netG.apply(weights_init_normal)
+netD.apply(weights_init_normal)
 
 # Configure data loader
 dataloader = torch.utils.data.DataLoader(
@@ -158,10 +159,10 @@ dataloader = torch.utils.data.DataLoader(
 )
 
 # Optimizers
-optimizer_G = torch.optim.Adam(generator.parameters(), lr=opt.lr, betas=(opt.b1, opt.b2))
-optimizer_D = torch.optim.Adam(discriminator.parameters(), lr=opt.lr, betas=(opt.b1, opt.b2))
-optimizer_info = torch.optim.Adam(
-    itertools.chain(generator.parameters(), discriminator.parameters()), lr=opt.lr, betas=(opt.b1, opt.b2)
+optimizerG = torch.optim.Adam(netG.parameters(), lr=opt.lr, betas=(opt.b1, opt.b2))
+optimizerD = torch.optim.Adam(netD.parameters(), lr=opt.lr, betas=(opt.b1, opt.b2))
+optimizerInfo = torch.optim.Adam(
+    itertools.chain(netG.parameters(), netD.parameters()), lr=opt.lr, betas=(opt.b1, opt.b2)
 )
 
 FloatTensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
@@ -179,7 +180,7 @@ def sample_image(n_row, batches_done):
     """Saves a grid of generated digits ranging from 0 to n_classes"""
     # Static sample
     z = Variable(FloatTensor(np.random.normal(0, 1, (n_row ** 2, opt.latent_dim))))
-    static_sample = generator(z, static_label, static_code)
+    static_sample = netG(z, static_label, static_code)
     save_image(static_sample.data, "images/static/%d.png" % batches_done, nrow=n_row, normalize=True)
 
     # Get varied c1 and c2
@@ -187,8 +188,8 @@ def sample_image(n_row, batches_done):
     c_varied = np.repeat(np.linspace(-1, 1, n_row)[:, np.newaxis], n_row, 0)
     c1 = Variable(FloatTensor(np.concatenate((c_varied, zeros), -1)))
     c2 = Variable(FloatTensor(np.concatenate((zeros, c_varied), -1)))
-    sample1 = generator(static_z, static_label, c1)
-    sample2 = generator(static_z, static_label, c2)
+    sample1 = netG(static_z, static_label, c1)
+    sample2 = netG(static_z, static_label, c2)
     save_image(sample1.data, "images/varying_c1/%d.png" % batches_done, nrow=n_row, normalize=True)
     save_image(sample2.data, "images/varying_c2/%d.png" % batches_done, nrow=n_row, normalize=True)
 
@@ -198,94 +199,94 @@ def sample_image(n_row, batches_done):
 # ----------
 
 for epoch in range(opt.n_epochs):
-    for i, (imgs, labels) in enumerate(dataloader):
+    for i, (real_imgs, labels) in enumerate(dataloader):
 
-        batch_size = imgs.shape[0]
+        batch_size = real_imgs.shape[0]
 
         # Adversarial ground truths
-        valid = Variable(FloatTensor(batch_size, 1).fill_(1.0), requires_grad=False)
-        fake = Variable(FloatTensor(batch_size, 1).fill_(0.0), requires_grad=False)
+        valid = torch.full((batch_size, 1), 1, requires_grad=False, device=device)
+        fake = torch.full((batch_size, 1), 0, requires_grad=False, device=device)
 
         # Configure input
-        real_imgs = Variable(imgs.type(FloatTensor))
+        real_imgs = real_imgs.to(device)
         labels = to_categorical(labels.numpy(), num_columns=opt.n_classes)
 
         # -----------------
         #  Train Generator
         # -----------------
 
-        optimizer_G.zero_grad()
+        optimizerG.zero_grad()
 
         # Sample noise and labels as generator input
-        z = Variable(FloatTensor(np.random.normal(0, 1, (batch_size, opt.latent_dim))))
-        label_input = to_categorical(np.random.randint(0, opt.n_classes, batch_size), num_columns=opt.n_classes)
+        z = torch.randn(batch_size, opt.latent_dim)
+        label_input = to_categorical(torch.randint(0, opt.n_classes, (opt.latent_dim, )), num_columns=opt.n_classes)
         code_input = Variable(FloatTensor(np.random.uniform(-1, 1, (batch_size, opt.code_dim))))
-
         # Generate a batch of images
-        gen_imgs = generator(z, label_input, code_input)
+        fake_imgs = netG(z, label_input, code_input)
 
         # Loss measures generator's ability to fool the discriminator
-        validity, _, _ = discriminator(gen_imgs)
-        g_loss = adversarial_loss(validity, valid)
+        validity, _, _ = netD(fake_imgs)
+        errG = adversarial_loss(validity, valid)
 
-        g_loss.backward()
-        optimizer_G.step()
+        errG.backward()
+        optimizerG.step()
 
         # ---------------------
         #  Train Discriminator
         # ---------------------
 
-        optimizer_D.zero_grad()
+        optimizerD.zero_grad()
 
         # Loss for real images
-        real_pred, _, _ = discriminator(real_imgs)
+        real_pred, _, _ = netD(real_imgs)
         d_real_loss = adversarial_loss(real_pred, valid)
 
         # Loss for fake images
-        fake_pred, _, _ = discriminator(gen_imgs.detach())
+        fake_pred, _, _ = netD(fake_imgs.detach())
         d_fake_loss = adversarial_loss(fake_pred, fake)
 
         # Total discriminator loss
-        d_loss = (d_real_loss + d_fake_loss) / 2
+        errD = (d_real_loss + d_fake_loss) / 2
 
-        d_loss.backward()
-        optimizer_D.step()
+        errD.backward()
+        optimizerD.step()
 
         # ------------------
         # Information Loss
         # ------------------
 
-        optimizer_info.zero_grad()
+        optimizerInfo.zero_grad()
 
         # Sample labels
-        sampled_labels = np.random.randint(0, opt.n_classes, batch_size)
+        sampled_labels = torch.randint(0, opt.n_classes, (batch_size, ))
 
         # Ground truth labels
         gt_labels = Variable(LongTensor(sampled_labels), requires_grad=False)
 
         # Sample noise, labels and code as generator input
-        z = Variable(FloatTensor(np.random.normal(0, 1, (batch_size, opt.latent_dim))))
+        z = torch.randn(batch_size, opt.latent_dim)
         label_input = to_categorical(sampled_labels, num_columns=opt.n_classes)
         code_input = Variable(FloatTensor(np.random.uniform(-1, 1, (batch_size, opt.code_dim))))
 
-        gen_imgs = generator(z, label_input, code_input)
-        _, pred_label, pred_code = discriminator(gen_imgs)
+        fake_imgs = netG(z, label_input, code_input)
+        _, pred_label, pred_code = netD(fake_imgs)
 
-        info_loss = lambda_cat * categorical_loss(pred_label, gt_labels) + lambda_con * continuous_loss(
+        errInfo = lambda_cat * categorical_loss(pred_label, gt_labels) + lambda_con * continuous_loss(
             pred_code, code_input
         )
 
-        info_loss.backward()
-        optimizer_info.step()
+        errInfo.backward()
+        optimizerInfo.step()
 
         # --------------
         # Log Progress
         # --------------
 
-        print(
-            "[Epoch %d/%d] [Batch %d/%d] [D loss: %f] [G loss: %f] [info loss: %f]"
-            % (epoch, opt.n_epochs, i, len(dataloader), d_loss.item(), g_loss.item(), info_loss.item())
-        )
+        print(f"[Epoch {epoch}/{opt.n_epochs}] "
+              f"[Batch {i}/{len(dataloader)}] "
+              f"[D loss: {errD.item()}] "
+              f"[G loss: {errG.item()}] "
+              f"[info loss: {errInfo.item()}]")
         batches_done = epoch * len(dataloader) + i
         if batches_done % opt.sample_interval == 0:
             sample_image(n_row=10, batches_done=batches_done)
