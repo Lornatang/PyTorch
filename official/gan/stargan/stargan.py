@@ -27,8 +27,8 @@ from torchvision import datasets
 from torch.autograd import Variable
 import torch.autograd as autograd
 
-from models import *
-from datasets import *
+from .models import *
+from .datasets import *
 
 import torch.nn as nn
 import torch.nn.functional as F
