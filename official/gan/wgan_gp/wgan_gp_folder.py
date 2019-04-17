@@ -277,12 +277,12 @@ def train():
             f'Loss_D: {errD.item():.4f} '
             f'Loss_G: {errG.item():.4f}.')
 
-      if i % 100 == 0:
+      if epoch % 5 == 0:
         vutils.save_image(real_imgs,
                           f'{opt.outf}/real_samples.png',
                           normalize=True)
         vutils.save_image(netG(noise).detach(),
-                          f'{opt.outf}/fake_samples_epoch_{epoch + 1}.png',
+                          f'{opt.outf}/fake_samples_epoch_{epoch}.png',
                           normalize=True)
 
     # do checkpointing
