@@ -2,7 +2,8 @@ import argparse
 import os
 import random
 
-from torch import autograd
+import torch
+import torch.autograd as autograd
 import torch.nn as nn
 import torch.backends.cudnn as cudnn
 import torch.optim as optim
@@ -117,10 +118,7 @@ netG = Generator(ngpu).to(device)
 netG.apply(weights_init)
 
 if opt.netG != '':
-  if torch.cuda.is_available():
-    netG = torch.load(opt.netG)
-  else:
-    netG = torch.load(opt.netG, map_location='cpu')
+  netG = torch.load(opt.netG)
 
 
 class Discriminator(nn.Module):
@@ -154,10 +152,7 @@ netD = Discriminator(ngpu).to(device)
 netD.apply(weights_init)
 
 if opt.netD != '':
-  if torch.cuda.is_available():
-    netD = torch.load(opt.netD)
-  else:
-    netD = torch.load(opt.netD, map_location='cpu')
+  netD = torch.load(opt.netD)
 
 # setup optimizer
 optimizerD = optim.Adam(netD.parameters(), lr=opt.lr, betas=(0.5, 0.9))
@@ -167,7 +162,7 @@ optimizerG = optim.Adam(netG.parameters(), lr=opt.lr, betas=(0.5, 0.9))
 def compute_gradient_penalty(net, real_samples, fake_samples):
   """Calculates the gradient penalty loss for WGAN GP"""
   # Random weight term for interpolation between real and fake samples
-  alpha = torch.randn(real_samples.size(0), 1, 1, 1)
+  alpha = torch.randn(real_samples.size(0), 1, 1, 1, device=device)
   # Get random interpolation between real and fake samples
   interpolates = (alpha * real_samples + ((1 - alpha) * fake_samples)).requires_grad_(True)
   d_interpolates = net(interpolates)
@@ -182,17 +177,8 @@ def compute_gradient_penalty(net, real_samples, fake_samples):
     only_inputs=True,
   )[0]
   gradients = gradients.view(gradients.size(0), -1)
-  gradient_penaltys = ((gradients.norm(2, dim=1) - 1) ** 2).mean()
+  gradient_penaltys = ((gradients.norm(2, dim=1) - 1) ** 2).mean() * lambda_gp
   return gradient_penaltys
-
-
-def gen_sample():
-  data = torch.utils.data.DataLoader(dataset, num_workers=int(opt.workers))
-  for i, (imgs, _) in enumerate(data):
-    noise = torch.randn(imgs.size(0), nz, 1, 1)
-    vutils.save_image(netG(noise).detach(),
-                      f'{opt.outf}/{i}.png',
-                      normalize=True)
 
 
 def train():
@@ -212,7 +198,7 @@ def train():
       netD.zero_grad()
 
       # Sample noise as generator input
-      noise = torch.randn(batch_size, nz, 1, 1)
+      noise = torch.randn(batch_size, nz, 1, 1, device=device)
 
       # Generate a batch of images
       fake_imgs = netG(noise)
@@ -225,7 +211,7 @@ def train():
       gradient_penalty = compute_gradient_penalty(netD, real_imgs.data, fake_imgs.data)
 
       # Loss measures generator's ability to fool the discriminator
-      errD = -torch.mean(real_validity) + torch.mean(fake_validity) + lambda_gp * gradient_penalty
+      errD = -torch.mean(real_validity) + torch.mean(fake_validity) + gradient_penalty
 
       errD.backward()
       optimizerD.step()
@@ -256,7 +242,7 @@ def train():
                           f'{opt.outf}/real_samples.png',
                           normalize=True)
         vutils.save_image(netG(noise).detach(),
-                          f'{opt.outf}/fake_samples_epoch_{epoch + 1}.png',
+                          f'{opt.outf}/fake_samples_epoch_{epoch}.png',
                           normalize=True)
 
     # do checkpointing
@@ -265,7 +251,4 @@ def train():
 
 
 if __name__ == '__main__':
-  if opt.model == 'train':
-    train()
-  elif opt.model == 'gen':
-    gen_sample()
+  train()
