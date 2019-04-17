@@ -2,7 +2,8 @@ import argparse
 import os
 import random
 
-from torch import autograd
+import torch
+import torch.autograd as autograd
 import torch.nn as nn
 import torch.backends.cudnn as cudnn
 import torch.optim as optim
@@ -21,7 +22,7 @@ parser.add_argument('--imageSize', type=int, default=64, help='the height / widt
 parser.add_argument('--nz', type=int, default=128, help='size of the latent z vector')
 parser.add_argument('--ngf', type=int, default=64)
 parser.add_argument('--ndf', type=int, default=64)
-parser.add_argument('--niter', type=int, default=50, help='number of epochs to train for')
+parser.add_argument('--niter', type=int, default=200, help='number of epochs to train for')
 parser.add_argument("--n_critic", type=int, default=5, help="number of training steps for discriminator per iter")
 parser.add_argument('--lr', type=float, default=0.0002, help='learning rate, default=0.0002')
 parser.add_argument('--cuda', action='store_true', help='enables cuda')
@@ -30,7 +31,6 @@ parser.add_argument('--netG', default='', help="path to netG (to continue traini
 parser.add_argument('--netD', default='', help="path to netD (to continue training)")
 parser.add_argument('--outf', default='.', help='folder to output images and model checkpoints')
 parser.add_argument('--manualSeed', type=int, help='manual seed')
-parser.add_argument('--model', type=str, default='train', help='GAN train models.default: \'train\'. other: gen')
 
 opt = parser.parse_args()
 print(opt)
@@ -136,10 +136,7 @@ netG = Generator(ngpu)
 netG.apply(weights_init)
 
 if opt.netG != '':
-  if torch.cuda.is_available():
-    netG = torch.load(opt.netG)
-  else:
-    netG = torch.load(opt.netG, map_location='cpu')
+  netG = torch.load(opt.netG)
 
 
 class Discriminator(nn.Module):
@@ -176,10 +173,7 @@ netD = Discriminator(ngpu)
 netD.apply(weights_init)
 
 if opt.netD != '':
-  if torch.cuda.is_available():
-    netD = torch.load(opt.netD)
-  else:
-    netD = torch.load(opt.netD, map_location='cpu')
+  netD = torch.load(opt.netD)
 
 if opt.cuda:
   netD.to(device)
@@ -208,17 +202,8 @@ def compute_gradient_penalty(net, real_samples, fake_samples):
     only_inputs=True,
   )[0]
   gradients = gradients.view(gradients.size(0), -1)
-  gradient_penaltys = ((gradients.norm(2, dim=1) - 1) ** 2).mean()
+  gradient_penaltys = ((gradients.norm(2, dim=1) - 1) ** 2).mean() * lambda_gp
   return gradient_penaltys
-
-
-def gen_sample():
-  data = torch.utils.data.DataLoader(dataset, num_workers=int(opt.workers))
-  for i, (imgs, _) in enumerate(data):
-    noise = torch.randn(imgs.size(0), nz, 1, 1)
-    vutils.save_image(netG(noise).detach(),
-                      f'{opt.outf}/{i}.png',
-                      normalize=True)
 
 
 def train():
@@ -251,7 +236,7 @@ def train():
       gradient_penalty = compute_gradient_penalty(netD, real_imgs.data, fake_imgs.data)
 
       # Loss measures generator's ability to fool the discriminator
-      errD = -torch.mean(real_validity) + torch.mean(fake_validity) + lambda_gp * gradient_penalty
+      errD = -torch.mean(real_validity) + torch.mean(fake_validity) + gradient_penalty
 
       errD.backward()
       optimizerD.step()
@@ -291,7 +276,4 @@ def train():
 
 
 if __name__ == '__main__':
-  if opt.model == 'train':
-    train()
-  elif opt.model == 'gen':
-    gen_sample()
+  train()
