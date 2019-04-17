@@ -2,7 +2,8 @@ import argparse
 import os
 import random
 
-from torch import autograd
+import torch
+import torch.autograd as autograd
 import torch.nn as nn
 import torch.backends.cudnn as cudnn
 import torch.optim as optim
@@ -126,10 +127,7 @@ netG = Generator(ngpu)
 netG.apply(weights_init)
 
 if opt.netG != '':
-  if torch.cuda.is_available():
-    netG = torch.load(opt.netG)
-  else:
-    netG = torch.load(opt.netG, map_location='cpu')
+  netG = torch.load(opt.netG)
 
 
 class Discriminator(nn.Module):
@@ -163,10 +161,7 @@ netD = Discriminator(ngpu)
 netD.apply(weights_init)
 
 if opt.netD != '':
-  if torch.cuda.is_available():
-    netD = torch.load(opt.netD)
-  else:
-    netD = torch.load(opt.netD, map_location='cpu')
+  netD = torch.load(opt.netD)
 
 if opt.cuda:
   netD.to(device)
@@ -196,17 +191,8 @@ def compute_gradient_penalty(net, real_samples, fake_samples):
     only_inputs=True,
   )[0]
   gradients = gradients.view(gradients.size(0), -1)
-  gradient_penaltys = ((gradients.norm(2, dim=1) - 1) ** 2).mean()
+  gradient_penaltys = ((gradients.norm(2, dim=1) - 1) ** 2).mean() * lambda_gp
   return gradient_penaltys
-
-
-def gen_sample():
-  data = torch.utils.data.DataLoader(dataset, num_workers=int(opt.workers))
-  for i, (imgs, _) in enumerate(data):
-    noise = torch.randn(imgs.size(0), nz, 1, 1, device=device)
-    vutils.save_image(netG(noise).detach(),
-                      f'{opt.outf}/{i}.png',
-                      normalize=True)
 
 
 def train():
@@ -239,7 +225,7 @@ def train():
       gradient_penalty = compute_gradient_penalty(netD, real_imgs.data, fake_imgs.data)
 
       # Loss measures generator's ability to fool the discriminator
-      errD = -torch.mean(real_validity) + torch.mean(fake_validity) + lambda_gp * gradient_penalty
+      errD = -torch.mean(real_validity) + torch.mean(fake_validity) + gradient_penalty
 
       errD.backward()
       optimizerD.step()
@@ -265,12 +251,12 @@ def train():
             f'Loss_D: {errD.item():.4f} '
             f'Loss_G: {errG.item():.4f}.')
 
-      if i % 100 == 0:
+      if epoch % 5 == 0:
         vutils.save_image(real_imgs,
                           f'{opt.outf}/real_samples.png',
                           normalize=True)
         vutils.save_image(netG(noise).detach(),
-                          f'{opt.outf}/fake_samples_epoch_{epoch + 1}.png',
+                          f'{opt.outf}/fake_samples_epoch_{epoch}.png',
                           normalize=True)
 
     # do checkpointing
@@ -281,5 +267,3 @@ def train():
 if __name__ == '__main__':
   if opt.model == 'train':
     train()
-  elif opt.model == 'gen':
-    gen_sample()
