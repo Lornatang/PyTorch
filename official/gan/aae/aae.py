@@ -1,7 +1,6 @@
 import argparse
 import os
 import numpy as np
-import math
 import itertools
 
 import torchvision.transforms as transforms
@@ -12,7 +11,6 @@ from torchvision import datasets
 from torch.autograd import Variable
 
 import torch.nn as nn
-import torch.nn.functional as F
 import torch
 
 os.makedirs("images", exist_ok=True)
