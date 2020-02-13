@@ -1,3 +1,4 @@
+from __future__ import print_function
 import argparse
 import torch
 from PIL import Image
@@ -7,7 +8,7 @@ import numpy as np
 
 # Training settings
 parser = argparse.ArgumentParser(description='PyTorch Super Res Example')
-parser.add_argument('--input_image', type=str, required=True, help='inputs image to use')
+parser.add_argument('--input_image', type=str, required=True, help='input image to use')
 parser.add_argument('--model', type=str, required=True, help='model file to use')
 parser.add_argument('--output_filename', type=str, help='where to save the output image')
 parser.add_argument('--cuda', action='store_true', help='use cuda')
@@ -19,13 +20,13 @@ y, cb, cr = img.split()
 
 model = torch.load(opt.model)
 img_to_tensor = ToTensor()
-inputs = img_to_tensor(y).view(1, -1, y.size[1], y.size[0])
+input = img_to_tensor(y).view(1, -1, y.size[1], y.size[0])
 
 if opt.cuda:
-  model = model.cuda()
-  inputs = inputs.cuda()
+    model = model.cuda()
+    input = input.cuda()
 
-out = model(inputs)
+out = model(input)
 out = out.cpu()
 out_img_y = out[0].detach().numpy()
 out_img_y *= 255.0

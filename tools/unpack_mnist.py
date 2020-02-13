@@ -1,8 +1,8 @@
-import numpy as np
+import os
 import struct
 
+import numpy as np
 from PIL import Image
-import os
 
 data_file = '/tmp/mnist/t10k-images-idx3-ubyte'
 # It's 47040016B, but we should set to 47040000B
