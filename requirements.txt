@@ -1,9 +1,7 @@
-requests
-scipy
-opencv-python
-matplotlib
+future
 numpy
-pillow
-torchvision
-torch
-torchtext
+pyyaml
+requests
+setuptools
+six
+typing
